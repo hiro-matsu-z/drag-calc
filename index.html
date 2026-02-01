@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>ARCHI-DIAGONAL PRO</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --card-bg: #1e1e1e;
+            --accent-blue: #00d4ff;
+            --accent-green: #34c759;
+            --text-main: #e0e0e0;
+            --text-dim: #888;
+            --border: #333;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(var(--border) 1px, transparent 1px);
+            background-size: 20px 20px; /* 方眼紙風の背景 */
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container { width: 100%; max-width: 480px; }
+
+        header {
+            text-align: left;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent-blue);
+            padding-left: 15px;
+        }
+
+        header h1 { font-size: 1.2rem; letter-spacing: 2px; margin: 0; color: white; }
+        header span { font-size: 0.7rem; color: var(--accent-blue); font-weight: bold; }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .section-title {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 入力エリア */
+        .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .input-box {
+            background: #2a2a2a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            transition: 0.3s;
+        }
+        .input-box.active { border-color: var(--accent-blue); box-shadow: 0 0 10px rgba(0, 212, 255, 0.2); }
+        .input-box label { display: block; font-size: 0.65rem; color: var(--accent-blue); margin-bottom: 5px; }
+        .input-box input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            outline: none;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 倍数パネル */
+        .panel-ctrl { display: flex; gap: 5px; margin-bottom: 10px; }
+        .tab {
+            flex: 1; padding: 10px; background: #2a2a2a; border: none; color: var(--text-dim);
+            border-radius: 6px; font-size: 0.75rem; font-weight: bold;
+        }
+        .tab.active { background: var(--accent-blue); color: #000; }
+
+        .grid-scroll {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+            height: 180px; overflow-y: auto; padding-right: 5px;
+        }
+        .grid-btn {
+            background: #252525; border: 1px solid var(--border); border-radius: 6px;
+            padding: 12px 5px; color: var(--text-main); font-size: 0.8rem;
+        }
+        .grid-btn:active { background: var(--accent-blue); color: black; }
+        .grid-btn span { display: block; font-size: 0.55rem; color: var(--text-dim); }
+
+        .main-btn {
+            width: 100%; padding: 16px; border: none; border-radius: 8px;
+            background: linear-gradient(90deg, #00d4ff, #008fb3);
+            color: white; font-weight: bold; font-size: 1rem; margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        /* 履歴テーブル */
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { text-align: left; color: var(--text-dim); padding: 10px; border-bottom: 1px solid var(--border); font-weight: normal; }
+        td { padding: 12px 10px; border-bottom: 1px solid #252525; }
+        .val-diag { color: var(--accent-blue); font-weight: bold; font-family: monospace; font-size: 1rem; }
+        .btn-del { color: #ff4d4d; background: none; border: none; font-size: 1.2rem; }
+
+        /* スクロールバーカスタム */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>ARCHI-DIAGONAL <span>PRO VERSION</span></h1>
+    </header>
+
+    <div class="card">
+        <div class="section-title"><span>●</span> 寸法入力</div>
+        <div class="input-group">
+            <div class="input-box" id="boxA" onclick="setActive('A')">
+                <label>SIDE A (長辺)</label>
+                <input type="number" id="sideA" placeholder="0" inputmode="decimal">
+            </div>
+            <div class="input-box" id="boxB" onclick="setActive('B')">
+                <label>SIDE B (短辺)</label>
+                <input type="number" id="sideB" placeholder="0" inputmode="decimal">
+            </div>
+        </div>
+
+        <div class="section-title"><span>●</span> 227.5mm プリセット</div>
+        <div class="panel-ctrl">
+            <button id="tabA" class="tab active" onclick="setActive('A')">Aにセット</button>
+            <button id="tabB" class="tab" onclick="setActive('B')">Bにセット</button>
+        </div>
+        <div class="grid-scroll" id="buttonGrid"></div>
+
+        <button class="main-btn" onclick="addRecord()">CALCULATE & RECORD</button>
+    </div>
+
+    <div class="card" style="padding: 10px;">
+        <table>
+            <thead>
+                <tr><th>A</th><th>B</th><th>DIAGONAL</th><th></th></tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let activeSide = 'A';
+    const UNIT = 227.5;
+
+    // ボタン生成
+    const grid = document.getElementById('buttonGrid');
+    for (let i = 1; i <= 48; i++) {
+        const val = i * UNIT;
+        const btn = document.createElement('button');
+        btn.className = 'grid-btn';
+        btn.innerHTML = `${val.toLocaleString()} <span>${i}倍</span>`;
+        btn.onclick = () => { document.getElementById('side' + activeSide).value = val; };
+        grid.appendChild(btn);
+    }
+
+    function setActive(side) {
+        activeSide = side;
+        document.getElementById('tabA').className = side === 'A' ? 'tab active' : 'tab';
+        document.getElementById('tabB').className = side === 'B' ? 'tab active' : 'tab';
+        document.getElementById('boxA').className = side === 'A' ? 'input-box active' : 'input-box';
+        document.getElementById('boxB').className = side === 'B' ? 'input-box active' : 'input-box';
+    }
+
+    function addRecord() {
+        const a = parseFloat(document.getElementById('sideA').value);
+        const b = parseFloat(document.getElementById('sideB').value);
+        if (!a || !b) return;
+
+        const c = Math.sqrt(a*a + b*b);
+        const result = Math.round(c * 100) / 100;
+
+        const tbody = document.getElementById('historyBody');
+        const row = tbody.insertRow(0);
+        row.innerHTML = `
+            <td>${a}</td>
+            <td>${b}</td>
+            <td class="val-diag">${result.toLocaleString()}</td>
+            <td><button class="btn-del" onclick="this.closest('tr').remove()">×</button></td>
+        `;
+    }
+    
+    // 初期選択状態
+    setActive('A');
+</script>
+
+</body>
+</html>
