@@ -29,11 +29,11 @@
         .tab { flex: 1; padding: 10px; background: #2a2a2a; border: none; color: #888; border-radius: 6px; font-size: 0.7rem; font-weight: bold; }
         .tab.active { background: var(--blue); color: #000; }
         
-        /* ① 4列配置に変更 */
+        /* 4列配置 */
         .grid-scroll { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; height: 180px; overflow-y: auto; background: #161616; padding: 8px; border-radius: 8px; -webkit-overflow-scrolling: touch; }
         
         .grid-btn { background: #252525; border: 1px solid var(--border); border-radius: 6px; padding: 10px 0; color: var(--text); font-size: 0.75rem; text-align: center; }
-        .grid-btn span { display: block; font-size: 0.45rem; color: #888; margin-top: 2px; }
+        .grid-btn span { display: block; font-size: 0.5rem; color: #888; margin-top: 2px; }
         
         .main-btn { width: 100%; padding: 16px; border: none; border-radius: 10px; background: linear-gradient(90deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; margin-top: 5px; }
         .table-container { width: 100%; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-top: 10px; }
@@ -72,25 +72,17 @@
 <script>
     let activeSide = 'A';
     const UNIT = 227.5;
-    
-    // ② 尺貫法表記の計算関数
-    function getShaku(mm) {
-        let totalSun = mm / 30.303; // 1寸=30.303mmとして計算
-        let shaku = Math.floor(totalSun / 10);
-        let sun = (totalSun % 10).toFixed(1);
-        
-        if (shaku === 0) return sun + "寸";
-        if (sun == 0) return shaku + "尺";
-        return shaku + "尺" + sun;
-    }
-
     const grid = document.getElementById('buttonGrid');
+    
     for (let i = 1; i <= 48; i++) {
         const val = i * UNIT;
         const btn = document.createElement('button');
         btn.className = 'grid-btn';
-        // 尺表示を適用
-        btn.innerHTML = `${val.toLocaleString()}<span>${getShaku(val)}</span>`;
+        
+        // 910を1とする計算 (i / 4)
+        const multiplier = i * 0.25;
+        
+        btn.innerHTML = `${val.toLocaleString()}<span>${multiplier}</span>`;
         btn.onclick = () => { document.getElementById('side' + activeSide).value = val; };
         grid.appendChild(btn);
     }
