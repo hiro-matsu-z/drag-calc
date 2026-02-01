@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>対角線電卓 PRO | 現場で最も優れた対角線計算ツール</title>
+    <meta name="description" content="基礎工事・大工工事に最適な対角線電卓。227.5mmピッチのボタン装備で簡単計算。枠外寸法（+150mm）にも対応し、現場で見やすく設計された最も優れた対角線計算ツールです。">
+    <meta name="keywords" content="対角線電卓,対角計算,基礎工事,枠外対応,227.5mm,墨出し,建築計算,簡単計算">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>対角計算電卓 PRO</title>
     <style>
         :root {
             --bg-dark: #121212; --card-bg: #1e1e1e;
@@ -21,8 +24,11 @@
         .container { width: 100%; max-width: 480px; flex: 1; }
         header { border-left: 4px solid var(--accent-blue); padding-left: 15px; margin-bottom: 20px; }
         header h1 { font-size: 1.2rem; letter-spacing: 1px; margin: 0; color: white; }
-        header span { font-size: 0.7rem; color: var(--accent-blue); font-weight: bold; }
+        header p { font-size: 0.7rem; color: var(--accent-blue); margin: 4px 0 0 0; font-weight: bold; }
         
+        /* 検索用キーワードをさりげなく配置（SEO対策） */
+        .seo-intro { font-size: 0.65rem; color: #555; margin-bottom: 15px; line-height: 1.4; }
+
         .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
         .section-title { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
         
@@ -37,29 +43,31 @@
         .tab.active { background: var(--accent-blue); color: #000; }
         .grid-scroll { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; height: 150px; overflow-y: auto; background: #161616; padding: 8px; border-radius: 8px; }
         .grid-btn { background: #252525; border: 1px solid var(--border); border-radius: 6px; padding: 10px 2px; color: var(--text-main); font-size: 0.8rem; }
-        .grid-btn:active { background: var(--accent-blue); color: black; }
         .grid-btn span { display: block; font-size: 0.5rem; color: var(--text-dim); }
 
-        .main-btn { width: 100%; padding: 16px; border: none; border-radius: 10px; background: linear-gradient(90deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; margin-top: 15px; box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3); }
+        .main-btn { width: 100%; padding: 16px; border: none; border-radius: 10px; background: linear-gradient(90deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; margin-top: 15px; }
 
-        .history-card { padding: 0; overflow: hidden; }
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th { text-align: left; color: var(--text-dim); padding: 12px 8px; border-bottom: 1px solid var(--border); font-weight: normal; background: #252525; }
-        td { padding: 12px 8px; border-bottom: 1px solid #252525; vertical-align: middle; }
-        .val-sub { display: block; font-size: 0.65rem; color: var(--text-dim); }
-        .val-diag { color: var(--accent-blue); font-weight: bold; font-family: monospace; font-size: 0.95rem; }
-        .val-outer { color: var(--accent-orange); font-weight: bold; font-family: monospace; font-size: 0.95rem; }
-        .btn-del { color: #555; background: none; border: none; font-size: 1.2rem; }
+        th { text-align: left; color: var(--text-dim); padding: 12px 8px; border-bottom: 1px solid var(--border); background: #252525; }
+        td { padding: 12px 8px; border-bottom: 1px solid #252525; }
+        .val-diag { color: var(--accent-blue); font-weight: bold; font-size: 0.95rem; }
+        .val-outer { color: var(--accent-orange); font-weight: bold; font-size: 0.95rem; }
 
-        footer { text-align: center; padding: 20px 0; color: #444; font-size: 0.7rem; letter-spacing: 1px; }
+        footer { text-align: center; padding: 30px 0; color: #444; font-size: 0.65rem; line-height: 1.6; }
+        .legal-link { color: #555; text-decoration: none; margin-top: 10px; display: inline-block; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>対角計算電卓 <span>PRO VERSION</span></h1>
+        <h1>対角線電卓 PRO</h1>
+        <p>現場で見やすい・最も優れた対角線計算ツール</p>
     </header>
+
+    <div class="seo-intro">
+        基礎工事・大工工事に特化した簡単計算アプリ。227.5mmずつのボタン装備で入力の手間を省き、枠外（各+150mm）の対角線も瞬時に算出します。
+    </div>
 
     <div class="card">
         <div class="section-title">📐 寸法入力 (mm)</div>
@@ -84,15 +92,10 @@
         <button class="main-btn" onclick="addRecord()">計算してリストに追加</button>
     </div>
 
-    <div class="card history-card">
+    <div class="card" style="padding:0; overflow:hidden;">
         <table>
             <thead>
-                <tr>
-                    <th>入力(A×B)</th>
-                    <th>図面対角</th>
-                    <th>外枠対角<br><small>(各+150mm)</small></th>
-                    <th></th>
-                </tr>
+                <tr><th>入力(A×B)</th><th>図面対角</th><th>枠外対角</th><th></th></tr>
             </thead>
             <tbody id="historyBody"></tbody>
         </table>
@@ -100,7 +103,9 @@
 </div>
 
 <footer>
-    CREATED BY HIROKI
+    CREATED BY HIROKI<br>
+    最速・簡単計算の対角線電卓シリーズ<br>
+    <a href="#" class="legal-link" onclick="alert('プライバシーポリシー：本アプリは入力データをサーバーに送信せず、ブラウザ内のみで計算を行います。広告配信の際にCookieを使用する場合があります。')">プライバシーポリシー</a>
 </footer>
 
 <script>
@@ -130,18 +135,11 @@
         const a = parseFloat(document.getElementById('sideA').value);
         const b = parseFloat(document.getElementById('sideB').value);
         if (!a || !b) return;
-
         const diagNormal = Math.sqrt(a*a + b*b);
         const diagOuter = Math.sqrt(Math.pow(a+FRAME_OFFSET, 2) + Math.pow(b+FRAME_OFFSET, 2));
-
         const tbody = document.getElementById('historyBody');
         const row = tbody.insertRow(0);
-        row.innerHTML = `
-            <td>${a}<br><span class="val-sub">× ${b}</span></td>
-            <td class="val-diag">${Math.round(diagNormal).toLocaleString()}</td>
-            <td class="val-outer">${Math.round(diagOuter).toLocaleString()}</td>
-            <td><button class="btn-del" onclick="this.closest('tr').remove()">×</button></td>
-        `;
+        row.innerHTML = `<td>${a}<br><small>×${b}</small></td><td class="val-diag">${Math.round(diagNormal).toLocaleString()}</td><td class="val-outer">${Math.round(diagOuter).toLocaleString()}</td><td><button style="color:#555;background:none;border:none;font-size:1.2rem" onclick="this.closest('tr').remove()">×</button></td>`;
     }
     setActive('A');
 </script>
