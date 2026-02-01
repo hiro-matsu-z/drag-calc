@@ -4,7 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>対角線電卓 PRO</title>
+    
+    <title>対角線電卓 PRO | 最も優れた現場計算ツール</title>
+    <meta name="description" content="基礎工事・大工工事に最適な対角線電卓。枠外対応、227.5mmピッチボタン装備、簡単計算。現場で見やすく設計された最も優れた対角線計算ツールです。">
+    <meta name="keywords" content="対角線電卓,対角計算,基礎工事,枠外対応,227.5mm,墨出し,建築計算,簡単計算">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google-site-verification" content="RXCG31T1BkABreUsckThte0DgkAERE-3LLp_ORSPmtE" />
@@ -15,7 +19,7 @@
         .container { width: 100%; max-width: 375px; padding-top: 15px; }
         header { border-left: 4px solid var(--blue); padding-left: 12px; margin-bottom: 15px; }
         header h1 { font-size: 1.1rem; margin: 0; color: white; }
-        header p { font-size: 0.6rem; color: var(--blue); margin: 0; }
+        header p { font-size: 0.6rem; color: var(--blue); margin: 0; font-weight: bold; }
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
         .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
         .input-box { flex: 1; background: #2a2a2a; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
@@ -35,20 +39,21 @@
         td { padding: 10px 8px; border-bottom: 1px solid #252525; }
         .val-diag { color: var(--blue); font-weight: bold; }
         .val-outer { color: var(--orange); font-weight: bold; }
-        footer { text-align: center; padding: 20px; color: #444; font-size: 0.6rem; letter-spacing: 1px; }
+        footer { text-align: center; padding: 25px; color: #444; font-size: 0.6rem; letter-spacing: 1.5px; }
+        .legal-link { color: #555; text-decoration: none; margin-top: 8px; display: inline-block; }
     </style>
 </head>
 <body>
 <div class="container">
-    <header><h1>対角線電卓 PRO</h1><p>HIROKI EDITION</p></header>
+    <header><h1>対角線電卓 PRO</h1><p>PRO VERSION</p></header>
     <div class="card">
         <div class="input-group">
-            <div class="input-box" id="boxA" onclick="setActive('A')"><label>A寸法</label><input type="number" id="sideA" placeholder="0" inputmode="decimal"></div>
-            <div class="input-box" id="boxB" onclick="setActive('B')"><label>B寸法</label><input type="number" id="sideB" placeholder="0" inputmode="decimal"></div>
+            <div class="input-box" id="boxA" onclick="setActive('A')"><label>A寸法 (図面)</label><input type="number" id="sideA" placeholder="0" inputmode="decimal"></div>
+            <div class="input-box" id="boxB" onclick="setActive('B')"><label>B寸法 (図面)</label><input type="number" id="sideB" placeholder="0" inputmode="decimal"></div>
         </div>
-        <div class="panel-ctrl"><button id="tabA" class="tab active" onclick="setActive('A')">A入力</button><button id="tabB" class="tab" onclick="setActive('B')">B入力</button></div>
+        <div class="panel-ctrl"><button id="tabA" class="tab active" onclick="setActive('A')">Aを入力</button><button id="tabB" class="tab" onclick="setActive('B')">Bを入力</button></div>
         <div class="grid-scroll" id="buttonGrid"></div>
-        <button class="main-btn" onclick="addRecord()">計算リストに追加</button>
+        <button class="main-btn" onclick="addRecord()">計算して追加</button>
     </div>
     <div class="table-container">
         <table>
@@ -57,7 +62,10 @@
         </table>
     </div>
 </div>
-<footer>CREATED BY HIROKI</footer>
+<footer>
+    CREATED BY HIROKI<br>
+    <a href="#" class="legal-link" onclick="alert('プライバシーポリシー：本アプリは入力データをサーバーに送信せず、ブラウザ内のみで処理を行います。')">PRIVACY POLICY</a>
+</footer>
 <script>
     let activeSide = 'A';
     const UNIT = 227.5;
