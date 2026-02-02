@@ -199,8 +199,9 @@
         const steps = parseFloat(document.getElementById('step_count').value) || 1;
         const dist = parseFloat(document.getElementById('dist_road').value) || 0;
         const baseTop = gl + baseH;
+        // --- ★ココを120に変更★ ---
         const porchTop = baseTop - 120;
-        const domaEnd = road + (dist * 0.02);
+        const domaEnd = road + (dist * 0.02); 
         const keage = Math.round(((porchTop - domaEnd) / steps) * 10) / 10;
         document.getElementById('stair-result').style.display = 'block';
         document.getElementById('keage_res').innerText = keage + " mm";
@@ -208,21 +209,36 @@
         const svg = document.getElementById('elevation-svg');
         const sc = 0.45; const bY = 280;
         const getP = (v) => bY - (v - Math.min(road, gl, 0)) * sc;
+        
+        const porchX = 260; 
+        const domaEndX = 200; 
+        
         let content = `
             <line x1="0" y1="${getP(0)}" x2="400" y2="${getP(0)}" stroke="#444" stroke-dasharray="2"/><text x="5" y="${getP(0)-5}" fill="#666" font-size="10">BM ±0</text>
-            <line x1="150" y1="${getP(gl)}" x2="400" y2="${getP(gl)}" stroke="var(--green)" stroke-width="2"/><text x="360" y="${getP(gl)-5}" fill="var(--green)" font-size="10">GL</text>
-            <rect x="0" y="${getP(road)}" width="80" height="40" fill="#334155"/><text x="10" y="${getP(road)+20}" fill="white" font-size="10">道路</text>
-            <path d="M 80 ${getP(road)} L 200 ${getP(domaEnd)} L 200 ${getP(road)} Z" fill="#334155" opacity="0.4"/>
+            <line x1="0" y1="${getP(gl)}" x2="400" y2="${getP(gl)}" stroke="var(--green)" stroke-width="1.5"/><text x="340" y="${getP(gl)-5}" fill="var(--green)" font-size="10" font-weight="bold">GL Line (${gl >= 0 ? '+' : ''}${gl}mm)</text>
+            
+            <rect x="0" y="${getP(road)}" width="80" height="40" fill="#334155"/><text x="10" y="${getP(road)+20}" fill="white" font-size="10">道路端</text>
+            <path d="M 80 ${getP(road)} L ${domaEndX} ${getP(domaEnd)} L ${domaEndX} ${getP(road)} Z" fill="#334155" opacity="0.4"/>
+            <text x="90" y="${getP(domaEnd)+15}" fill="var(--blue)" font-size="9" font-weight="bold">水上土間高: ${Math.round(domaEnd)}mm</text>
+            
             <path d="M 320 ${getP(baseTop)} L 380 ${getP(baseTop)} L 380 ${getP(gl)+40} L 320 ${getP(gl)+40} Z" fill="#94a3b8" stroke="#fff"/>
-            <rect x="260" y="${getP(porchTop)}" width="60" height="10" fill="var(--orange)"/>
+            <text x="325" y="${getP(baseTop)+15}" fill="white" font-size="9">基礎天端</text>
+            
+            <rect x="${porchX}" y="${getP(porchTop)}" width="60" height="10" fill="var(--orange)"/>
+            <text x="${porchX}" y="${getP(porchTop)-5}" fill="var(--orange)" font-size="9" font-weight="bold">ポーチ天端</text>
         `;
-        const startX = 200; const endX = 260; const stepW = (endX - startX) / (steps - 1 || 1);
+        
+        const stepW = (porchX - domaEndX) / (steps - 1 || 1);
         for (let i = 1; i < steps; i++) {
-            const sY = porchTop - (keage * i); const sX = endX - (stepW * i);
-            content += `<rect x="${sX}" y="${getP(sY)}" width="${stepW}" height="${keage * sc}" fill="#1e293b" stroke="#475569"/>
+            const sY = porchTop - (keage * i); 
+            const sX = porchX - (stepW * i);
+            content += `
+                <rect x="${sX}" y="${getP(sY)}" width="${stepW}" height="${keage * sc}" fill="#1e293b" stroke="#475569"/>
                 <line x1="20" y1="${getP(sY)}" x2="${sX}" y2="${getP(sY)}" stroke="var(--blue)" stroke-width="0.5" stroke-dasharray="2"/>
-                <text x="25" y="${getP(sY)-4}" fill="var(--blue)" font-size="10">基礎天端から ${Math.round(sY - baseTop)}mm</text>`;
+                <text x="25" y="${getP(sY)-4}" fill="var(--blue)" font-size="10">天端から -${Math.round(baseTop - sY)}mm</text>
+            `;
         }
+        content += `<line x1="${porchX}" y1="${getP(porchTop)}" x2="${porchX}" y2="${getP(porchTop - keage)}" stroke="var(--orange)" stroke-width="1"/>`;
         svg.innerHTML = content;
     }
     setActiveDiag('A');
