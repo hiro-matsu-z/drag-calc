@@ -199,7 +199,7 @@
         const steps = parseFloat(document.getElementById('step_count').value) || 1;
         const dist = parseFloat(document.getElementById('dist_road').value) || 0;
         const baseTop = gl + baseH;
-        const porchTop = baseTop - 40;
+        const porchTop = baseTop - 120;
         const domaEnd = road + (dist * 0.02);
         const keage = Math.round(((porchTop - domaEnd) / steps) * 10) / 10;
         document.getElementById('stair-result').style.display = 'block';
