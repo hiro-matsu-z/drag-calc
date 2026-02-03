@@ -1,16 +1,17 @@
 {
   "name": "対角線電卓 PRO",
   "short_name": "対角計算",
-  "start_url": "/index.html",
+  "start_url": "https://hiro-matsu-z.github.io/drag-calc/",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#00d4ff",
   "description": "現場のプロ専用・対角線計算ツール",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "https://hiro-matsu-z.github.io/drag-calc/icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
