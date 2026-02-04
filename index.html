@@ -19,60 +19,48 @@
     <title>対角線電卓 PRO | 現場計算ツールの決定版</title>
     
     <style>
-        :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --green: #22c55e; --concrete: #95a5a6; --bm-red: #e74c3c; }
+        :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --green: #22c55e; --concrete: #7f8c8d; --road: #34495e; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
         .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; }
         .page { display: none; }
         .page.active { display: block; }
         
-        header { display: flex; justify-content: space-between; align-items: flex-start; border-left: 5px solid var(--blue); padding-left: 15px; margin-bottom: 20px; }
-        header h1 { font-size: 1.3rem; margin: 0; color: white; }
-        header p { font-size: 0.7rem; color: var(--blue); margin: 0; font-weight: bold; }
-        .settings-btn { background: #2a2a2a; border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
+        header { border-left: 5px solid var(--blue); padding-left: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 1.2rem; margin: 0; color: white; }
+        .settings-btn { background: #2a2a2a; border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; }
 
         #settings-panel { display: none; background: #2a2a2a; border: 2px solid var(--orange); border-radius: 10px; padding: 15px; margin-bottom: 20px; }
         #settings-panel.open { display: block; }
 
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .input-group { display: flex; gap: 10px; margin-bottom: 12px; }
-        .input-box { flex: 1; background: #2a2a2a; border: 2px solid var(--border); border-radius: 10px; padding: 8px 12px; }
-        .input-box.active { border-color: var(--blue); background: #333; }
-        .input-box label { display: block; font-size: 0.65rem; color: var(--blue); font-weight: bold; }
-        .input-box span { display: block; font-size: 0.55rem; color: #888; }
-        .input-box input { width: 100%; background: transparent; border: none; color: white; font-size: 1.4rem; outline: none; font-family: monospace; font-weight: bold; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 10px; }
+        .input-box { flex: 1; background: #2a2a2a; border: 2px solid var(--border); border-radius: 8px; padding: 6px 10px; }
+        .input-box.active { border-color: var(--blue); }
+        .input-box label { display: block; font-size: 0.6rem; color: var(--blue); font-weight: bold; }
+        .input-box span { font-size: 0.5rem; color: #777; display: block; }
+        .input-box input { width: 100%; background: transparent; border: none; color: white; font-size: 1.2rem; outline: none; font-weight: bold; }
         
-        .panel-ctrl { display: flex; gap: 6px; margin-bottom: 10px; }
-        .tab { flex: 1; padding: 12px; background: #2a2a2a; border: none; color: #aaa; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
-        .tab.active { background: var(--blue); color: #000; }
-        
-        .grid-scroll { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; height: 180px; overflow-y: auto; background: #161616; padding: 10px; border-radius: 10px; }
-        .grid-btn { background: #252525; border: 1px solid #333; border-radius: 8px; padding: 12px 0; color: var(--text); font-size: 0.85rem; text-align: center; }
+        .grid-scroll { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; height: 160px; overflow-y: auto; background: #161616; padding: 8px; border-radius: 8px; }
+        .grid-btn { background: #252525; border: 1px solid #333; border-radius: 6px; padding: 10px 0; color: var(--text); font-size: 0.8rem; text-align: center; }
         .grid-btn.highlight { border: 2px solid var(--blue); background: #1a2a3a; }
-        .grid-btn.highlight span { color: var(--blue); font-weight: bold; }
-        .grid-btn span { display: block; font-size: 0.6rem; color: #777; }
+        .grid-btn span { display: block; font-size: 0.55rem; color: #666; }
         
-        .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .main-btn { width: 100%; padding: 16px; border: none; border-radius: 10px; background: linear-gradient(135deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; }
 
-        .ad-container { margin: 10px 0 20px; text-align: center; border-top: 1px solid #222; border-bottom: 1px solid #222; padding: 10px 0; background: rgba(0,0,0,0.2); }
-        .ad-label { font-size: 10px; color: #555; margin-bottom: 5px; }
-        .ad-placeholder { min-height: 100px; display: flex; align-items: center; justify-content: center; }
+        .ad-container { margin: 10px 0; text-align: center; border-top: 1px solid #222; border-bottom: 1px solid #222; padding: 10px 0; }
+        .ad-label { font-size: 9px; color: #444; margin-bottom: 4px; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { text-align: left; color: #888; padding: 12px 10px; border-bottom: 2px solid var(--border); background: #252525; font-weight: normal; }
-        td { padding: 12px 10px; border-bottom: 1px solid #252525; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th { text-align: left; color: #777; padding: 10px; border-bottom: 2px solid var(--border); background: #252525; }
+        td { padding: 10px; border-bottom: 1px solid #252525; }
 
-        .article-section { margin-top: 20px; padding: 15px; background: #1a1a1a; border-radius: 10px; border-top: 3px solid var(--orange); }
-        .article-section h2 { color: var(--orange); font-size: 1rem; margin-top: 0; }
-        .article-section p { font-size: 0.8rem; color: #aaa; }
-
-        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(65px + env(safe-area-inset-bottom)); z-index: 1000; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #777; text-decoration: none; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1a1a; border-top: 1px solid var(--border); display: flex; padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom)); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; font-size: 0.65rem; font-weight: bold; }
         .nav-item.active { color: var(--blue); }
-        
-        /* SVGスタイル */
-        #elevation-svg { background: #1a1a1a; border-radius: 8px; width: 100%; height: auto; border: 1px solid #333; }
-        #elevation-svg text { font-family: -apple-system, sans-serif; }
+
+        /* SVG */
+        #elevation-svg { background: #000; border-radius: 8px; width: 100%; height: auto; margin-top: 10px; border: 1px solid #222; }
     </style>
 </head>
 <body>
@@ -80,15 +68,15 @@
 <div class="container">
     <div id="page-diag" class="page active">
         <header>
-            <div><h1>対角線電卓 PRO</h1><p>建築現場専用・高精度対角計算</p></div>
+            <div><h1>対角線電卓 PRO</h1><p style="font-size:0.6rem; margin:0; color:var(--blue);">現場専用・高精度計算</p></div>
             <button class="settings-btn" onclick="toggleSettings()">⚙️ 設定</button>
         </header>
 
         <div id="settings-panel">
-            <label style="color:var(--orange); font-size:0.8rem; font-weight:bold;">【設定】デフォルト枠外寸法 (mm)</label>
-            <div style="display:flex; gap:10px; margin-top:8px;">
-                <input type="number" id="offsetSetting" style="flex:1; background:#121212; border:1px solid var(--border); color:white; padding:10px; border-radius:5px;">
-                <button onclick="saveSettings()" style="background:var(--orange); border:none; color:black; padding:0 15px; border-radius:5px; font-weight:bold;">保存</button>
+            <label style="color:var(--orange); font-size:0.8rem; font-weight:bold;">デフォルト枠外寸法 (mm)</label>
+            <div style="display:flex; gap:8px; margin-top:5px;">
+                <input type="number" id="offsetSetting" style="flex:1; background:#121212; border:1px solid #444; color:white; padding:8px; border-radius:5px;">
+                <button onclick="saveSettings()" style="background:var(--orange); border:none; color:black; padding:0 12px; border-radius:5px; font-weight:bold;">保存</button>
             </div>
         </div>
         
@@ -97,67 +85,56 @@
                 <div class="input-box active" id="boxA" onclick="setActiveDiag('A')"><label>A寸法 (mm)</label><input type="number" id="sideA" placeholder="0" inputmode="decimal"></div>
                 <div class="input-box" id="boxB" onclick="setActiveDiag('B')"><label>B寸法 (mm)</label><input type="number" id="sideB" placeholder="0" inputmode="decimal"></div>
             </div>
-            <div class="panel-ctrl">
-                <button id="tabA" class="tab active" onclick="setActiveDiag('A')">Aを入力</button>
-                <button id="tabB" class="tab" onclick="setActiveDiag('B')">Bを入力</button>
-            </div>
             <div class="grid-scroll" id="buttonGrid"></div>
-            <button class="main-btn" style="margin-top:15px;" onclick="addDiagRecord()">対角線を計算する</button>
+            <button class="main-btn" style="margin-top:10px;" onclick="addDiagRecord()">計算実行</button>
         </div>
 
         <div class="ad-container">
             <div class="ad-label">SPONSOR</div>
-            <div class="ad-placeholder">
-                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5476919369993440" data-ad-slot="YOUR_AD_SLOT_ID" data-ad-format="horizontal" data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5476919369993440" data-ad-slot="YOUR_AD_SLOT_ID" data-ad-format="horizontal" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
         <div class="card" style="padding:0; overflow:hidden;">
             <table>
-                <thead><tr><th>入力(A/B)</th><th>図面対角</th><th id="th-outer">枠外(+150)</th><th>消去</th></tr></thead>
+                <thead><tr><th>A/B</th><th>対角</th><th id="th-outer">枠外</th><th>消去</th></tr></thead>
                 <tbody id="historyBody"></tbody>
             </table>
         </div>
     </div>
 
     <div id="page-stair" class="page">
-        <header><h1>ポーチ計算 PRO</h1><p>高低差から蹴上を自動算出</p></header>
+        <header><h1>ポーチ計算 PRO</h1></header>
         <div class="card">
             <div class="input-group">
                 <div class="input-box"><label>① BM - 道路 (mm)</label><span>低いなら正</span><input type="number" id="road_bm" value="200"></div>
-                <div class="input-box"><label>② 段数</label><span>ポーチ天含</span><input type="number" id="step_count" value="2"></div>
+                <div class="input-box"><label>② 段数</label><span>ポーチ天含む</span><input type="number" id="step_count" value="2"></div>
             </div>
             <div class="input-group">
                 <div class="input-box"><label>③ 基礎高 (GLから)</label><input type="number" id="gl_base" value="410"></div>
-                <div class="input-box"><label>④ 道路〜1段目距離</label><input type="number" id="dist_road" value="2000"></div>
+                <div class="input-box"><label>④ 道路〜1段目(mm)</label><span>距離</span><input type="number" id="dist_road" value="2000"></div>
             </div>
             <div class="input-box" style="width:100%;"><label>⑤ GL - BM (mm)</label><span>高いなら正</span><input type="number" id="gl_bm" value="50"></div>
-            <button class="main-btn" style="margin-top:15px;" onclick="calculateStair()">蹴上寸法を算出</button>
+            <button class="main-btn" style="margin-top:10px;" onclick="calculateStair()">蹴上寸法を算出</button>
         </div>
 
         <div id="stair-result" style="display:none;" class="card">
-            <div style="font-size:0.8rem; color:var(--orange); font-weight:bold;">算出された蹴上（一段）</div>
-            <div style="font-size:2.5rem; font-weight:bold; color:var(--orange); margin-bottom:10px;" id="keage_res">--- mm</div>
-            <svg id="elevation-svg" viewBox="0 0 400 350"></svg>
+            <p style="font-size:0.7rem; color:var(--orange); margin:0;">蹴上（一段あたり）</p>
+            <div style="font-size:2rem; font-weight:bold; color:var(--orange);" id="keage_res">--- mm</div>
+            <svg id="elevation-svg" viewBox="0 0 400 300"></svg>
         </div>
-
-        <article class="article-section">
-            <h2>ポーチ計算のロジック</h2>
-            <p>道路からポーチ天端までの総高低差を、指定された段数で均等に割り振ります。土間勾配（2%）を考慮し、1段目の正確な高さを導き出します。</p>
-        </article>
     </div>
 
     <nav>
-        <div class="nav-item active" id="nav-diag" onclick="showPage('diag', this)">📐 対角計算</div>
-        <div class="nav-item" id="nav-stair" onclick="showPage('stair', this)">🪜 ポーチ計算</div>
+        <div class="nav-item active" id="nav-diag" onclick="showPage('diag', this)">📐 対角</div>
+        <div class="nav-item" id="nav-stair" onclick="showPage('stair', this)">🪜 ポーチ</div>
     </nav>
 </div>
 
 <script>
-    // --- 共通設定 ---
     let currentOffset = parseInt(localStorage.getItem('diagOffset')) || 150;
     document.getElementById('offsetSetting').value = currentOffset;
+    document.getElementById('th-outer').innerText = "枠外(+" + currentOffset + ")";
 
     function showPage(pageId, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -166,16 +143,12 @@
         el.classList.add('active');
     }
 
-    // --- 対角計算ロジック ---
     function toggleSettings() { document.getElementById('settings-panel').classList.toggle('open'); }
     function saveSettings() {
-        const val = parseInt(document.getElementById('offsetSetting').value);
-        if (!isNaN(val)) {
-            currentOffset = val;
-            localStorage.setItem('diagOffset', val);
-            document.getElementById('th-outer').innerText = "枠外(+" + currentOffset + ")";
-            toggleSettings();
-        }
+        currentOffset = parseInt(document.getElementById('offsetSetting').value) || 0;
+        localStorage.setItem('diagOffset', currentOffset);
+        document.getElementById('th-outer').innerText = "枠外(+" + currentOffset + ")";
+        toggleSettings();
     }
 
     let activeSide = 'A';
@@ -191,22 +164,21 @@
     }
     function setActiveDiag(side) {
         activeSide = side;
-        document.getElementById('tabA').classList.toggle('active', side === 'A');
-        document.getElementById('tabB').classList.toggle('active', side === 'B');
         document.getElementById('boxA').classList.toggle('active', side === 'A');
         document.getElementById('boxB').classList.toggle('active', side === 'B');
     }
+
     function addDiagRecord() {
-        const a = parseFloat(document.getElementById('sideA').value);
-        const b = parseFloat(document.getElementById('sideB').value);
+        const a = parseFloat(document.getElementById('sideA').value) || 0;
+        const b = parseFloat(document.getElementById('sideB').value) || 0;
         if (!a || !b) return;
         const diag = Math.round(Math.sqrt(a*a + b*b));
-        const outer = Math.round(Math.sqrt(Math.pow(a + currentOffset, 2) + Math.pow(b + currentOffset, 2)));
+        const outer = Math.round(Math.sqrt(Math.pow(a+currentOffset,2) + Math.pow(b+currentOffset,2)));
         const row = document.getElementById('historyBody').insertRow(0);
-        row.innerHTML = `<td>${a}<br>${b}</td><td style="color:var(--blue); font-weight:bold;">${diag.toLocaleString()}</td><td style="color:var(--orange); font-weight:bold;">${outer.toLocaleString()}</td><td><button onclick="this.closest('tr').remove()" style="background:none; border:none; color:#555;">×</button></td>`;
+        row.innerHTML = `<td>${a}<br>${b}</td><td>${diag}</td><td>${outer}</td><td><button onclick="this.closest('tr').remove()" style="color:#444; background:none; border:none;">×</button></td>`;
     }
 
-    // --- ポーチ計算ロジック (新デザイン図形) ---
+    // --- ポーチ図解ロジック (完全修正版) ---
     function calculateStair() {
         const road = parseFloat(document.getElementById('road_bm').value) || 0;
         const gl = parseFloat(document.getElementById('gl_bm').value) || 0;
@@ -216,73 +188,68 @@
 
         const absGL = gl;
         const absRoad = -road;
+        const absDomaEnd = absRoad + (dist * 0.02); // 2%勾配の水上
         const absBaseTop = absGL + baseH;
-        const absPorchTop = absBaseTop - 120; // ポーチ天は基礎天-120mm
-        const absDomaEnd = absRoad + (dist * 0.02); // 水上土間
-        
+        const absPorchTop = absBaseTop - 120; // 基礎天端から-120mm
         const keage = Math.round(((absPorchTop - absDomaEnd) / steps) * 10) / 10;
         
         document.getElementById('stair-result').style.display = 'block';
         document.getElementById('keage_res').innerText = keage + " mm";
         
-        // SVG描画
         const svg = document.getElementById('elevation-svg');
-        const sc = 0.4; const bY = 300; // スケールと基準Y座標を調整
-        // 描画範囲の最低レベルを決定（少し余裕を持たせる）
-        const minLvl = Math.min(absRoad, absGL, 0, absDomaEnd) - 150;
+        const sc = 0.4; // スケール
+        const bY = 250; // 下基準座標
+        const minLvl = Math.min(absRoad, absGL, 0) - 100;
         const getP = (v) => bY - (v - minLvl) * sc;
 
-        // 色の定義
-        const col = { bm: 'var(--bm-red)', gl: 'var(--green)', base: 'var(--concrete)', finish: 'var(--orange)', dim: 'var(--blue)', text: '#eee' };
-        
-        // 矢印マーカー定義
-        let content = `<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="${col.dim}"/></marker></defs>`;
+        const roadX = 20; const domaX = 150; const houseX = 320;
 
-        // 基準線
-        content += `
-            <line x1="0" y1="${getP(0)}" x2="400" y2="${getP(0)}" stroke="${col.bm}" stroke-width="1.5" stroke-dasharray="6,3"/>
-            <text x="5" y="${getP(0)-5}" fill="${col.bm}" font-size="11" font-weight="bold">BM ±0</text>
-            <line x1="0" y1="${getP(absGL)}" x2="400" y2="${getP(absGL)}" stroke="${col.gl}" stroke-width="2" stroke-dasharray="12,4,2,4"/>
-            <text x="395" y="${getP(absGL)-5}" fill="${col.gl}" font-size="11" font-weight="bold" text-anchor="end">GL ${absGL>=0?'+':''}${absGL}</text>
-        `;
-
-        // 基礎・ポーチ本体
-        const porchRight = 380; const porchWidth = 80;
-        // 基礎コンクリート
-        content += `<rect x="${porchRight-porchWidth}" y="${getP(absBaseTop)}" width="${porchWidth}" height="${(absBaseTop - minLvl)*sc}" fill="${col.base}" stroke="#555" stroke-width="1"/>`;
-        // ポーチ仕上げ
-        content += `<rect x="${porchRight-porchWidth}" y="${getP(absPorchTop)}" width="${porchWidth}" height="15" fill="${col.finish}" stroke="none"/>`;
-        // 基礎天端引き出し線
-        content += `
-            <line x1="${porchRight-porchWidth-10}" y1="${getP(absBaseTop)}" x2="${porchRight-porchWidth+5}" y2="${getP(absBaseTop)}" stroke="${col.dim}" stroke-width="1"/>
-            <text x="${porchRight-porchWidth-15}" y="${getP(absBaseTop)+4}" fill="${col.dim}" font-size="10" text-anchor="end">基礎天端</text>
-        `;
-
-        // 階段ループ
-        const stepW = 220 / steps; // 階段全体の幅を段数で割る
-        const startX = porchRight - porchWidth;
-        for(let i=1; i<=steps; i++) {
-            const sY = absPorchTop - (keage * i);
-            const sX = startX - (stepW * i);
-            // 階段下地（コンクリート）
-            content += `<rect x="${sX}" y="${getP(sY)}" width="${stepW}" height="${(sY - minLvl)*sc}" fill="${col.base}" stroke="#555" stroke-width="1"/>`;
-            // 階段仕上げ（1段目以降）
-            if(i < steps) content += `<rect x="${sX}" y="${getP(sY)}" width="${stepW}" height="15" fill="${col.finish}" stroke="none"/>`;
+        let res = `
+            <line x1="0" y1="${getP(0)}" x2="400" y2="${getP(0)}" stroke="#e74c3c" stroke-dasharray="4" stroke-width="1"/>
+            <text x="5" y="${getP(0)-5}" fill="#e74c3c" font-size="10">BM ±0</text>
             
-            // 寸法線（1段目のみ表示）
-            if(i===1) {
-                content += `
-                    <line x1="${sX+stepW+15}" y1="${getP(absPorchTop)}" x2="${sX+stepW+15}" y2="${getP(sY)}" stroke="${col.dim}" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
-                    <text x="${sX+stepW+20}" y="${getP(absPorchTop - keage/2)+4}" fill="${col.dim}" font-size="11" font-weight="bold">H=${keage}</text>
+            <line x1="0" y1="${getP(absGL)}" x2="400" y2="${getP(absGL)}" stroke="#22c55e" stroke-dasharray="8,4" stroke-width="1"/>
+            <text x="395" y="${getP(absGL)-5}" fill="#22c55e" font-size="10" text-anchor="end">GL ${absGL>=0?'+':''}${absGL}</text>
+
+            <rect x="${houseX}" y="${getP(absBaseTop)}" width="60" height="${(absBaseTop - minLvl)*sc}" fill="#333" stroke="#555"/>
+            <text x="${houseX+30}" y="${getP(absBaseTop)+15}" fill="#888" font-size="9" text-anchor="middle">建物基礎</text>
+
+            <path d="M ${roadX} ${getP(absRoad)} L ${domaX} ${getP(absDomaEnd)} L ${domaX} ${getP(minLvl)} L ${roadX} ${getP(minLvl)} Z" fill="#2c3e50" opacity="0.6"/>
+            <line x1="${roadX}" y1="${getP(absRoad)}" x2="${domaX}" y2="${getP(absDomaEnd)}" stroke="#5dade2" stroke-width="3"/>
+            <text x="${(roadX+domaX)/2}" y="${getP(absDomaEnd)-15}" fill="#5dade2" font-size="10" text-anchor="middle" font-weight="bold">土間勾配(2%)</text>
+
+            <rect x="0" y="${getP(absRoad)}" width="${roadX}" height="${(absRoad - minLvl)*sc}" fill="#555"/>
+            <text x="5" y="${getP(absRoad)+15}" fill="#aaa" font-size="8">道路</text>
+        `;
+
+        // 階段（ポーチ）
+        const stepW = (houseX - domaX) / steps;
+        for(let i=1; i<=steps; i++) {
+            const topY = absPorchTop - (keage * (i-1));
+            const bottomY = absPorchTop - (keage * i);
+            const currX = houseX - (stepW * i);
+            
+            // 階段本体 (コンクリート)
+            res += `<rect x="${currX}" y="${getP(topY)}" width="${stepW}" height="${(topY - minLvl)*sc}" fill="#7f8c8d" stroke="#111"/>`;
+            // 仕上げ面 (オレンジ)
+            res += `<line x1="${currX}" y1="${getP(topY)}" x2="${currX+stepW}" y2="${getP(topY)}" stroke="var(--orange)" stroke-width="3"/>`;
+            
+            // 蹴上寸法表示 (一段目のみ)
+            if(i === steps) {
+                res += `
+                    <line x1="${currX-15}" y1="${getP(absDomaEnd)}" x2="${currX-15}" y2="${getP(bottomY + keage)}" stroke="var(--orange)" stroke-width="1"/>
+                    <text x="${currX-20}" y="${getP(bottomY + keage/2)}" fill="var(--orange)" font-size="12" font-weight="bold" text-anchor="end">H=${keage}</text>
                 `;
             }
         }
         
-        // 1段目スタート位置
-        content += `<circle cx="${startX - (stepW * steps)}" cy="${getP(absDomaEnd)}" r="4" fill="${col.dim}"/>`;
-        content += `<text x="${startX - (stepW * steps)}" y="${getP(absDomaEnd)+18}" fill="${col.dim}" font-size="10" text-anchor="middle">1段目付根</text>`;
+        // ポーチ天端ラベル
+        res += `
+            <text x="${houseX-5}" y="${getP(absPorchTop)-8}" fill="var(--orange)" font-size="11" font-weight="bold" text-anchor="end">ポーチ天端</text>
+            <circle cx="${houseX}" cy="${getP(absPorchTop)}" r="3" fill="var(--orange)"/>
+        `;
 
-        svg.innerHTML = content;
+        svg.innerHTML = res;
     }
 </script>
 </body>
