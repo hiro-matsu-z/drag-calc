@@ -1,32 +1,23 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta name="google-adsense-account" content="ca-pub-5476919369993440">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5476919369993440" crossorigin="anonymous"></script>
-
-  <meta name="google-adsense-account" content="ca-pub-5476919369993440">
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ERMFG5G32F"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-ERMFG5G32F');
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-      <link rel="manifest" href="./manifest.json">
-
     
-    <title>対角線電卓 PRO | 基礎工事・大工向け現場計算ツールの決定版</title>
-    <meta name="description" content="【現場のプロ監修】基礎工事や大工工事に欠かせない対角線計算（ピタゴラスの定理）と、ポーチ蹴上計算を高精度に算出。227.5mmピッチ入力、枠外150mm対応など実務に特化したツールです。">
-    <meta name="keywords" content="対角線電卓,対角計算,基礎工事,枠外対応,ポーチ計算,蹴上計算,建築計算ツール,墨出し">
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="google-site-verification" content="RXCG31T1BkABreUsckThte0DgkAERE-3LLp_ORSPmtE" />
+    <meta name="google-adsense-account" content="ca-pub-5476919369993440">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5476919369993440" crossorigin="anonymous"></script>
 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ERMFG5G32F"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-ERMFG5G32F');
+    </script>
+
+    <link rel="manifest" href="./manifest.json">
+    <title>対角線電卓 PRO | 現場計算ツールの決定版</title>
+    
     <style>
         :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --green: #22c55e; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -34,11 +25,9 @@
         .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; }
         .page { display: none; }
         .page.active { display: block; }
-
         header { border-left: 5px solid var(--blue); padding-left: 15px; margin-bottom: 20px; }
         header h1 { font-size: 1.3rem; margin: 0; color: white; }
         header p { font-size: 0.7rem; color: var(--blue); margin: 0; font-weight: bold; }
-
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .input-group { display: flex; gap: 10px; margin-bottom: 12px; }
         .input-box { flex: 1; background: #2a2a2a; border: 2px solid var(--border); border-radius: 10px; padding: 8px 12px; }
@@ -46,37 +35,25 @@
         .input-box label { display: block; font-size: 0.65rem; color: var(--blue); font-weight: bold; }
         .input-box span { display: block; font-size: 0.55rem; color: #888; }
         .input-box input { width: 100%; background: transparent; border: none; color: white; font-size: 1.4rem; outline: none; font-family: monospace; font-weight: bold; }
-        
         .panel-ctrl { display: flex; gap: 6px; margin-bottom: 10px; }
         .tab { flex: 1; padding: 12px; background: #2a2a2a; border: none; color: #aaa; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
         .tab.active { background: var(--blue); color: #000; }
-        
         .grid-scroll { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; height: 180px; overflow-y: auto; background: #161616; padding: 10px; border-radius: 10px; }
         .grid-btn { background: #252525; border: 1px solid #333; border-radius: 8px; padding: 12px 0; color: var(--text); font-size: 0.85rem; text-align: center; }
         .grid-btn span { display: block; font-size: 0.6rem; color: #777; }
-
         .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; }
-
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 10px; }
         th { text-align: left; color: #888; padding: 12px; border-bottom: 2px solid var(--border); background: #252525; font-weight: normal; }
         td { padding: 12px; border-bottom: 1px solid #252525; }
-
-        /* 解説セクション */
         .article-section { margin-top: 40px; padding: 25px; background: #1a1a1a; border-radius: 12px; border-top: 5px solid var(--orange); }
         .article-section h2 { color: var(--orange); font-size: 1.2rem; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; }
         .article-section h3 { color: var(--blue); font-size: 1.05rem; margin-top: 25px; }
         .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; }
-        .article-section ul { padding-left: 20px; font-size: 0.9rem; color: #ccc; }
-
         nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(26, 26, 26, 0.9); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(65px + env(safe-area-inset-bottom)); z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #777; text-decoration: none; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
         .nav-item.active { color: var(--blue); }
-
         footer { text-align: center; padding: 40px 20px; color: #666; font-size: 0.75rem; border-top: 1px solid #222; margin-top: 40px; }
         .legal-link { color: var(--blue); text-decoration: none; margin: 0 10px; cursor: pointer; }
-        <meta name="google-adsense-account" content="ca-pub-5476919369993440">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5476919369993440"
-     crossorigin="anonymous"></script>
     </style>
 </head>
 <body>
@@ -84,7 +61,6 @@
 <div class="container">
     <div id="page-diag" class="page active">
         <header><h1>対角線電卓 PRO</h1><p>建築現場専用・高精度対角計算ツール</p></header>
-        
         <div class="card">
             <div class="input-group">
                 <div class="input-box active" id="boxA" onclick="setActiveDiag('A')"><label>A寸法 (mm)</label><input type="number" id="sideA" placeholder="0" inputmode="decimal"></div>
@@ -97,21 +73,17 @@
             <div class="grid-scroll" id="buttonGrid"></div>
             <button class="main-btn" style="margin-top:15px;" onclick="addDiagRecord()">対角線を計算する</button>
         </div>
-
         <div class="card" style="padding:0; overflow:hidden;">
             <table>
                 <thead><tr><th>入力(A/B)</th><th>図面対角</th><th>枠外(+150)</th><th>削除</th></tr></thead>
                 <tbody id="historyBody"></tbody>
             </table>
         </div>
-
         <article class="article-section">
             <h2>対角線の計算（かね出し）の重要性</h2>
-            <p>建築現場において「かね（直角）」を出す作業は、建物の精度を決定づける最も重要な工程の一つです。本ツールはピタゴラスの定理（$a^2 + b^2 = c^2$）をベースに、現場実務に特化した最適化を行っています。</p>
-            <h3>なぜ227.5mmピッチ入力なのか？</h3>
-            <p>日本の木造住宅の設計で広く用いられる「尺モジュール」。その基本単位である910mmの1/4にあたる227.5mmをワンタップで入力可能にすることで、図面からの転記ミスを防ぎ、スピード入力を実現しました。</p>
-            <h3>枠外（水貫）150mm対応の仕組み</h3>
-            <p>実際の基礎工事では、建物の位置を示すために「水杭」や「水貫」を建物の外側に設置します。本ツールの「枠外対応」機能は、自動的に両側150mm（合計300mm）を加算して対角を算出するため、逃げ墨や外枠の確認にそのまま使用できます。</p>
+            <p>建築現場において「かね（直角）」を出す作業は、建物の精度を決定づける最も重要な工程の一つです。ピタゴラスの定理に基づき、現場実務に特化した計算を行います。</p>
+            <h3>枠外（水貫）150mm対応</h3>
+            <p>実際の基礎工事では、建物の位置を示すために「水杭」を外側に設置します。本ツールは自動的に両側150mmを加算して対角を算出可能です。</p>
         </article>
     </div>
 
@@ -119,48 +91,29 @@
         <header><h1>ポーチ蹴上計算 PRO</h1><p>立面図解モード</p></header>
         <div class="card">
             <div class="input-group">
-                <div class="input-box"><label>① BM - 道路 (mm)</label><span>(BMより低いなら正)</span><input type="number" id="road_bm" value="200"></div>
-                <div class="input-box"><label>② 段数 (ポーチ天含む)</label><span>(合計の段数)</span><input type="number" id="step_count" value="2"></div>
+                <div class="input-box"><label>① BM - 道路 (mm)</label><input type="number" id="road_bm" value="200"></div>
+                <div class="input-box"><label>② 段数 (ポーチ天含む)</label><input type="number" id="step_count" value="2"></div>
             </div>
-            <div class="input-group">
-                <div class="input-box"><label>③ 基礎高さ (GLから)</label><span>(一般 410)</span><input type="number" id="gl_base" value="410"></div>
-                <div class="input-box"><label>④ 道路〜1段目距離</label><span>(勾配計算用)</span><input type="number" id="dist_road" value="2000"></div>
-            </div>
-            <div class="input-box" style="width:100%;"><label>⑤ GL - BM (mm)</label><span>(BMより高いなら正)</span><input type="number" id="gl_bm" value="50"></div>
             <button class="main-btn" style="margin-top:10px;" onclick="calculateStair()">蹴上寸法を算出</button>
         </div>
-
         <div id="stair-result" style="display:none;" class="card">
-            <p style="font-size:0.8rem; color:var(--orange); font-weight:bold; margin:0;">算出された蹴上（一段）</p>
-            <div style="font-size:2.5rem; font-weight:bold; color:var(--orange); border-bottom:3px solid #333; display:inline-block; margin-bottom:15px;" id="keage_res">--- mm</div>
-            <div style="background:#111827; border-radius:10px; padding:5px; overflow:hidden;">
-                <svg id="elevation-svg" viewBox="0 0 400 320"></svg>
-            </div>
+            <div style="font-size:2.5rem; font-weight:bold; color:var(--orange);" id="keage_res">--- mm</div>
+            <svg id="elevation-svg" viewBox="0 0 400 320" style="background:#111; border-radius:8px;"></svg>
         </div>
-
-        <article class="article-section">
-            <h2>ポーチ蹴上計算の考え方</h2>
-            <p>玄関ポーチの設計において、一段の高さ（蹴上）を均一にすることは、歩行の安全性と見た目の美しさに直結します。本ツールでは、道路からポーチ天端までの総高低差を、指定された段数で精密に等分します。</p>
-            <h3>段数の数え方とロジック</h3>
-            <p>入力する「段数」には、**最上段であるポーチ天端の段差も含めてください**。計算式は「(ポーチ天端レベル - 1段目設置ポイントのレベル) ÷ 入力段数」となっており、一段あたりの正確な高さを導き出します。</p>
-            <h3>土間勾配（2%）の影響</h3>
-            <p>駐車場やアプローチには水はけを良くするために「水勾配」をつけます。本ツールでは標準的な2%勾配を計算に含めており、道路から離れるほど高くなる土間天端のレベルを自動計算して、1段目のスタート地点を割り出します。</p>
-        </article>
     </div>
 
     <footer>
         <p>&copy; 2026 HIROKI - 現場計算ツール PRO</p>
         <p>
             <span class="legal-link" onclick="showLegal('policy')">プライバシーポリシー</span> | 
-            <span class="legal-link" onclick="showLegal('disclaimer')">免責事項</span> |
-            <span class="legal-link" onclick="showLegal('contact')">お問い合わせ</span>
+            <span class="legal-link" onclick="showLegal('disclaimer')">免責事項</span>
         </p>
     </footer>
 </div>
 
 <nav>
-    <div class="nav-item active" onclick="showPage('diag', this)"><span style="font-size:1.5rem; margin-bottom:3px;">📐</span>対角計算</div>
-    <div class="nav-item" onclick="showPage('stair', this)"><span style="font-size:1.5rem; margin-bottom:3px;">🪜</span>ポーチ計算</div>
+    <div class="nav-item active" onclick="showPage('diag', this)">📐 対角計算</div>
+    <div class="nav-item" onclick="showPage('stair', this)">🪜 ポーチ計算</div>
 </nav>
 
 <script>
@@ -169,18 +122,14 @@
         document.getElementById('page-' + pageId).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        window.scrollTo(0,0);
     }
-
     function showLegal(type) {
         const texts = {
-            policy: "【プライバシーポリシー】\n本サイトはGoogle AdSenseを利用して広告を表示する場合があります。ユーザーの入力データ（寸法等）はブラウザ内でのみ処理され、外部サーバーに送信・蓄積されることはありません。",
-            disclaimer: "【免責事項】\n計算結果の正確性には万全を期していますが、現場の状況により誤差が生じる場合があります。施工の際は必ず手計算による再確認を行ってください。",
-            contact: "【お問い合わせ】\n不具合報告やご要望はGitHubリポジトリのIssueより受け付けております。"
+            policy: "本サイトはGoogle AdSenseを利用しています。データはブラウザ内でのみ処理されます。",
+            disclaimer: "現場の状況により誤差が生じる場合があります。施工前には必ず再確認をお願いします。"
         };
         alert(texts[type]);
     }
-
     let activeSide = 'A';
     const grid = document.getElementById('buttonGrid');
     for (let i = 1; i <= 48; i++) {
@@ -205,67 +154,8 @@
         const diag = Math.round(Math.sqrt(a*a + b*b));
         const outer = Math.round(Math.sqrt(Math.pow(a+150, 2) + Math.pow(b+150, 2)));
         const row = document.getElementById('historyBody').insertRow(0);
-        row.innerHTML = `<td>${a}<br>${b}</td><td style="color:var(--blue); font-weight:bold;">${diag.toLocaleString()}</td><td style="color:var(--orange); font-weight:bold;">${outer.toLocaleString()}</td><td><button onclick="this.closest('tr').remove()" style="background:none; border:none; color:#555;">×</button></td>`;
+        row.innerHTML = `<td>${a}<br>${b}</td><td style="color:var(--blue); font-weight:bold;">${diag.toLocaleString()}</td><td style="color:var(--orange); font-weight:bold;">${outer.toLocaleString()}</td><td><button onclick="this.closest('tr').remove()">×</button></td>`;
     }
-
-    function calculateStair() {
-        const roadInput = parseFloat(document.getElementById('road_bm').value) || 0;
-        const glInput = parseFloat(document.getElementById('gl_bm').value) || 0;
-        const baseH = parseFloat(document.getElementById('gl_base').value) || 410;
-        const steps = parseFloat(document.getElementById('step_count').value) || 1;
-        const dist = parseFloat(document.getElementById('dist_road').value) || 0;
-
-        // ★レベル管理の統合（高いほど正の値にする）
-        const absGL = glInput; // GLは高いなら正
-        const absRoad = -roadInput; // 道路は低いなら正の入力なので、計算上はマイナスにする
-        
-        const absBaseTop = absGL + baseH;
-        const absPorchTop = absBaseTop - 120; // ★120mm固定
-        const absDomaEnd = absRoad + (dist * 0.02); // 道路レベルから水上へ勾配分プラス
-        
-        const keage = Math.round(((absPorchTop - absDomaEnd) / steps) * 10) / 10;
-        
-        document.getElementById('stair-result').style.display = 'block';
-        document.getElementById('keage_res').innerText = keage + " mm";
-        
-        const svg = document.getElementById('elevation-svg');
-        const sc = 0.45; const bY = 280;
-        // 最小値を基準に描画座標を決定
-        const minLvl = Math.min(absRoad, absGL, 0);
-        const getP = (v) => bY - (v - minLvl) * sc;
-        
-        const porchX = 260; 
-        const domaEndX = 200; 
-        
-        let content = `
-            <line x1="0" y1="${getP(0)}" x2="400" y2="${getP(0)}" stroke="#444" stroke-dasharray="2"/><text x="5" y="${getP(0)-5}" fill="#666" font-size="10">BM ±0</text>
-            <line x1="0" y1="${getP(absGL)}" x2="400" y2="${getP(absGL)}" stroke="var(--green)" stroke-width="1.5"/><text x="340" y="${getP(absGL)-5}" fill="var(--green)" font-size="10" font-weight="bold">GL Line (${absGL >= 0 ? '+' : ''}${absGL}mm)</text>
-            
-            <rect x="0" y="${getP(absRoad)}" width="80" height="40" fill="#334155"/><text x="10" y="${getP(absRoad)+20}" fill="white" font-size="10">道路端</text>
-            <path d="M 80 ${getP(absRoad)} L ${domaEndX} ${getP(absDomaEnd)} L ${domaEndX} ${getP(absRoad)} Z" fill="#334155" opacity="0.4"/>
-            <text x="90" y="${getP(absDomaEnd)+15}" fill="var(--blue)" font-size="9" font-weight="bold">水上土間高: ${Math.round(absDomaEnd)}mm</text>
-            
-            <path d="M 320 ${getP(absBaseTop)}" L 380 ${getP(absBaseTop)} L 380 ${getP(absGL)+40} L 320 ${getP(absGL)+40} Z" fill="#94a3b8" stroke="#fff"/>
-            <text x="325" y="${getP(absBaseTop)+15}" fill="white" font-size="9">基礎天端</text>
-            
-            <rect x="${porchX}" y="${getP(absPorchTop)}" width="60" height="10" fill="var(--orange)"/>
-            <text x="${porchX}" y="${getP(absPorchTop)-5}" fill="var(--orange)" font-size="9" font-weight="bold">ポーチ天端</text>
-        `;
-        
-        const stepW = (porchX - domaEndX) / (steps - 1 || 1);
-        for (let i = 1; i < steps; i++) {
-            const sY = absPorchTop - (keage * i); 
-            const sX = porchX - (stepW * i);
-            content += `
-                <rect x="${sX}" y="${getP(sY)}" width="${stepW}" height="${keage * sc}" fill="#1e293b" stroke="#475569"/>
-                <line x1="20" y1="${getP(sY)}" x2="${sX}" y2="${getP(sY)}" stroke="var(--blue)" stroke-width="0.5" stroke-dasharray="2"/>
-                <text x="25" y="${getP(sY)-4}" fill="var(--blue)" font-size="10">天端から -${Math.round(absBaseTop - sY)}mm</text>
-            `;
-        }
-        content += `<line x1="${porchX}" y1="${getP(absPorchTop)}" x2="${porchX}" y2="${getP(absPorchTop - keage)}" stroke="var(--orange)" stroke-width="1"/>`;
-        svg.innerHTML = content;
-    }
-    setActiveDiag('A');
 </script>
 </body>
 </html>
