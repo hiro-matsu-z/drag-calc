@@ -199,6 +199,7 @@
     }
 
     // --- 対角計算ロジック ---
+        // --- 対角計算ロジック ---
     let activeSide = 'A';
     const grid = document.getElementById('buttonGrid');
     for (let i = 1; i <= 48; i++) {
@@ -206,10 +207,14 @@
         const btn = document.createElement('button');
         btn.className = 'grid-btn';
         if (Math.round(val) % 910 === 0) btn.classList.add('highlight');
-        btn.innerHTML = `${(Math.round(val * 10) / 10).toLocaleString()}<span>${i * 0.25} 尺</span>`;
+        
+        // 修正点： <span>内の「 尺」を削除しました
+        btn.innerHTML = `${(Math.round(val * 10) / 10).toLocaleString()}<span>${i * 0.25}</span>`;
+        
         btn.onclick = () => { document.getElementById('side' + activeSide).value = val; };
         grid.appendChild(btn);
     }
+
 
     function setActiveDiag(side) {
         activeSide = side;
