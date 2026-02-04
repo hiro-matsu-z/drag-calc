@@ -21,27 +21,27 @@
     <style>
         :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --green: #22c55e; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(90px + env(safe-area-inset-bottom)); line-height: 1.6; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
         .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; }
         .page { display: none; }
         .page.active { display: block; }
         
-        /* Header & Settings */
+        /* Header */
         header { display: flex; justify-content: space-between; align-items: flex-start; border-left: 5px solid var(--blue); padding-left: 15px; margin-bottom: 20px; }
         header h1 { font-size: 1.3rem; margin: 0; color: white; }
         header p { font-size: 0.7rem; color: var(--blue); margin: 0; font-weight: bold; }
         .settings-btn { background: #2a2a2a; border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
 
-        /* Settings Card */
-        #settings-panel { display: none; background: #2a2a2a; border: 1px solid var(--orange); border-radius: 10px; padding: 15px; margin-bottom: 20px; }
+        /* Settings Panel */
+        #settings-panel { display: none; background: #2a2a2a; border: 2px solid var(--orange); border-radius: 10px; padding: 15px; margin-bottom: 20px; }
         #settings-panel.open { display: block; }
 
+        /* Calculation Card */
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .input-group { display: flex; gap: 10px; margin-bottom: 12px; }
-        .input-box { flex: 1; background: #2a2a2a; border: 2px solid var(--border); border-radius: 10px; padding: 8px 12px; }
-        .input-box.active { border-color: var(--blue); background: #333; }
+        .input-box { flex: 1; background: #2a2a2a; border: 2px solid var(--border); border-radius: 10px; padding: 8px 12px; transition: 0.2s; }
+        .input-box.active { border-color: var(--blue); background: #333; box-shadow: 0 0 10px rgba(0,212,255,0.2); }
         .input-box label { display: block; font-size: 0.65rem; color: var(--blue); font-weight: bold; }
-        .input-box span { display: block; font-size: 0.55rem; color: #888; }
         .input-box input { width: 100%; background: transparent; border: none; color: white; font-size: 1.4rem; outline: none; font-family: monospace; font-weight: bold; }
         
         .panel-ctrl { display: flex; gap: 6px; margin-bottom: 10px; }
@@ -50,18 +50,26 @@
         
         .grid-scroll { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; height: 180px; overflow-y: auto; background: #161616; padding: 10px; border-radius: 10px; }
         .grid-btn { background: #252525; border: 1px solid #333; border-radius: 8px; padding: 12px 0; color: var(--text); font-size: 0.85rem; text-align: center; }
+        .grid-btn.highlight { border: 2px solid var(--blue); background: #1a2a3a; }
+        .grid-btn.highlight span { color: var(--blue); font-weight: bold; }
         .grid-btn span { display: block; font-size: 0.6rem; color: #777; }
         
-        .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,212,255,0.3); }
 
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
-        th { text-align: left; color: #888; padding: 10px; border-bottom: 2px solid var(--border); background: #252525; font-weight: normal; }
-        td { padding: 10px; border-bottom: 1px solid #252525; }
+        /* ★広告エリア専用スタイル */
+        .ad-container { margin: 10px 0 20px; text-align: center; border-top: 1px solid #222; border-bottom: 1px solid #222; padding: 10px 0; background: rgba(0,0,0,0.2); }
+        .ad-label { font-size: 10px; color: #555; margin-bottom: 5px; letter-spacing: 1px; }
+        .ad-placeholder { min-height: 100px; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.7rem; border: 1px dashed #333; border-radius: 8px; margin: 0 10px; }
 
-        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(26, 26, 26, 0.9); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(65px + env(safe-area-inset-bottom)); z-index: 1000; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #777; text-decoration: none; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
+        /* Table */
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { text-align: left; color: #888; padding: 12px 10px; border-bottom: 2px solid var(--border); background: #252525; font-weight: normal; }
+        td { padding: 12px 10px; border-bottom: 1px solid #252525; }
+
+        /* Nav */
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(65px + env(safe-area-inset-bottom)); z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #777; text-decoration: none; font-size: 0.7rem; font-weight: bold; }
         .nav-item.active { color: var(--blue); }
-        footer { text-align: center; padding: 40px 20px; color: #666; font-size: 0.75rem; border-top: 1px solid #222; margin-top: 40px; }
     </style>
 </head>
 <body>
@@ -79,6 +87,7 @@
                 <input type="number" id="offsetSetting" style="flex:1; background:#121212; border:1px solid var(--border); color:white; padding:10px; border-radius:5px;" placeholder="150">
                 <button onclick="saveSettings()" style="background:var(--orange); border:none; color:black; padding:0 15px; border-radius:5px; font-weight:bold;">保存</button>
             </div>
+            <p style="font-size:0.6rem; color:#888; margin-top:8px;">※RCなどで逃げが変わる場合に変更してください</p>
         </div>
         
         <div class="card">
@@ -94,37 +103,41 @@
             <button class="main-btn" style="margin-top:15px;" onclick="addDiagRecord()">対角線を計算する</button>
         </div>
 
+        <div class="ad-container">
+            <div class="ad-label">SPONSOR</div>
+            <div class="ad-placeholder">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-5476919369993440"
+                     data-ad-slot="YOUR_AD_SLOT_ID"
+                     data-ad-format="horizontal"
+                     data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+        </div>
+
         <div class="card" style="padding:0; overflow:hidden;">
             <table>
-                <thead><tr><th>入力(A/B)</th><th>図面対角</th><th id="th-outer">枠外(+150)</th><th>削除</th></tr></thead>
+                <thead><tr><th>入力(A/B)</th><th>図面対角</th><th id="th-outer">枠外(+150)</th><th>消去</th></tr></thead>
                 <tbody id="historyBody"></tbody>
             </table>
         </div>
     </div>
 
     <div id="page-stair" class="page">
-        <header><h1>ポーチ蹴上計算 PRO</h1><p>立面図解モード</p></header>
-        <div class="card">
-            <div class="input-group">
-                <div class="input-box"><label>① BM - 道路 (mm)</label><input type="number" id="road_bm" value="200"></div>
-                <div class="input-box"><label>② 段数 (ポーチ天含む)</label><input type="number" id="step_count" value="2"></div>
-            </div>
-            <button class="main-btn" style="margin-top:10px;" onclick="alert('計算機能は対角計算と同様に動作します')">蹴上寸法を算出</button>
+        <header><h1>ポーチ計算</h1><p>今後のアップデートをお待ちください</p></header>
+        <div class="card" style="text-align:center; padding:50px 20px;">
+            <p>👷 現場の声を反映して開発中です</p>
         </div>
     </div>
 
-    <footer>
-        <p>&copy; 2026 HIROKI - 現場計算ツール PRO</p>
-    </footer>
+    <nav>
+        <div class="nav-item active" onclick="showPage('diag', this)">📐 対角計算</div>
+        <div class="nav-item" onclick="showPage('stair', this)">🪜 ポーチ計算</div>
+    </nav>
 </div>
 
-<nav>
-    <div class="nav-item active" onclick="showPage('diag', this)">📐 対角計算</div>
-    <div class="nav-item" onclick="showPage('stair', this)">🪜 ポーチ計算</div>
-</nav>
-
 <script>
-    // --- 設定管理 ---
     let currentOffset = parseInt(localStorage.getItem('diagOffset')) || 150;
     document.getElementById('offsetSetting').value = currentOffset;
     updateTableHead();
@@ -135,19 +148,18 @@
 
     function saveSettings() {
         const val = parseInt(document.getElementById('offsetSetting').value);
-        if (isNaN(val)) return;
-        currentOffset = val;
-        localStorage.setItem('diagOffset', val);
-        updateTableHead();
-        toggleSettings();
-        alert("設定を保存しました（" + val + "mm）");
+        if (!isNaN(val)) {
+            currentOffset = val;
+            localStorage.setItem('diagOffset', val);
+            updateTableHead();
+            toggleSettings();
+        }
     }
 
     function updateTableHead() {
         document.getElementById('th-outer').innerText = "枠外(+" + currentOffset + ")";
     }
 
-    // --- メインロジック ---
     function showPage(pageId, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById('page-' + pageId).classList.add('active');
@@ -161,6 +173,7 @@
         const val = i * 227.5;
         const btn = document.createElement('button');
         btn.className = 'grid-btn';
+        if (val % 910 === 0) btn.classList.add('highlight'); // 910の倍数
         btn.innerHTML = `${val.toLocaleString()}<span>${i * 0.25}</span>`;
         btn.onclick = () => { document.getElementById('side' + activeSide).value = val; };
         grid.appendChild(btn);
@@ -178,19 +191,10 @@
         const a = parseFloat(document.getElementById('sideA').value);
         const b = parseFloat(document.getElementById('sideB').value);
         if (!a || !b) return;
-        
-        // ピタゴラスの定理: √(a² + b²)
         const diag = Math.round(Math.sqrt(a*a + b*b));
-        // 設定されたオフセット値を使用
         const outer = Math.round(Math.sqrt(Math.pow(a + currentOffset, 2) + Math.pow(b + currentOffset, 2)));
-        
         const row = document.getElementById('historyBody').insertRow(0);
-        row.innerHTML = `
-            <td>${a}<br>${b}</td>
-            <td style="color:var(--blue); font-weight:bold;">${diag.toLocaleString()}</td>
-            <td style="color:var(--orange); font-weight:bold;">${outer.toLocaleString()}</td>
-            <td><button onclick="this.closest('tr').remove()" style="background:none; border:none; color:#555; font-size:1.2rem;">×</button></td>
-        `;
+        row.innerHTML = `<td>${a}<br>${b}</td><td style="color:var(--blue); font-weight:bold;">${diag.toLocaleString()}</td><td style="color:var(--orange); font-weight:bold;">${outer.toLocaleString()}</td><td><button onclick="this.closest('tr').remove()" style="background:none; border:none; color:#555; font-size:1.2rem;">×</button></td>`;
     }
 </script>
 </body>
