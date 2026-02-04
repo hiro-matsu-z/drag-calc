@@ -26,20 +26,22 @@
         .page { display: none; }
         .page.active { display: block; }
         
+        /* Header */
         header { display: flex; justify-content: space-between; align-items: flex-start; border-left: 5px solid var(--blue); padding-left: 15px; margin-bottom: 20px; }
         header h1 { font-size: 1.3rem; margin: 0; color: white; }
         header p { font-size: 0.7rem; color: var(--blue); margin: 0; font-weight: bold; }
         .settings-btn { background: #2a2a2a; border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
 
+        /* Settings Panel */
         #settings-panel { display: none; background: #2a2a2a; border: 2px solid var(--orange); border-radius: 10px; padding: 15px; margin-bottom: 20px; }
         #settings-panel.open { display: block; }
 
+        /* Calculation Card */
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .input-group { display: flex; gap: 10px; margin-bottom: 12px; }
-        .input-box { flex: 1; background: #2a2a2a; border: 2px solid var(--border); border-radius: 10px; padding: 8px 12px; }
-        .input-box.active { border-color: var(--blue); background: #333; }
+        .input-box { flex: 1; background: #2a2a2a; border: 2px solid var(--border); border-radius: 10px; padding: 8px 12px; transition: 0.2s; }
+        .input-box.active { border-color: var(--blue); background: #333; box-shadow: 0 0 10px rgba(0,212,255,0.2); }
         .input-box label { display: block; font-size: 0.65rem; color: var(--blue); font-weight: bold; }
-        .input-box span { display: block; font-size: 0.55rem; color: #888; }
         .input-box input { width: 100%; background: transparent; border: none; color: white; font-size: 1.4rem; outline: none; font-family: monospace; font-weight: bold; }
         
         .panel-ctrl { display: flex; gap: 6px; margin-bottom: 10px; }
@@ -52,22 +54,21 @@
         .grid-btn.highlight span { color: var(--blue); font-weight: bold; }
         .grid-btn span { display: block; font-size: 0.6rem; color: #777; }
         
-        .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,212,255,0.3); }
 
+        /* ★広告エリア専用スタイル */
         .ad-container { margin: 10px 0 20px; text-align: center; border-top: 1px solid #222; border-bottom: 1px solid #222; padding: 10px 0; background: rgba(0,0,0,0.2); }
-        .ad-label { font-size: 10px; color: #555; margin-bottom: 5px; }
-        .ad-placeholder { min-height: 100px; display: flex; align-items: center; justify-content: center; }
+        .ad-label { font-size: 10px; color: #555; margin-bottom: 5px; letter-spacing: 1px; }
+        .ad-placeholder { min-height: 100px; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.7rem; border: 1px dashed #333; border-radius: 8px; margin: 0 10px; }
 
+        /* Table */
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th { text-align: left; color: #888; padding: 12px 10px; border-bottom: 2px solid var(--border); background: #252525; font-weight: normal; }
         td { padding: 12px 10px; border-bottom: 1px solid #252525; }
 
-        .article-section { margin-top: 20px; padding: 15px; background: #1a1a1a; border-radius: 10px; border-top: 3px solid var(--orange); }
-        .article-section h2 { color: var(--orange); font-size: 1rem; margin-top: 0; }
-        .article-section p { font-size: 0.8rem; color: #aaa; }
-
+        /* Nav */
         nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(65px + env(safe-area-inset-bottom)); z-index: 1000; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #777; text-decoration: none; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #777; text-decoration: none; font-size: 0.7rem; font-weight: bold; }
         .nav-item.active { color: var(--blue); }
     </style>
 </head>
@@ -83,9 +84,10 @@
         <div id="settings-panel">
             <label style="color:var(--orange); font-size:0.8rem; font-weight:bold;">【設定】デフォルト枠外寸法 (mm)</label>
             <div style="display:flex; gap:10px; margin-top:8px;">
-                <input type="number" id="offsetSetting" style="flex:1; background:#121212; border:1px solid var(--border); color:white; padding:10px; border-radius:5px;">
+                <input type="number" id="offsetSetting" style="flex:1; background:#121212; border:1px solid var(--border); color:white; padding:10px; border-radius:5px;" placeholder="150">
                 <button onclick="saveSettings()" style="background:var(--orange); border:none; color:black; padding:0 15px; border-radius:5px; font-weight:bold;">保存</button>
             </div>
+            <p style="font-size:0.6rem; color:#888; margin-top:8px;">※RCなどで逃げが変わる場合に変更してください</p>
         </div>
         
         <div class="card">
@@ -104,7 +106,12 @@
         <div class="ad-container">
             <div class="ad-label">SPONSOR</div>
             <div class="ad-placeholder">
-                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5476919369993440" data-ad-slot="YOUR_AD_SLOT_ID" data-ad-format="horizontal" data-full-width-responsive="true"></ins>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-5476919369993440"
+                     data-ad-slot="YOUR_AD_SLOT_ID"
+                     data-ad-format="horizontal"
+                     data-full-width-responsive="true"></ins>
                 <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
         </div>
@@ -118,42 +125,40 @@
     </div>
 
     <div id="page-stair" class="page">
-        <header><h1>ポーチ計算 PRO</h1><p>高低差から蹴上を自動算出</p></header>
-        <div class="card">
-            <div class="input-group">
-                <div class="input-box"><label>① BM - 道路 (mm)</label><span>低いなら正</span><input type="number" id="road_bm" value="200"></div>
-                <div class="input-box"><label>② 段数</label><span>ポーチ天含</span><input type="number" id="step_count" value="2"></div>
-            </div>
-            <div class="input-group">
-                <div class="input-box"><label>③ 基礎高 (GLから)</label><input type="number" id="gl_base" value="410"></div>
-                <div class="input-box"><label>④ 道路〜1段目距離</label><input type="number" id="dist_road" value="2000"></div>
-            </div>
-            <div class="input-box" style="width:100%;"><label>⑤ GL - BM (mm)</label><span>高いなら正</span><input type="number" id="gl_bm" value="50"></div>
-            <button class="main-btn" style="margin-top:15px;" onclick="calculateStair()">蹴上寸法を算出</button>
+        <header><h1>ポーチ計算</h1><p>今後のアップデートをお待ちください</p></header>
+        <div class="card" style="text-align:center; padding:50px 20px;">
+            <p>👷 現場の声を反映して開発中です</p>
         </div>
-
-        <div id="stair-result" style="display:none;" class="card">
-            <div style="font-size:0.8rem; color:var(--orange); font-weight:bold;">算出された蹴上（一段）</div>
-            <div style="font-size:2.5rem; font-weight:bold; color:var(--orange); margin-bottom:10px;" id="keage_res">--- mm</div>
-            <svg id="elevation-svg" viewBox="0 0 400 320" style="background:#111; border-radius:8px; width:100%; height:auto;"></svg>
-        </div>
-
-        <article class="article-section">
-            <h2>ポーチ計算のロジック</h2>
-            <p>道路からポーチ天端までの総高低差を、指定された段数で均等に割り振ります。土間勾配（2%）を考慮し、1段目の正確な高さを導き出します。</p>
-        </article>
     </div>
 
     <nav>
-        <div class="nav-item active" id="nav-diag" onclick="showPage('diag', this)">📐 対角計算</div>
-        <div class="nav-item" id="nav-stair" onclick="showPage('stair', this)">🪜 ポーチ計算</div>
+        <div class="nav-item active" onclick="showPage('diag', this)">📐 対角計算</div>
+        <div class="nav-item" onclick="showPage('stair', this)">🪜 ポーチ計算</div>
     </nav>
 </div>
 
 <script>
-    // --- 共通設定 ---
     let currentOffset = parseInt(localStorage.getItem('diagOffset')) || 150;
     document.getElementById('offsetSetting').value = currentOffset;
+    updateTableHead();
+
+    function toggleSettings() {
+        document.getElementById('settings-panel').classList.toggle('open');
+    }
+
+    function saveSettings() {
+        const val = parseInt(document.getElementById('offsetSetting').value);
+        if (!isNaN(val)) {
+            currentOffset = val;
+            localStorage.setItem('diagOffset', val);
+            updateTableHead();
+            toggleSettings();
+        }
+    }
+
+    function updateTableHead() {
+        document.getElementById('th-outer').innerText = "枠外(+" + currentOffset + ")";
+    }
 
     function showPage(pageId, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -162,29 +167,18 @@
         el.classList.add('active');
     }
 
-    // --- 対角計算ロジック ---
-    function toggleSettings() { document.getElementById('settings-panel').classList.toggle('open'); }
-    function saveSettings() {
-        const val = parseInt(document.getElementById('offsetSetting').value);
-        if (!isNaN(val)) {
-            currentOffset = val;
-            localStorage.setItem('diagOffset', val);
-            document.getElementById('th-outer').innerText = "枠外(+" + currentOffset + ")";
-            toggleSettings();
-        }
-    }
-
     let activeSide = 'A';
     const grid = document.getElementById('buttonGrid');
     for (let i = 1; i <= 48; i++) {
         const val = i * 227.5;
         const btn = document.createElement('button');
         btn.className = 'grid-btn';
-        if (val % 910 === 0) btn.classList.add('highlight');
+        if (val % 910 === 0) btn.classList.add('highlight'); // 910の倍数
         btn.innerHTML = `${val.toLocaleString()}<span>${i * 0.25}</span>`;
         btn.onclick = () => { document.getElementById('side' + activeSide).value = val; };
         grid.appendChild(btn);
     }
+
     function setActiveDiag(side) {
         activeSide = side;
         document.getElementById('tabA').classList.toggle('active', side === 'A');
@@ -192,6 +186,7 @@
         document.getElementById('boxA').classList.toggle('active', side === 'A');
         document.getElementById('boxB').classList.toggle('active', side === 'B');
     }
+
     function addDiagRecord() {
         const a = parseFloat(document.getElementById('sideA').value);
         const b = parseFloat(document.getElementById('sideB').value);
@@ -199,44 +194,7 @@
         const diag = Math.round(Math.sqrt(a*a + b*b));
         const outer = Math.round(Math.sqrt(Math.pow(a + currentOffset, 2) + Math.pow(b + currentOffset, 2)));
         const row = document.getElementById('historyBody').insertRow(0);
-        row.innerHTML = `<td>${a}<br>${b}</td><td style="color:var(--blue); font-weight:bold;">${diag.toLocaleString()}</td><td style="color:var(--orange); font-weight:bold;">${outer.toLocaleString()}</td><td><button onclick="this.closest('tr').remove()" style="background:none; border:none; color:#555;">×</button></td>`;
-    }
-
-    // --- ポーチ計算ロジック (復活) ---
-    function calculateStair() {
-        const road = parseFloat(document.getElementById('road_bm').value) || 0;
-        const gl = parseFloat(document.getElementById('gl_bm').value) || 0;
-        const baseH = parseFloat(document.getElementById('gl_base').value) || 410;
-        const steps = parseFloat(document.getElementById('step_count').value) || 1;
-        const dist = parseFloat(document.getElementById('dist_road').value) || 0;
-
-        const absGL = gl;
-        const absRoad = -road;
-        const absBaseTop = absGL + baseH;
-        const absPorchTop = absBaseTop - 120;
-        const absDomaEnd = absRoad + (dist * 0.02);
-        
-        const keage = Math.round(((absPorchTop - absDomaEnd) / steps) * 10) / 10;
-        
-        document.getElementById('stair-result').style.display = 'block';
-        document.getElementById('keage_res').innerText = keage + " mm";
-        
-        const svg = document.getElementById('elevation-svg');
-        const sc = 0.45; const bY = 280;
-        const minLvl = Math.min(absRoad, absGL, 0);
-        const getP = (v) => bY - (v - minLvl) * sc;
-        
-        let content = `
-            <line x1="0" y1="${getP(0)}" x2="400" y2="${getP(0)}" stroke="#444" stroke-dasharray="2"/><text x="5" y="${getP(0)-5}" fill="#666" font-size="10">BM ±0</text>
-            <rect x="320" y="${getP(absBaseTop)}" width="60" height="${(absBaseTop-absGL)*sc}" fill="#444" stroke="#fff"/>
-            <rect x="240" y="${getP(absPorchTop)}" width="80" height="10" fill="var(--orange)"/>
-        `;
-        // 簡易的な階段図形
-        const stepW = 40;
-        for(let i=1; i<steps; i++) {
-            content += `<rect x="${240 - (stepW*i)}" y="${getP(absPorchTop - keage*i)}" width="${stepW}" height="${keage*sc}" fill="#222" stroke="#555"/>`;
-        }
-        svg.innerHTML = content;
+        row.innerHTML = `<td>${a}<br>${b}</td><td style="color:var(--blue); font-weight:bold;">${diag.toLocaleString()}</td><td style="color:var(--orange); font-weight:bold;">${outer.toLocaleString()}</td><td><button onclick="this.closest('tr').remove()" style="background:none; border:none; color:#555; font-size:1.2rem;">×</button></td>`;
     }
 </script>
 </body>
