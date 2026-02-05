@@ -69,7 +69,6 @@
 
         #elevation-svg { background: #000; border-radius: 8px; width: 100%; height: auto; margin-top: 10px; border: 1px solid #333; }
         
-        /* ▼▼▼ 追加：生コン積算リスト用のスタイル ▼▼▼ */
         .con-row td { font-size: 0.8rem; border-bottom: 1px solid #333; padding: 10px 5px; }
         .con-name { color: var(--blue); font-weight: bold; font-size: 0.9rem; }
         .con-detail { color: #888; font-size: 0.7rem; margin-top: 2px; }
@@ -163,8 +162,14 @@
                 <div class="input-box"><label>横 W (mm)</label><input type="number" id="con_w" placeholder="3000"></div>
             </div>
             <div class="input-group">
-                <div class="input-box"><label>厚み D (mm)</label><input type="number" id="con_d" value="150"></div>
-                <div class="input-box" style="visibility:hidden;"></div>
+                <div class="input-box"><label>厚み/高さ D (mm)</label><input type="number" id="con_d" value="150"></div>
+                <div class="input-box">
+                    <label>形状</label>
+                    <select id="con_shape" style="width:100%; background:transparent; border:none; color:white; font-size:1.1rem; height:40px; font-weight:bold; -webkit-appearance: none;">
+                        <option value="box" style="background:#333;">■ 四角</option>
+                        <option value="hunch" style="background:#333;">◢ ハンチ</option>
+                    </select>
+                </div>
             </div>
             <button class="main-btn" style="margin-top:15px;" onclick="addConcreteRecord()">＋ リストに追加</button>
         </div>
@@ -182,7 +187,7 @@
             <div style="background:#2a2a2a; padding:15px; border-top:2px solid var(--border);">
                 <div class="input-group" style="align-items:center; margin-bottom:5px;">
                     <label style="color:var(--text); font-size:0.9rem;">全体ロス率</label>
-                    <input type="number" id="con_total_loss" value="3" oninput="updateConcreteTotal()" style="width:60px; background:#121212; border:1px solid #444; color:white; padding:5px; border-radius:5px; text-align:center;">
+                    <input type="number" id="con_total_loss" value="10" oninput="updateConcreteTotal()" style="width:60px; background:#121212; border:1px solid #444; color:white; padding:5px; border-radius:5px; text-align:center;">
                     <span style="color:var(--text);">%</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:10px;">
@@ -194,8 +199,8 @@
         </div>
 
         <article class="article-section">
-            <h2>符号管理で拾い漏れ防止</h2>
-            <p>図面の記号（FG1, B1など）を入力しながら計算することで、どの部分が計算済みかをリストで管理できます。同じ形状が複数ある場合は「箇所数」を入力するだけで自動で掛け合わせて積算します。</p>
+            <h2>ハンチ（三角形）も計算可能</h2>
+            <p>「形状」で「◢ ハンチ」を選択すると、入力した寸法（L×W×D）を半分（1/2）にして体積を算出します。基礎のフーチングやコーナー補強など、複雑な形状の積算に対応しました。</p>
         </article>
     </div>
 
@@ -327,7 +332,7 @@
         svg.innerHTML = res;
     }
 
-    // --- ▼▼▼ 追加：生コン計算ロジック（符号・箇所数対応） ▼▼▼ ---
+    // --- 生コン計算ロジック（ハンチ対応版） ---
     let concreteItems = [];
 
     function addConcreteRecord() {
@@ -336,20 +341,27 @@
         const l = parseFloat(document.getElementById('con_l').value);
         const w = parseFloat(document.getElementById('con_w').value);
         const d = parseFloat(document.getElementById('con_d').value);
+        const shape = document.getElementById('con_shape').value;
         
         if (!l || !w || !d) {
             alert("縦、横、厚みをすべて入力してください");
             return;
         }
 
-        // 単体積 × 箇所数
-        const singleVol = (l * w * d) / 1000000000;
+        // 基本体積 (m3)
+        let singleVol = (l * w * d) / 1000000000;
+        
+        // ハンチなら半分にする
+        if (shape === 'hunch') {
+            singleVol = singleVol / 2;
+        }
+
         const subTotal = singleVol * count;
         
-        concreteItems.push({ name: name, count: count, l: l, w: w, d: d, vol: subTotal });
+        concreteItems.push({ name: name, count: count, l: l, w: w, d: d, vol: subTotal, shape: shape });
         renderConcreteList();
         
-        // 次の入力のため、寸法だけクリア（符号は連続で同じ系が多いので残すか迷うが、今回は名前もクリアする）
+        // 入力クリア
         document.getElementById('con_name').value = '';
         document.getElementById('con_count').value = '1';
         document.getElementById('con_l').value = '';
@@ -364,9 +376,11 @@
         concreteItems.forEach((item, index) => {
             const row = document.createElement('tr');
             row.className = 'con-row';
+            const shapeLabel = item.shape === 'hunch' ? '<span style="color:#ff9500;">[ハンチ]</span>' : '';
+            
             row.innerHTML = `
                 <td>
-                    <div class="con-name">${item.name} <span style="font-size:0.8rem; color:#888; font-weight:normal;">(×${item.count})</span></div>
+                    <div class="con-name">${item.name} ${shapeLabel} <span style="font-size:0.8rem; color:#888; font-weight:normal;">(×${item.count})</span></div>
                     <div class="con-vol">${item.vol.toFixed(3)} m³</div>
                     <div class="con-detail">L:${item.l} W:${item.w} D:${item.d}</div>
                 </td>
