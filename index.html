@@ -187,7 +187,7 @@
             <div style="background:#2a2a2a; padding:15px; border-top:2px solid var(--border);">
                 <div class="input-group" style="align-items:center; margin-bottom:5px;">
                     <label style="color:var(--text); font-size:0.9rem;">全体ロス率</label>
-                    <input type="number" id="con_total_loss" value="3" oninput="updateConcreteTotal()" style="width:60px; background:#121212; border:1px solid #444; color:white; padding:5px; border-radius:5px; text-align:center;">
+                    <input type="number" id="con_total_loss" value="10" oninput="updateConcreteTotal()" style="width:60px; background:#121212; border:1px solid #444; color:white; padding:5px; border-radius:5px; text-align:center;">
                     <span style="color:var(--text);">%</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:10px;">
@@ -199,8 +199,8 @@
         </div>
 
         <article class="article-section">
-            <h2>ハンチ（三角形）も計算可能</h2>
-            <p>「形状」で「◢ ハンチ」を選択すると、入力した寸法（L×W×D）を半分（1/2）にして体積を算出します。基礎のフーチングやコーナー補強など、複雑な形状の積算に対応しました。</p>
+            <h2>自動保存に対応</h2>
+            <p>計算したリストは自動的にスマホ内に保存されるため、アプリを閉じたりページを移動したりしても消えません。「全クリア」ボタンを押すまで記録は残ります。</p>
         </article>
     </div>
 
@@ -332,8 +332,19 @@
         svg.innerHTML = res;
     }
 
-    // --- 生コン計算ロジック（ハンチ対応版） ---
-    let concreteItems = [];
+    // --- 生コン計算ロジック（保存機能付き） ---
+    // 起動時にロード
+    let concreteItems = JSON.parse(localStorage.getItem('concreteList')) || [];
+    let savedLoss = localStorage.getItem('concreteLoss');
+    if(savedLoss) document.getElementById('con_total_loss').value = savedLoss;
+    
+    // ロードしたデータを表示
+    renderConcreteList();
+
+    function saveData() {
+        localStorage.setItem('concreteList', JSON.stringify(concreteItems));
+        localStorage.setItem('concreteLoss', document.getElementById('con_total_loss').value);
+    }
 
     function addConcreteRecord() {
         const name = document.getElementById('con_name').value || '名称なし';
@@ -359,6 +370,8 @@
         const subTotal = singleVol * count;
         
         concreteItems.push({ name: name, count: count, l: l, w: w, d: d, vol: subTotal, shape: shape });
+        
+        saveData(); // 保存
         renderConcreteList();
         
         // 入力クリア
@@ -395,12 +408,14 @@
 
     function removeConcreteItem(index) {
         concreteItems.splice(index, 1);
+        saveData(); // 保存
         renderConcreteList();
     }
 
     function clearConcreteList() {
         if(confirm('リストを全て消去しますか？')) {
             concreteItems = [];
+            saveData(); // 保存
             renderConcreteList();
         }
     }
@@ -413,6 +428,9 @@
         
         document.getElementById('con_grand_total').innerText = grandTotal.toFixed(3) + " m³";
         document.getElementById('con_pure_total').innerText = "（正味合計：" + totalVol.toFixed(3) + " m³）";
+        
+        // ロス率が変わった時も保存
+        localStorage.setItem('concreteLoss', loss);
     }
 </script>
 </body>
