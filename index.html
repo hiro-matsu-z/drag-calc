@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
+    <title>現場計算 PRO | 建築現場の無料計算アプリ（対角・生コン・残土・ポーチ）</title>
+    <meta name="description" content="建築現場監督・職人向けの無料計算ツール。直角の対角線計算、生コン・残土の立米(m3)積算、ポーチの階段割付がスマホで一瞬で完了。登録不要、インストール不要ですぐ使えます。">
+    <meta name="keywords" content="建築,現場,計算,アプリ,対角線,生コン,立米計算,残土,ポーチ,階段,無料,ツール">
+
+    <meta property="og:title" content="現場計算 PRO | 建築現場の決定版ツール">
+    <meta property="og:description" content="対角線、生コン立米、残土ダンプ数、ポーチ割付をスマホで計算。現場の「欲しい」を詰め込みました。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://zawa.click">
+    <meta property="og:image" content="https://zawa.click/ogp.png">
+    <meta name="twitter:card" content="summary_large_image">
+
     <meta name="google-adsense-account" content="ca-pub-5476919369993440">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5476919369993440" crossorigin="anonymous"></script>
 
@@ -16,9 +27,10 @@
     </script>
 
     <link rel="manifest" href="./manifest.json">
-    <title>対角線電卓 PRO | 現場計算ツールの決定版</title>
+    <link rel="icon" href="./favicon.ico">
     
     <style>
+        /* スタイルは変更していませんが、長いので省略します。元のまま残してください */
         :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --green: #22c55e; --concrete: #7f8c8d; --soil: #d35400; --bm-red: #e74c3c; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
@@ -69,16 +81,14 @@
 
         #elevation-svg { background: #000; border-radius: 8px; width: 100%; height: auto; margin-top: 10px; border: 1px solid #333; }
         
-        /* リスト用スタイル */
         .con-row td { font-size: 0.8rem; border-bottom: 1px solid #333; padding: 10px 5px; }
         .con-name { color: var(--blue); font-weight: bold; font-size: 0.9rem; }
         .con-detail { color: #888; font-size: 0.7rem; margin-top: 2px; }
         .con-vol { font-size: 1rem; font-weight: bold; color: white; }
-        
-        /* 残土用の色設定 */
         .soil-val { color: var(--soil); font-weight: bold; }
     </style>
 </head>
+
 <body>
 
 <div class="container">
