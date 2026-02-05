@@ -54,7 +54,6 @@
         
         .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; }
 
-       
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th { text-align: left; color: #888; padding: 12px 10px; border-bottom: 2px solid var(--border); background: #252525; font-weight: normal; }
         td { padding: 12px 10px; border-bottom: 1px solid #252525; }
@@ -69,6 +68,12 @@
         .nav-item.active { color: var(--blue); }
 
         #elevation-svg { background: #000; border-radius: 8px; width: 100%; height: auto; margin-top: 10px; border: 1px solid #333; }
+        
+        /* ▼▼▼ 追加：生コン積算リスト用のスタイル ▼▼▼ */
+        .con-row td { font-size: 0.8rem; border-bottom: 1px solid #333; padding: 10px 5px; }
+        .con-name { color: var(--blue); font-weight: bold; font-size: 0.9rem; }
+        .con-detail { color: #888; font-size: 0.7rem; margin-top: 2px; }
+        .con-vol { font-size: 1rem; font-weight: bold; color: white; }
     </style>
 </head>
 <body>
@@ -145,16 +150,65 @@
             <p>玄関ポーチの設計において、一段の高さ（蹴上）を均一にすることは、歩行の安全性と見た目の美しさに直結します。本ツールでは、道路からポーチ天端までの総高低差を等分し、土間勾配（2%）を自動計算に含めています。</p>
         </article>
     </div>
-        <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
+
+    <div id="page-concrete" class="page">
+        <header><h1>生コン立米計算</h1><p>図面の符号と連動して積算</p></header>
+        <div class="card">
+            <div class="input-group">
+                <div class="input-box" style="flex:2;"><label>符号 (例: FG1)</label><input type="text" id="con_name" placeholder="場所名" style="font-size:1rem;"></div>
+                <div class="input-box" style="flex:1;"><label>箇所数</label><input type="number" id="con_count" value="1" style="font-size:1.2rem;"></div>
+            </div>
+            <div class="input-group">
+                <div class="input-box"><label>縦 L (mm)</label><input type="number" id="con_l" placeholder="5000"></div>
+                <div class="input-box"><label>横 W (mm)</label><input type="number" id="con_w" placeholder="3000"></div>
+            </div>
+            <div class="input-group">
+                <div class="input-box"><label>厚み D (mm)</label><input type="number" id="con_d" value="150"></div>
+                <div class="input-box" style="visibility:hidden;"></div>
+            </div>
+            <button class="main-btn" style="margin-top:15px;" onclick="addConcreteRecord()">＋ リストに追加</button>
+        </div>
+
+        <div class="card" style="padding:0; overflow:hidden;">
+            <div style="background:#252525; padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.8rem; color:#aaa;">計算履歴</span>
+                <button onclick="clearConcreteList()" style="font-size:0.7rem; background:#333; color:white; border:none; padding:4px 8px; border-radius:4px;">全クリア</button>
+            </div>
+            <table style="width:100%;">
+                <tbody id="concreteListBody">
+                    </tbody>
+            </table>
+            
+            <div style="background:#2a2a2a; padding:15px; border-top:2px solid var(--border);">
+                <div class="input-group" style="align-items:center; margin-bottom:5px;">
+                    <label style="color:var(--text); font-size:0.9rem;">全体ロス率</label>
+                    <input type="number" id="con_total_loss" value="10" oninput="updateConcreteTotal()" style="width:60px; background:#121212; border:1px solid #444; color:white; padding:5px; border-radius:5px; text-align:center;">
+                    <span style="color:var(--text);">%</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:10px;">
+                    <span style="color:#aaa; font-size:0.8rem;">発注予定数量</span>
+                    <span id="con_grand_total" style="font-size:2rem; font-weight:bold; color:var(--orange);">0.000 m³</span>
+                </div>
+                <p style="text-align:right; margin:0; font-size:0.7rem; color:#666;" id="con_pure_total">（正味合計：0.000 m³）</p>
+            </div>
+        </div>
+
+        <article class="article-section">
+            <h2>符号管理で拾い漏れ防止</h2>
+            <p>図面の記号（FG1, B1など）を入力しながら計算することで、どの部分が計算済みかをリストで管理できます。同じ形状が複数ある場合は「箇所数」を入力するだけで自動で掛け合わせて積算します。</p>
+        </article>
+    </div>
+
+    <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
         <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー</a>
         <span style="color: #444; margin: 0 10px;">|</span>
         <span style="color: #666;">© 2026 現場計算 PRO</span>
     </div>
 
-
     <nav>
         <div class="nav-item active" onclick="showPage('diag', this)">📐 対角計算</div>
         <div class="nav-item" onclick="showPage('stair', this)">🪜 ポーチ計算</div>
+        <div class="nav-item" onclick="showPage('concrete', this)">💧 生コン</div>
     </nav>
 </div>
 
@@ -191,7 +245,6 @@
     }
 
     // --- 対角計算ロジック ---
-        // --- 対角計算ロジック ---
     let activeSide = 'A';
     const grid = document.getElementById('buttonGrid');
     for (let i = 1; i <= 48; i++) {
@@ -199,14 +252,10 @@
         const btn = document.createElement('button');
         btn.className = 'grid-btn';
         if (Math.round(val) % 910 === 0) btn.classList.add('highlight');
-        
-        // 修正点： <span>内の「 尺」を削除しました
         btn.innerHTML = `${(Math.round(val * 10) / 10).toLocaleString()}<span>${i * 0.25}</span>`;
-        
         btn.onclick = () => { document.getElementById('side' + activeSide).value = val; };
         grid.appendChild(btn);
     }
-
 
     function setActiveDiag(side) {
         activeSide = side;
@@ -276,6 +325,80 @@
             <text x="5" y="${getP(0)-5}" fill="#e74c3c" font-size="11" font-weight="bold">BM ±0</text>
         `;
         svg.innerHTML = res;
+    }
+
+    // --- ▼▼▼ 追加：生コン計算ロジック（符号・箇所数対応） ▼▼▼ ---
+    let concreteItems = [];
+
+    function addConcreteRecord() {
+        const name = document.getElementById('con_name').value || '名称なし';
+        const count = parseFloat(document.getElementById('con_count').value) || 1;
+        const l = parseFloat(document.getElementById('con_l').value);
+        const w = parseFloat(document.getElementById('con_w').value);
+        const d = parseFloat(document.getElementById('con_d').value);
+        
+        if (!l || !w || !d) {
+            alert("縦、横、厚みをすべて入力してください");
+            return;
+        }
+
+        // 単体積 × 箇所数
+        const singleVol = (l * w * d) / 1000000000;
+        const subTotal = singleVol * count;
+        
+        concreteItems.push({ name: name, count: count, l: l, w: w, d: d, vol: subTotal });
+        renderConcreteList();
+        
+        // 次の入力のため、寸法だけクリア（符号は連続で同じ系が多いので残すか迷うが、今回は名前もクリアする）
+        document.getElementById('con_name').value = '';
+        document.getElementById('con_count').value = '1';
+        document.getElementById('con_l').value = '';
+        document.getElementById('con_w').value = '';
+        document.getElementById('con_name').focus();
+    }
+
+    function renderConcreteList() {
+        const tbody = document.getElementById('concreteListBody');
+        tbody.innerHTML = '';
+        
+        concreteItems.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.className = 'con-row';
+            row.innerHTML = `
+                <td>
+                    <div class="con-name">${item.name} <span style="font-size:0.8rem; color:#888; font-weight:normal;">(×${item.count})</span></div>
+                    <div class="con-vol">${item.vol.toFixed(3)} m³</div>
+                    <div class="con-detail">L:${item.l} W:${item.w} D:${item.d}</div>
+                </td>
+                <td style="text-align:right;">
+                    <button onclick="removeConcreteItem(${index})" style="background:#333; color:#888; border:none; padding:5px 10px; border-radius:4px;">×</button>
+                </td>
+            `;
+            tbody.insertBefore(row, tbody.firstChild);
+        });
+        updateConcreteTotal();
+    }
+
+    function removeConcreteItem(index) {
+        concreteItems.splice(index, 1);
+        renderConcreteList();
+    }
+
+    function clearConcreteList() {
+        if(confirm('リストを全て消去しますか？')) {
+            concreteItems = [];
+            renderConcreteList();
+        }
+    }
+
+    function updateConcreteTotal() {
+        const totalVol = concreteItems.reduce((sum, item) => sum + item.vol, 0);
+        const loss = parseFloat(document.getElementById('con_total_loss').value) || 0;
+        
+        const grandTotal = totalVol * (1 + loss / 100);
+        
+        document.getElementById('con_grand_total').innerText = grandTotal.toFixed(3) + " m³";
+        document.getElementById('con_pure_total').innerText = "（正味合計：" + totalVol.toFixed(3) + " m³）";
     }
 </script>
 </body>
