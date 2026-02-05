@@ -19,7 +19,7 @@
     <title>対角線電卓 PRO | 現場計算ツールの決定版</title>
     
     <style>
-        :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --green: #22c55e; --concrete: #7f8c8d; --bm-red: #e74c3c; }
+        :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --green: #22c55e; --concrete: #7f8c8d; --soil: #d35400; --bm-red: #e74c3c; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
         .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; }
@@ -69,10 +69,14 @@
 
         #elevation-svg { background: #000; border-radius: 8px; width: 100%; height: auto; margin-top: 10px; border: 1px solid #333; }
         
+        /* リスト用スタイル */
         .con-row td { font-size: 0.8rem; border-bottom: 1px solid #333; padding: 10px 5px; }
         .con-name { color: var(--blue); font-weight: bold; font-size: 0.9rem; }
         .con-detail { color: #888; font-size: 0.7rem; margin-top: 2px; }
         .con-vol { font-size: 1rem; font-weight: bold; color: white; }
+        
+        /* 残土用の色設定 */
+        .soil-val { color: var(--soil); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -106,20 +110,16 @@
             <button class="main-btn" style="margin-top:15px;" onclick="addDiagRecord()">対角線を計算する</button>
         </div>
 
-     
-
         <div class="card" style="padding:0; overflow:hidden;">
             <table>
                 <thead><tr><th>A/B</th><th>対角</th><th id="th-outer">枠外(+150)</th><th>消去</th></tr></thead>
                 <tbody id="historyBody"></tbody>
             </table>
         </div>
-
+        
         <article class="article-section">
             <h2>建築現場の対角計算について</h2>
             <p>かね（直角）を出す作業は建物の精度を決定づける重要工程です。本ツールはピタゴラスの定理 ($a^2 + b^2 = c^2$) に基づき、現場実務に特化した計算を行います。</p>
-            <h3>尺モジュールへの対応</h3>
-            <p>日本の木造住宅で標準的な910mmの1/4にあたる227.5mmピッチをワンタップで入力可能です。枠外（逃げ）寸法も自由に設定でき、RC造の現場でも活用いただけます。</p>
         </article>
     </div>
 
@@ -143,11 +143,6 @@
             <div style="font-size:2rem; font-weight:bold; color:var(--orange);" id="keage_res">--- mm</div>
             <svg id="elevation-svg" viewBox="0 0 400 350"></svg>
         </div>
-
-        <article class="article-section">
-            <h2>ポーチ蹴上計算の考え方</h2>
-            <p>玄関ポーチの設計において、一段の高さ（蹴上）を均一にすることは、歩行の安全性と見た目の美しさに直結します。本ツールでは、道路からポーチ天端までの総高低差を等分し、土間勾配（2%）を自動計算に含めています。</p>
-        </article>
     </div>
 
     <div id="page-concrete" class="page">
@@ -180,10 +175,8 @@
                 <button onclick="clearConcreteList()" style="font-size:0.7rem; background:#333; color:white; border:none; padding:4px 8px; border-radius:4px;">全クリア</button>
             </div>
             <table style="width:100%;">
-                <tbody id="concreteListBody">
-                    </tbody>
+                <tbody id="concreteListBody"></tbody>
             </table>
-            
             <div style="background:#2a2a2a; padding:15px; border-top:2px solid var(--border);">
                 <div class="input-group" style="align-items:center; margin-bottom:5px;">
                     <label style="color:var(--text); font-size:0.9rem;">全体ロス率</label>
@@ -197,10 +190,71 @@
                 <p style="text-align:right; margin:0; font-size:0.7rem; color:#666;" id="con_pure_total">（正味合計：0.000 m³）</p>
             </div>
         </div>
+    </div>
 
+    <div id="page-soil" class="page">
+        <header><h1>残土・搬出計算</h1><p>ほぐし率とダンプ台数算出</p></header>
+        <div class="card">
+            <div class="input-group">
+                <div class="input-box" style="flex:2;"><label>符号 (例: 掘削1)</label><input type="text" id="soil_name" placeholder="場所名" style="font-size:1rem;"></div>
+                <div class="input-box" style="flex:1;"><label>箇所数</label><input type="number" id="soil_count" value="1" style="font-size:1.2rem;"></div>
+            </div>
+            <div class="input-group">
+                <div class="input-box"><label>縦 L (mm)</label><input type="number" id="soil_l" placeholder="5000"></div>
+                <div class="input-box"><label>横 W (mm)</label><input type="number" id="soil_w" placeholder="3000"></div>
+            </div>
+            <div class="input-group">
+                <div class="input-box"><label>深さ D (mm)</label><input type="number" id="soil_d" value="300"></div>
+                <div class="input-box">
+                    <label>形状</label>
+                    <select id="soil_shape" style="width:100%; background:transparent; border:none; color:white; font-size:1.1rem; height:40px; font-weight:bold; -webkit-appearance: none;">
+                        <option value="box" style="background:#333;">■ 四角</option>
+                        <option value="hunch" style="background:#333;">◢ ハンチ</option>
+                    </select>
+                </div>
+            </div>
+            <button class="main-btn" style="margin-top:15px; background:linear-gradient(135deg, #e67e22, #d35400);" onclick="addSoilRecord()">＋ 残土リストに追加</button>
+        </div>
+
+        <div class="card" style="padding:0; overflow:hidden;">
+            <div style="background:#252525; padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.8rem; color:#aaa;">掘削履歴 (地山)</span>
+                <button onclick="clearSoilList()" style="font-size:0.7rem; background:#333; color:white; border:none; padding:4px 8px; border-radius:4px;">全クリア</button>
+            </div>
+            <table style="width:100%;">
+                <tbody id="soilListBody"></tbody>
+            </table>
+            
+            <div style="background:#2a2a2a; padding:15px; border-top:2px solid var(--border);">
+                <div class="input-group" style="align-items:center; margin-bottom:5px;">
+                    <label style="color:var(--text); font-size:0.9rem;">ほぐし率 (土換算係数)</label>
+                    <input type="number" id="soil_factor" value="1.3" oninput="updateSoilTotal()" style="width:60px; background:#121212; border:1px solid #444; color:white; padding:5px; border-radius:5px; text-align:center;">
+                    <span style="color:var(--text); font-size:0.8rem;">倍</span>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:10px;">
+                    <span style="color:#aaa; font-size:0.8rem;">搬出予定数量</span>
+                    <span id="soil_grand_total" style="font-size:2rem; font-weight:bold; color:var(--soil);">0.000 m³</span>
+                </div>
+                <p style="text-align:right; margin:0; font-size:0.7rem; color:#666;" id="soil_pure_total">（地山合計：0.000 m³）</p>
+
+                <div style="margin-top:15px; padding-top:10px; border-top:1px solid #444;">
+                    <label style="font-size:0.7rem; color:#888;">ダンプ台数目安 (積載率100%計算)</label>
+                    <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.8rem;">
+                        <div>2t (1.5㎥): <span id="truck_2t" style="font-weight:bold; color:white;">0</span> 台</div>
+                        <div>3t (2.0㎥): <span id="truck_3t" style="font-weight:bold; color:white;">0</span> 台</div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.8rem;">
+                        <div>4t (2.5㎥): <span id="truck_4t" style="font-weight:bold; color:white;">0</span> 台</div>
+                        <div>10t (5.5㎥): <span id="truck_10t" style="font-weight:bold; color:white;">0</span> 台</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <article class="article-section">
-            <h2>自動保存に対応</h2>
-            <p>計算したリストは自動的にスマホ内に保存されるため、アプリを閉じたりページを移動したりしても消えません。「全クリア」ボタンを押すまで記録は残ります。</p>
+            <h2>残土計算について</h2>
+            <p>地山（掘る前の土）の体積に「ほぐし率（土の換算係数）」を掛けて、搬出時の体積を計算します。一般的な目安は1.2〜1.3程度です。ダンプの積載量は目安値を用いています。</p>
         </article>
     </div>
 
@@ -211,9 +265,10 @@
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="showPage('diag', this)">📐 対角計算</div>
-        <div class="nav-item" onclick="showPage('stair', this)">🪜 ポーチ計算</div>
+        <div class="nav-item active" onclick="showPage('diag', this)">📐 対角</div>
+        <div class="nav-item" onclick="showPage('stair', this)">🪜 ポーチ</div>
         <div class="nav-item" onclick="showPage('concrete', this)">💧 生コン</div>
+        <div class="nav-item" onclick="showPage('soil', this)">🚜 残土</div>
     </nav>
 </div>
 
@@ -333,15 +388,12 @@
     }
 
     // --- 生コン計算ロジック（保存機能付き） ---
-    // 起動時にロード
     let concreteItems = JSON.parse(localStorage.getItem('concreteList')) || [];
     let savedLoss = localStorage.getItem('concreteLoss');
     if(savedLoss) document.getElementById('con_total_loss').value = savedLoss;
-    
-    // ロードしたデータを表示
     renderConcreteList();
 
-    function saveData() {
+    function saveConcreteData() {
         localStorage.setItem('concreteList', JSON.stringify(concreteItems));
         localStorage.setItem('concreteLoss', document.getElementById('con_total_loss').value);
     }
@@ -354,27 +406,15 @@
         const d = parseFloat(document.getElementById('con_d').value);
         const shape = document.getElementById('con_shape').value;
         
-        if (!l || !w || !d) {
-            alert("縦、横、厚みをすべて入力してください");
-            return;
-        }
-
-        // 基本体積 (m3)
+        if (!l || !w || !d) { alert("縦、横、厚みをすべて入力してください"); return; }
         let singleVol = (l * w * d) / 1000000000;
-        
-        // ハンチなら半分にする
-        if (shape === 'hunch') {
-            singleVol = singleVol / 2;
-        }
-
+        if (shape === 'hunch') singleVol = singleVol / 2;
         const subTotal = singleVol * count;
         
         concreteItems.push({ name: name, count: count, l: l, w: w, d: d, vol: subTotal, shape: shape });
-        
-        saveData(); // 保存
+        saveConcreteData();
         renderConcreteList();
         
-        // 入力クリア
         document.getElementById('con_name').value = '';
         document.getElementById('con_count').value = '1';
         document.getElementById('con_l').value = '';
@@ -385,22 +425,11 @@
     function renderConcreteList() {
         const tbody = document.getElementById('concreteListBody');
         tbody.innerHTML = '';
-        
         concreteItems.forEach((item, index) => {
             const row = document.createElement('tr');
             row.className = 'con-row';
             const shapeLabel = item.shape === 'hunch' ? '<span style="color:#ff9500;">[ハンチ]</span>' : '';
-            
-            row.innerHTML = `
-                <td>
-                    <div class="con-name">${item.name} ${shapeLabel} <span style="font-size:0.8rem; color:#888; font-weight:normal;">(×${item.count})</span></div>
-                    <div class="con-vol">${item.vol.toFixed(3)} m³</div>
-                    <div class="con-detail">L:${item.l} W:${item.w} D:${item.d}</div>
-                </td>
-                <td style="text-align:right;">
-                    <button onclick="removeConcreteItem(${index})" style="background:#333; color:#888; border:none; padding:5px 10px; border-radius:4px;">×</button>
-                </td>
-            `;
+            row.innerHTML = `<td><div class="con-name">${item.name} ${shapeLabel} <span style="font-size:0.8rem; color:#888; font-weight:normal;">(×${item.count})</span></div><div class="con-vol">${item.vol.toFixed(3)} m³</div><div class="con-detail">L:${item.l} W:${item.w} D:${item.d}</div></td><td style="text-align:right;"><button onclick="removeConcreteItem(${index})" style="background:#333; color:#888; border:none; padding:5px 10px; border-radius:4px;">×</button></td>`;
             tbody.insertBefore(row, tbody.firstChild);
         });
         updateConcreteTotal();
@@ -408,14 +437,14 @@
 
     function removeConcreteItem(index) {
         concreteItems.splice(index, 1);
-        saveData(); // 保存
+        saveConcreteData();
         renderConcreteList();
     }
 
     function clearConcreteList() {
         if(confirm('リストを全て消去しますか？')) {
             concreteItems = [];
-            saveData(); // 保存
+            saveConcreteData();
             renderConcreteList();
         }
     }
@@ -423,14 +452,93 @@
     function updateConcreteTotal() {
         const totalVol = concreteItems.reduce((sum, item) => sum + item.vol, 0);
         const loss = parseFloat(document.getElementById('con_total_loss').value) || 0;
-        
         const grandTotal = totalVol * (1 + loss / 100);
-        
         document.getElementById('con_grand_total').innerText = grandTotal.toFixed(3) + " m³";
         document.getElementById('con_pure_total').innerText = "（正味合計：" + totalVol.toFixed(3) + " m³）";
-        
-        // ロス率が変わった時も保存
         localStorage.setItem('concreteLoss', loss);
+    }
+
+    // --- 【新機能】残土計算ロジック（保存機能付き） ---
+    let soilItems = JSON.parse(localStorage.getItem('soilList')) || [];
+    let savedFactor = localStorage.getItem('soilFactor');
+    if(savedFactor) document.getElementById('soil_factor').value = savedFactor;
+    renderSoilList();
+
+    function saveSoilData() {
+        localStorage.setItem('soilList', JSON.stringify(soilItems));
+        localStorage.setItem('soilFactor', document.getElementById('soil_factor').value);
+    }
+
+    function addSoilRecord() {
+        const name = document.getElementById('soil_name').value || '名称なし';
+        const count = parseFloat(document.getElementById('soil_count').value) || 1;
+        const l = parseFloat(document.getElementById('soil_l').value);
+        const w = parseFloat(document.getElementById('soil_w').value);
+        const d = parseFloat(document.getElementById('soil_d').value);
+        const shape = document.getElementById('soil_shape').value;
+        
+        if (!l || !w || !d) { alert("縦、横、深さをすべて入力してください"); return; }
+        
+        // 地山体積
+        let singleVol = (l * w * d) / 1000000000;
+        if (shape === 'hunch') singleVol = singleVol / 2;
+        const subTotal = singleVol * count;
+        
+        soilItems.push({ name: name, count: count, l: l, w: w, d: d, vol: subTotal, shape: shape });
+        saveSoilData();
+        renderSoilList();
+        
+        document.getElementById('soil_name').value = '';
+        document.getElementById('soil_count').value = '1';
+        document.getElementById('soil_l').value = '';
+        document.getElementById('soil_w').value = '';
+        document.getElementById('soil_name').focus();
+    }
+
+    function renderSoilList() {
+        const tbody = document.getElementById('soilListBody');
+        tbody.innerHTML = '';
+        soilItems.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.className = 'con-row';
+            const shapeLabel = item.shape === 'hunch' ? '<span style="color:#ff9500;">[ハンチ]</span>' : '';
+            row.innerHTML = `<td><div class="con-name">${item.name} ${shapeLabel} <span style="font-size:0.8rem; color:#888; font-weight:normal;">(×${item.count})</span></div><div class="soil-val">${item.vol.toFixed(3)} m³</div><div class="con-detail">L:${item.l} W:${item.w} D:${item.d}</div></td><td style="text-align:right;"><button onclick="removeSoilItem(${index})" style="background:#333; color:#888; border:none; padding:5px 10px; border-radius:4px;">×</button></td>`;
+            tbody.insertBefore(row, tbody.firstChild);
+        });
+        updateSoilTotal();
+    }
+
+    function removeSoilItem(index) {
+        soilItems.splice(index, 1);
+        saveSoilData();
+        renderSoilList();
+    }
+
+    function clearSoilList() {
+        if(confirm('残土リストを全て消去しますか？')) {
+            soilItems = [];
+            saveSoilData();
+            renderSoilList();
+        }
+    }
+
+    function updateSoilTotal() {
+        const totalVol = soilItems.reduce((sum, item) => sum + item.vol, 0); // 地山合計
+        const factor = parseFloat(document.getElementById('soil_factor').value) || 1.0;
+        
+        const grandTotal = totalVol * factor; // ほぐし後体積
+        
+        document.getElementById('soil_grand_total').innerText = grandTotal.toFixed(3) + " m³";
+        document.getElementById('soil_pure_total').innerText = "（地山合計：" + totalVol.toFixed(3) + " m³）";
+        
+        // ダンプ台数計算 (目安: 2t=1.5m3, 3t=2.0m3, 4t=2.5m3, 10t=5.5m3)
+        // ※積載量は土質により異なりますが一般的な目安
+        document.getElementById('truck_2t').innerText = Math.ceil(grandTotal / 1.5);
+        document.getElementById('truck_3t').innerText = Math.ceil(grandTotal / 2.0);
+        document.getElementById('truck_4t').innerText = Math.ceil(grandTotal / 2.5);
+        document.getElementById('truck_10t').innerText = Math.ceil(grandTotal / 5.5);
+
+        localStorage.setItem('soilFactor', factor);
     }
 </script>
 </body>
