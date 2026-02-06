@@ -1,4 +1,4 @@
-　<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -350,7 +350,13 @@
         </div>
     </div>
 
-    <div style="text-align:center; padding: 20px 0 100px 0;"></div>
+    <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
+        <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー</a>
+        <span style="color: #444; margin: 0 10px;">|</span>
+        <a href="mailto:Hiroki199809@gmail.com" style="color: #888; text-decoration: none;">お問い合わせ</a>
+        <br><br>
+        <span style="color: #666;">© 2026 現場計算 PRO</span>
+    </div>
 
     <nav>
         <div class="nav-item active" onclick="showPage('diag', this)">
@@ -495,7 +501,7 @@
         svg.innerHTML = res;
     }
 
-    // --- 生コン計算ロジック ---
+    // --- 生コン計算ロジック（保存機能付き） ---
     let concreteItems = JSON.parse(localStorage.getItem('concreteList')) || [];
     let savedLoss = localStorage.getItem('concreteLoss');
     if(savedLoss) document.getElementById('con_total_loss').value = savedLoss;
@@ -566,7 +572,7 @@
         localStorage.setItem('concreteLoss', loss);
     }
 
-    // --- 残土計算ロジック ---
+    // --- 残土計算ロジック（保存機能付き） ---
     let soilItems = JSON.parse(localStorage.getItem('soilList')) || [];
     let savedFactor = localStorage.getItem('soilFactor');
     if(savedFactor) document.getElementById('soil_factor').value = savedFactor;
@@ -631,12 +637,15 @@
     }
 
     function updateSoilTotal() {
-        const totalVol = soilItems.reduce((sum, item) => sum + item.vol, 0);
+        const totalVol = soilItems.reduce((sum, item) => sum + item.vol, 0); // 地山合計
         const factor = parseFloat(document.getElementById('soil_factor').value) || 1.0;
-        const grandTotal = totalVol * factor;
+        
+        const grandTotal = totalVol * factor; // ほぐし後体積
+        
         document.getElementById('soil_grand_total').innerText = grandTotal.toFixed(3) + " m³";
         document.getElementById('soil_pure_total').innerText = "（地山合計：" + totalVol.toFixed(3) + " m³）";
         
+        // ダンプ台数計算
         document.getElementById('truck_2t').innerText = Math.ceil(grandTotal / 1.5);
         document.getElementById('truck_3t').innerText = Math.ceil(grandTotal / 2.0);
         document.getElementById('truck_4t').innerText = Math.ceil(grandTotal / 2.5);
