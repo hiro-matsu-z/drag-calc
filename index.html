@@ -29,8 +29,9 @@
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" href="./favicon.ico">
     
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+    
     <style>
-        /* スタイルは変更していませんが、長いので省略します。元のまま残してください */
         :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --green: #22c55e; --concrete: #7f8c8d; --soil: #d35400; --bm-red: #e74c3c; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
@@ -75,9 +76,44 @@
         .article-section h3 { color: var(--blue); font-size: 1.05rem; margin-top: 25px; }
         .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; }
 
-        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(65px + env(safe-area-inset-bottom)); z-index: 1000; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #777; text-decoration: none; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
-        .nav-item.active { color: var(--blue); }
+        /* ▼▼▼ ナビゲーションのデザイン変更（高級感UP） ▼▼▼ */
+        nav { 
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: rgba(18, 18, 18, 0.95); /* 深い黒の透過 */
+            backdrop-filter: blur(12px); /* すりガラス効果 */
+            border-top: 1px solid #333; 
+            display: flex; justify-content: space-around; 
+            padding-bottom: env(safe-area-inset-bottom); 
+            height: calc(60px + env(safe-area-inset-bottom)); 
+            z-index: 1000; 
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5); /* 影で浮遊感 */
+        }
+        .nav-item { 
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            color: #666; /* 非アクティブはグレー */
+            text-decoration: none; cursor: pointer; 
+            transition: all 0.3s ease;
+            padding-top: 8px;
+        }
+        /* アイコンの設定 */
+        .nav-item .material-symbols-outlined {
+            font-size: 24px;
+            font-weight: 300; /* 細めのラインで上品に */
+            margin-bottom: 2px;
+        }
+        /* 文字の設定 */
+        .nav-item span:last-child {
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        /* アクティブ時の設定 */
+        .nav-item.active { 
+            color: var(--blue); 
+        }
+        .nav-item.active .material-symbols-outlined {
+            text-shadow: 0 0 12px rgba(0, 212, 255, 0.4); /* ほんのり光らせる */
+        }
 
         #elevation-svg { background: #000; border-radius: 8px; width: 100%; height: auto; margin-top: 10px; border: 1px solid #333; }
         
@@ -275,10 +311,22 @@
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="showPage('diag', this)">📐 対角</div>
-        <div class="nav-item" onclick="showPage('stair', this)">🪜 ポーチ</div>
-        <div class="nav-item" onclick="showPage('concrete', this)">💧 生コン</div>
-        <div class="nav-item" onclick="showPage('soil', this)">🚜 残土</div>
+        <div class="nav-item active" onclick="showPage('diag', this)">
+            <span class="material-symbols-outlined">square_foot</span>
+            <span>対角</span>
+        </div>
+        <div class="nav-item" onclick="showPage('stair', this)">
+            <span class="material-symbols-outlined">stairs</span>
+            <span>ポーチ</span>
+        </div>
+        <div class="nav-item" onclick="showPage('concrete', this)">
+            <span class="material-symbols-outlined">water_drop</span>
+            <span>生コン</span>
+        </div>
+        <div class="nav-item" onclick="showPage('soil', this)">
+            <span class="material-symbols-outlined">landscape</span>
+            <span>残土</span>
+        </div>
     </nav>
 </div>
 
@@ -468,7 +516,7 @@
         localStorage.setItem('concreteLoss', loss);
     }
 
-    // --- 【新機能】残土計算ロジック（保存機能付き） ---
+    // --- 残土計算ロジック（保存機能付き） ---
     let soilItems = JSON.parse(localStorage.getItem('soilList')) || [];
     let savedFactor = localStorage.getItem('soilFactor');
     if(savedFactor) document.getElementById('soil_factor').value = savedFactor;
@@ -541,8 +589,7 @@
         document.getElementById('soil_grand_total').innerText = grandTotal.toFixed(3) + " m³";
         document.getElementById('soil_pure_total').innerText = "（地山合計：" + totalVol.toFixed(3) + " m³）";
         
-        // ダンプ台数計算 (目安: 2t=1.5m3, 3t=2.0m3, 4t=2.5m3, 10t=5.5m3)
-        // ※積載量は土質により異なりますが一般的な目安
+        // ダンプ台数計算
         document.getElementById('truck_2t').innerText = Math.ceil(grandTotal / 1.5);
         document.getElementById('truck_3t').innerText = Math.ceil(grandTotal / 2.0);
         document.getElementById('truck_4t').innerText = Math.ceil(grandTotal / 2.5);
