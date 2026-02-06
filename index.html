@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+　<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -71,10 +71,19 @@
         th { text-align: left; color: #888; padding: 12px 10px; border-bottom: 2px solid var(--border); background: #252525; font-weight: normal; }
         td { padding: 12px 10px; border-bottom: 1px solid #252525; }
 
-        .article-section { margin-top: 40px; padding: 25px; background: #1a1a1a; border-radius: 12px; border-top: 5px solid var(--orange); }
-        .article-section h2 { color: var(--orange); font-size: 1.2rem; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; }
-        .article-section h3 { color: var(--blue); font-size: 1.05rem; margin-top: 25px; }
-        .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; }
+        /* ▼▼▼ SEO & 説明エリアの強化スタイル ▼▼▼ */
+        .article-section { margin-top: 40px; padding: 30px 20px; background: #1a1a1a; border-radius: 12px; border-top: 4px solid var(--blue); }
+        .article-section h2 { color: var(--blue); font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 40px; margin-bottom: 20px; }
+        .article-section h2:first-of-type { margin-top: 0; }
+        .article-section h3 { color: #fff; font-size: 1rem; margin-top: 25px; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
+        .article-section h3 .material-symbols-outlined { color: var(--orange); }
+        .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; line-height: 1.8; text-align: justify; }
+        .article-section ul { padding-left: 20px; margin-bottom: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; }
+        .article-section li { font-size: 0.9rem; color: #ddd; margin-bottom: 8px; }
+        .faq-box { background: #252525; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .faq-q { color: var(--blue); font-weight: bold; margin-bottom: 5px; font-size: 0.95rem; }
+        .faq-a { color: #aaa; font-size: 0.9rem; line-height: 1.6; }
+        .policy-box { font-size: 0.75rem; color: #666; margin-top: 50px; border-top: 1px solid #333; padding-top: 20px; line-height: 1.8; }
 
         nav { 
             position: fixed; bottom: 0; left: 0; width: 100%; 
@@ -89,52 +98,33 @@
         }
         .nav-item { 
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            color: #666;
-            text-decoration: none; cursor: pointer; 
-            transition: all 0.3s ease;
-            padding-top: 8px;
+            color: #666; text-decoration: none; cursor: pointer; 
+            transition: all 0.3s ease; padding-top: 8px;
         }
-        .nav-item .material-symbols-outlined {
-            font-size: 24px;
-            font-weight: 300;
-            margin-bottom: 2px;
-        }
-        .nav-item span:last-child {
-            font-size: 0.65rem;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-        }
-        .nav-item.active { 
-            color: var(--blue); 
-        }
-        .nav-item.active .material-symbols-outlined {
-            text-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
-        }
+        .nav-item .material-symbols-outlined { font-size: 24px; font-weight: 300; margin-bottom: 2px; }
+        .nav-item span:last-child { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.5px; }
+        .nav-item.active { color: var(--blue); }
+        .nav-item.active .material-symbols-outlined { text-shadow: 0 0 12px rgba(0, 212, 255, 0.4); }
 
         #elevation-svg { background: #000; border-radius: 8px; width: 100%; height: auto; margin-top: 10px; border: 1px solid #333; }
-        
         .con-row td { font-size: 0.8rem; border-bottom: 1px solid #333; padding: 10px 5px; }
         .con-name { color: var(--blue); font-weight: bold; font-size: 0.9rem; }
         .con-detail { color: #888; font-size: 0.7rem; margin-top: 2px; }
         .con-vol { font-size: 1rem; font-weight: bold; color: white; }
         .soil-val { color: var(--soil); font-weight: bold; }
 
-        /* ▼▼▼ 追加：インストール案内のポップアップスタイル ▼▼▼ */
+        /* モーダル */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
-            display: flex; align-items: center; justify-content: center;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+            z-index: 2000; display: flex; align-items: center; justify-content: center;
             opacity: 0; visibility: hidden; transition: all 0.4s ease;
         }
         .modal-overlay.show { opacity: 1; visibility: visible; }
         .modal-box {
             background: #252525; border: 1px solid var(--blue);
-            width: 85%; max-width: 350px;
-            padding: 25px; border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 85%; max-width: 350px; padding: 25px; border-radius: 15px;
+            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             transform: translateY(20px); transition: all 0.4s ease;
         }
         .modal-overlay.show .modal-box { transform: translateY(0); }
@@ -142,9 +132,7 @@
         .modal-text { color: #ccc; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.8; }
         .modal-icon { vertical-align: middle; font-size: 1.2rem; color: var(--blue); background: rgba(0, 212, 255, 0.1); padding: 4px; border-radius: 4px; }
         .modal-btn {
-            background: var(--blue); color: #000;
-            border: none; padding: 12px 30px; border-radius: 25px;
-            font-weight: bold; cursor: pointer; width: 100%;
+            background: var(--blue); color: #000; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; width: 100%;
         }
     </style>
 </head>
@@ -188,10 +176,51 @@
         </div>
         
         <article class="article-section">
-            <h2>建築現場の対角計算について</h2>
-            <p>かね（直角）を出す作業は建物の精度を決定づける重要工程です。本ツールはピタゴラスの定理 ($a^2 + b^2 = c^2$) に基づき、現場実務に特化した計算を行います。</p>
+            <h2>建築現場の計算をアプリで効率化</h2>
+            <p>現場監督や職人にとって、墨出しや発注数量の計算はスピードと正確性が命です。「現場計算 PRO」は、現場の声から生まれた、インストール不要の無料Webアプリです。</p>
+
+            <h3><span class="material-symbols-outlined">square_foot</span> 対角線の計算（大矩・カネ）</h3>
+            <p>建物の基礎工事や造作工事において、直角（カネ）を確認する作業は必須です。このツールはピタゴラスの定理 ($a^2 + b^2 = c^2$) を活用し、2辺の長さから対角線長を瞬時に算出します。</p>
+            <ul>
+                <li><strong>尺モジュール入力：</strong>910mm、455mm、227.5mmなど、木造建築特有の寸法をワンタップで入力できます。</li>
+                <li><strong>枠外（逃げ）計算：</strong>基礎の通り芯から「逃げ（オフセット）」を設定した状態での対角寸法も同時に表示。デフォルトは150mmですが、設定から変更可能です。</li>
+            </ul>
+
+            <h3><span class="material-symbols-outlined">water_drop</span> 生コンクリート・体積計算</h3>
+            <p>複雑な基礎形状のコンクリート体積（立米数）を、図面の符号ごとにリスト化して合算できます。打設前の拾い出し業務を強力にサポートします。</p>
+            <ul>
+                <li><strong>ハンチ（三角形）対応：</strong>フーチングやコーナー補強など、断面が三角形になる部位も「形状」スイッチを切り替えるだけで正確に計算します。</li>
+                <li><strong>自動保存機能：</strong>計算途中でブラウザを閉じても、入力データは自動的に保存されます。</li>
+            </ul>
+
+            <h3><span class="material-symbols-outlined">landscape</span> 残土処分・ダンプ台数計算</h3>
+            <p>掘削工事で発生する残土の搬出計画をサポートします。地山土量（掘る前の体積）に対し、土質に応じた「ほぐし率（変化率L）」を掛けることで、ダンプに積載する際の実体積を算出します。</p>
+            <ul>
+                <li><strong>ダンプ台数の目安：</strong>2t、3t、4t、10tダンプそれぞれで何台必要になるかを自動で割り出します。</li>
+            </ul>
+
+            <h2>よくある質問 (FAQ)</h2>
+            <div class="faq-box">
+                <div class="faq-q">Q. アプリの料金はかかりますか？</div>
+                <div class="faq-a">A. すべての機能を無料でご利用いただけます。登録なども一切不要です。</div>
+            </div>
+            <div class="faq-box">
+                <div class="faq-q">Q. オフラインでも使えますか？</div>
+                <div class="faq-a">A. はい、PWA（Progressive Web Apps）技術に対応しているため、一度読み込めば電波の悪い現場でも動作します。ホーム画面に追加してご利用ください。</div>
+            </div>
+            <div class="faq-box">
+                <div class="faq-q">Q. 計算データはどこに保存されますか？</div>
+                <div class="faq-a">A. お客様の端末（ブラウザ）内にのみ保存されます。外部のサーバーに送信されることはないため、図面情報などの機密も安全です。</div>
+            </div>
+
+            <div class="policy-box">
+                <strong>プライバシーポリシー・免責事項</strong><br>
+                当サイト「現場計算 PRO」は、Google AdSenseおよびGoogle Analyticsを使用しています。これらはトラフィックデータの収集のためにCookieを使用しますが、個人を特定するものではありません。<br>
+                計算結果の正確性には万全を期していますが、本ツールを使用したことによる損害やトラブル（発注ミス等）について、運営者は一切の責任を負いません。最終的な数値の確認は、必ず設計図書に基づき利用者ご自身の責任で行ってください。<br>
+                © 2026 現場計算 PRO
+            </div>
         </article>
-    </div>
+        </div>
 
     <div id="page-stair" class="page">
         <header><h1>ポーチ計算 PRO</h1><p>高低差から蹴上を自動算出</p></header>
@@ -207,7 +236,6 @@
             <div class="input-box" style="width:100%;"><label>⑤ GL - BM (mm)</label><span>高いなら正</span><input type="number" id="gl_bm" value="50"></div>
             <button class="main-btn" style="margin-top:15px;" onclick="calculateStair()">蹴上寸法を算出</button>
         </div>
-
         <div id="stair-result" style="display:none;" class="card">
             <div style="font-size:0.7rem; color:var(--orange);">蹴上（一段あたり）</div>
             <div style="font-size:2rem; font-weight:bold; color:var(--orange);" id="keage_res">--- mm</div>
@@ -238,7 +266,6 @@
             </div>
             <button class="main-btn" style="margin-top:15px;" onclick="addConcreteRecord()">＋ リストに追加</button>
         </div>
-
         <div class="card" style="padding:0; overflow:hidden;">
             <div style="background:#252525; padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-size:0.8rem; color:#aaa;">計算履歴</span>
@@ -321,18 +348,9 @@
                 </div>
             </div>
         </div>
-        
-        <article class="article-section">
-            <h2>残土計算について</h2>
-            <p>地山（掘る前の土）の体積に「ほぐし率（土の換算係数）」を掛けて、搬出時の体積を計算します。一般的な目安は1.2〜1.3程度です。ダンプの積載量は目安値を用いています。</p>
-        </article>
     </div>
 
-    <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
-        <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー</a>
-        <span style="color: #444; margin: 0 10px;">|</span>
-        <span style="color: #666;">© 2026 現場計算 PRO</span>
-    </div>
+    <div style="text-align:center; padding: 20px 0 100px 0;"></div>
 
     <nav>
         <div class="nav-item active" onclick="showPage('diag', this)">
@@ -477,7 +495,7 @@
         svg.innerHTML = res;
     }
 
-    // --- 生コン計算ロジック（保存機能付き） ---
+    // --- 生コン計算ロジック ---
     let concreteItems = JSON.parse(localStorage.getItem('concreteList')) || [];
     let savedLoss = localStorage.getItem('concreteLoss');
     if(savedLoss) document.getElementById('con_total_loss').value = savedLoss;
@@ -548,7 +566,7 @@
         localStorage.setItem('concreteLoss', loss);
     }
 
-    // --- 残土計算ロジック（保存機能付き） ---
+    // --- 残土計算ロジック ---
     let soilItems = JSON.parse(localStorage.getItem('soilList')) || [];
     let savedFactor = localStorage.getItem('soilFactor');
     if(savedFactor) document.getElementById('soil_factor').value = savedFactor;
@@ -613,15 +631,12 @@
     }
 
     function updateSoilTotal() {
-        const totalVol = soilItems.reduce((sum, item) => sum + item.vol, 0); // 地山合計
+        const totalVol = soilItems.reduce((sum, item) => sum + item.vol, 0);
         const factor = parseFloat(document.getElementById('soil_factor').value) || 1.0;
-        
-        const grandTotal = totalVol * factor; // ほぐし後体積
-        
+        const grandTotal = totalVol * factor;
         document.getElementById('soil_grand_total').innerText = grandTotal.toFixed(3) + " m³";
         document.getElementById('soil_pure_total').innerText = "（地山合計：" + totalVol.toFixed(3) + " m³）";
         
-        // ダンプ台数計算
         document.getElementById('truck_2t').innerText = Math.ceil(grandTotal / 1.5);
         document.getElementById('truck_3t').innerText = Math.ceil(grandTotal / 2.0);
         document.getElementById('truck_4t').innerText = Math.ceil(grandTotal / 2.5);
@@ -630,31 +645,20 @@
         localStorage.setItem('soilFactor', factor);
     }
 
-    // --- ▼▼▼ 追加：インストール案内ロジック ▼▼▼ ---
+    // --- インストール案内 ---
     window.addEventListener('load', function() {
-        // すでに訪問済みなら何もしない
         if (localStorage.getItem('isInstalledPromptShown')) return;
-
-        // OS判定
         const ua = navigator.userAgent.toLowerCase();
         let msg = "";
-        
         if (ua.indexOf('iphone') > -1 || ua.indexOf('ipad') > -1) {
             msg = '画面下の <span class="modal-icon material-symbols-outlined">ios_share</span> (共有) ボタンを押し<br>「ホーム画面に追加 <span class="material-symbols-outlined" style="font-size:1rem; vertical-align:middle;">add_box</span>」を選択してください。';
         } else if (ua.indexOf('android') > -1) {
             msg = '画面右上の <span class="modal-icon material-symbols-outlined">more_vert</span> (メニュー) ボタンを押し<br>「アプリをインストール」または「ホーム画面に追加」を選択してください。';
         } else {
-            // PCなどの場合
             msg = 'このページをブックマークしておくと、<br>次回からすぐに計算できます。';
         }
-
-        // メッセージをセットして表示
         document.getElementById('modal-text').innerHTML = msg;
-        setTimeout(() => {
-            document.getElementById('install-modal').classList.add('show');
-        }, 1500); // 1.5秒後にふわっと出す
-
-        // 表示したことを記録
+        setTimeout(() => { document.getElementById('install-modal').classList.add('show'); }, 1500);
         localStorage.setItem('isInstalledPromptShown', 'true');
     });
 
