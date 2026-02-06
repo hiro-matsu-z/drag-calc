@@ -76,43 +76,39 @@
         .article-section h3 { color: var(--blue); font-size: 1.05rem; margin-top: 25px; }
         .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; }
 
-        /* ▼▼▼ ナビゲーションのデザイン変更（高級感UP） ▼▼▼ */
         nav { 
             position: fixed; bottom: 0; left: 0; width: 100%; 
-            background: rgba(18, 18, 18, 0.95); /* 深い黒の透過 */
-            backdrop-filter: blur(12px); /* すりガラス効果 */
+            background: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(12px); 
             border-top: 1px solid #333; 
             display: flex; justify-content: space-around; 
             padding-bottom: env(safe-area-inset-bottom); 
             height: calc(60px + env(safe-area-inset-bottom)); 
             z-index: 1000; 
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.5); /* 影で浮遊感 */
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
         .nav-item { 
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            color: #666; /* 非アクティブはグレー */
+            color: #666;
             text-decoration: none; cursor: pointer; 
             transition: all 0.3s ease;
             padding-top: 8px;
         }
-        /* アイコンの設定 */
         .nav-item .material-symbols-outlined {
             font-size: 24px;
-            font-weight: 300; /* 細めのラインで上品に */
+            font-weight: 300;
             margin-bottom: 2px;
         }
-        /* 文字の設定 */
         .nav-item span:last-child {
             font-size: 0.65rem;
             font-weight: 500;
             letter-spacing: 0.5px;
         }
-        /* アクティブ時の設定 */
         .nav-item.active { 
             color: var(--blue); 
         }
         .nav-item.active .material-symbols-outlined {
-            text-shadow: 0 0 12px rgba(0, 212, 255, 0.4); /* ほんのり光らせる */
+            text-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
         }
 
         #elevation-svg { background: #000; border-radius: 8px; width: 100%; height: auto; margin-top: 10px; border: 1px solid #333; }
@@ -122,6 +118,34 @@
         .con-detail { color: #888; font-size: 0.7rem; margin-top: 2px; }
         .con-vol { font-size: 1rem; font-weight: bold; color: white; }
         .soil-val { color: var(--soil); font-weight: bold; }
+
+        /* ▼▼▼ 追加：インストール案内のポップアップスタイル ▼▼▼ */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 0.4s ease;
+        }
+        .modal-overlay.show { opacity: 1; visibility: visible; }
+        .modal-box {
+            background: #252525; border: 1px solid var(--blue);
+            width: 85%; max-width: 350px;
+            padding: 25px; border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: translateY(20px); transition: all 0.4s ease;
+        }
+        .modal-overlay.show .modal-box { transform: translateY(0); }
+        .modal-title { color: white; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; }
+        .modal-text { color: #ccc; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.8; }
+        .modal-icon { vertical-align: middle; font-size: 1.2rem; color: var(--blue); background: rgba(0, 212, 255, 0.1); padding: 4px; border-radius: 4px; }
+        .modal-btn {
+            background: var(--blue); color: #000;
+            border: none; padding: 12px 30px; border-radius: 25px;
+            font-weight: bold; cursor: pointer; width: 100%;
+        }
     </style>
 </head>
 
@@ -328,6 +352,14 @@
             <span>残土</span>
         </div>
     </nav>
+</div>
+
+<div id="install-modal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-title">ホーム画面に追加して<br>アプリ化しませんか？</div>
+        <div class="modal-text" id="modal-text"></div>
+        <button class="modal-btn" onclick="closeInstallModal()">閉じる</button>
+    </div>
 </div>
 
 <script>
@@ -596,6 +628,38 @@
         document.getElementById('truck_10t').innerText = Math.ceil(grandTotal / 5.5);
 
         localStorage.setItem('soilFactor', factor);
+    }
+
+    // --- ▼▼▼ 追加：インストール案内ロジック ▼▼▼ ---
+    window.addEventListener('load', function() {
+        // すでに訪問済みなら何もしない
+        if (localStorage.getItem('isInstalledPromptShown')) return;
+
+        // OS判定
+        const ua = navigator.userAgent.toLowerCase();
+        let msg = "";
+        
+        if (ua.indexOf('iphone') > -1 || ua.indexOf('ipad') > -1) {
+            msg = '画面下の <span class="modal-icon material-symbols-outlined">ios_share</span> (共有) ボタンを押し<br>「ホーム画面に追加 <span class="material-symbols-outlined" style="font-size:1rem; vertical-align:middle;">add_box</span>」を選択してください。';
+        } else if (ua.indexOf('android') > -1) {
+            msg = '画面右上の <span class="modal-icon material-symbols-outlined">more_vert</span> (メニュー) ボタンを押し<br>「アプリをインストール」または「ホーム画面に追加」を選択してください。';
+        } else {
+            // PCなどの場合
+            msg = 'このページをブックマークしておくと、<br>次回からすぐに計算できます。';
+        }
+
+        // メッセージをセットして表示
+        document.getElementById('modal-text').innerHTML = msg;
+        setTimeout(() => {
+            document.getElementById('install-modal').classList.add('show');
+        }, 1500); // 1.5秒後にふわっと出す
+
+        // 表示したことを記録
+        localStorage.setItem('isInstalledPromptShown', 'true');
+    });
+
+    function closeInstallModal() {
+        document.getElementById('install-modal').classList.remove('show');
     }
 </script>
 </body>
