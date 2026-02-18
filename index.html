@@ -231,7 +231,7 @@
     for (let i = 1; i <= 48; i++) {
         const val = i * 227.5; const btn = document.createElement('button'); btn.className = 'grid-btn';
         if (Math.round(val) % 910 === 0) btn.classList.add('highlight');
-        btn.innerHTML = `${(Math.round(val * 10) / 10).toLocaleString()}<span>${i * 0.25}間</span>`;
+        btn.innerHTML = `${(Math.round(val * 10) / 10).toLocaleString()}<span>${i * 0.25}</span>`;
         btn.onclick = () => { document.getElementById('side' + activeSide).value = val; if(activeSide === 'A') setActiveDiag('B'); };
         grid.appendChild(btn);
     }
