@@ -43,14 +43,43 @@
         .tab.active { background: var(--blue); color: #000; }
         
         /* 電卓CSS */
-        .calc-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-        .calc-btn { background: #252525; border: 1px solid #444; border-radius: 8px; padding: 14px 0; color: white; font-size: 1.3rem; font-weight: bold; cursor: pointer; text-align: center; }
-        .calc-btn:active { background: #444; }
-        .calc-btn.op { background: #1a3a4a; color: var(--blue); border-color: var(--blue); }
-        .calc-btn.action { background: #444; color: #ccc; font-size: 1.1rem; }
-        .calc-btn.eq { background: var(--orange); color: #000; border-color: #d35400; grid-row: span 2; display: flex; align-items: center; justify-content: center; }
-        .calc-btn.zero { grid-column: span 2; }
+                /* 電卓CSS */
+        .calc-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding-bottom: 5px; }
         
+        /* ▼ 通常のボタン（立体感と動きのベース） ▼ */
+        .calc-btn { 
+            background: #252525; border: 1px solid #444; border-radius: 8px; padding: 14px 0; 
+            color: white; font-size: 1.3rem; font-weight: bold; cursor: pointer; text-align: center;
+            /* 下に影をつけて立体的にする */
+            box-shadow: 0 4px 0 #000;
+            /* アニメーションを滑らかで少し弾むようにする */
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* 押した時に影を消して、下に沈み込ませる（ポコッという動き） */
+        .calc-btn:active { 
+            background: #444; 
+            box-shadow: 0 0px 0 #000; 
+            transform: translateY(4px) scale(0.96); 
+        }
+
+        /* ▼ 記号ボタン（÷ × - +）の色と影 ▼ */
+        .calc-btn.op { background: #1a3a4a; color: var(--blue); border-color: #005a73; box-shadow: 0 4px 0 #002233; }
+        .calc-btn.op:active { background: #005a73; box-shadow: 0 0px 0 #002233; }
+
+        /* ▼ アクションボタン（C ⌫）の色と影 ▼ */
+        .calc-btn.action { background: #444; color: #ccc; font-size: 1.1rem; border-color: #555; box-shadow: 0 4px 0 #111; }
+        .calc-btn.action:active { background: #666; box-shadow: 0 0px 0 #111; }
+
+        /* ▼ イコールボタン（＝）の色と影 ▼ */
+        .calc-btn.eq { 
+            background: var(--orange); color: #000; border-color: #cc7700; 
+            grid-row: span 2; display: flex; align-items: center; justify-content: center; 
+            box-shadow: 0 4px 0 #995500; 
+        }
+        .calc-btn.eq:active { background: #ffaa33; box-shadow: 0 0px 0 #995500; transform: translateY(4px) scale(0.96); }
+        
+        .calc-btn.zero { grid-column: span 2; }
+
         .grid-scroll { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; height: 210px; overflow-y: auto; background: #161616; padding: 10px; border-radius: 10px; }
         .grid-btn { background: #252525; border: 1px solid #333; border-radius: 8px; padding: 12px 0; color: var(--text); font-size: 0.85rem; text-align: center; }
         .grid-btn.highlight { border: 2px solid var(--blue); background: #1a2a3a; }
