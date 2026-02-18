@@ -3,668 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <title>現場計算 PRO | 建築現場の無料計算ツール（対角・大矩・生コン・立米・残土・階段）</title>
-    <meta name="description" content="現役の現場監督が開発。建築・土木現場で必須の対角線（大矩）計算、生コン立米（m3）積算、残土のほぐし率・ダンプ台数算出、ポーチ階段の蹴上割付がスマホで完結。一級・二級建築士や基礎屋、職人向けの無料計算アプリ。">
-    <meta name="keywords" content="建築現場,現場計算,立米計算,生コン,対角線,大矩,ピタゴラス,残土処分,ほぐし率,ダンプ台数,階段計算,蹴上,基礎工事,現場監督,施工管理,二級建築士">
-
-    <meta property="og:title" content="現場計算 PRO | 建築現場の決定版ツール（登録不要）">
-    <meta property="og:description" content="対角線、生コン立米、残土処分量、ポーチ割付。現役監督の「欲しい」を形にした無料Webアプリ。">
-    <meta property="og:type" content="website">
+    <title>現場計算 PRO | 建築現場の無料対角線・大矩計算ツール</title>
+    <meta name="description" content="現役の現場監督が開発。建築現場で必須の対角線（大矩）計算がスマホで完結。専用電卓キーボード搭載で、図面にない寸法も一発計算。">
+    <meta name="keywords" content="建築現場,現場計算,対角線,大矩,ピタゴラス,現場監督,施工管理,二級建築士">
+    <meta property="og:title" content="現場計算 PRO | 建築現場の決定版ツール">
+    <meta property="og:description" content="対角線計算、生コン立米など。現役監督の「欲しい」を形にした無料Webアプリ。">
     <meta property="og:url" content="https://zawa.click">
     <meta property="og:image" content="https://zawa.click/ogp.png">
     <meta name="twitter:card" content="summary_large_image">
 
     <meta name="google-adsense-account" content="ca-pub-5476919369993440">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5476919369993440" crossorigin="anonymous"></script>
-
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ERMFG5G32F"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-ERMFG5G32F');
-    </script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ERMFG5G32F');</script>
 
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" href="./favicon.ico">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
     
     <style>
-        :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --green: #22c55e; --concrete: #7f8c8d; --soil: #d35400; --bm-red: #e74c3c; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; }
+        * { box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
         .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; }
-        .page { display: none; }
-        .page.active { display: block; }
-        
         header { display: flex; justify-content: space-between; align-items: flex-start; border-left: 5px solid var(--blue); padding-left: 15px; margin-bottom: 20px; }
         header h1 { font-size: 1.3rem; margin: 0; color: white; }
         header p { font-size: 0.7rem; color: var(--blue); margin: 0; font-weight: bold; }
         .settings-btn { background: #2a2a2a; border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
-
         #settings-panel { display: none; background: #2a2a2a; border: 2px solid var(--orange); border-radius: 10px; padding: 15px; margin-bottom: 20px; }
         #settings-panel.open { display: block; }
-
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .input-group { display: flex; gap: 10px; margin-bottom: 12px; }
-        .input-box { flex: 1; background: #2a2a2a; border: 2px solid var(--border); border-radius: 10px; padding: 8px 12px; }
-        .input-box.active { border-color: var(--blue); background: #333; }
+        .input-box { flex: 1; background: #2a2a2a; border: 2px solid var(--border); border-radius: 10px; padding: 8px 12px; cursor: pointer; }
+        .input-box.active { border-color: var(--blue); background: #333; box-shadow: 0 0 8px rgba(0, 212, 255, 0.2); }
         .input-box label { display: block; font-size: 0.65rem; color: var(--blue); font-weight: bold; }
-        .input-box span { display: block; font-size: 0.55rem; color: #888; }
-        .input-box input { width: 100%; background: transparent; border: none; color: white; font-size: 1.4rem; outline: none; font-family: monospace; font-weight: bold; }
-        
+        .input-box input { width: 100%; background: transparent; border: none; color: white; font-size: 1.4rem; outline: none; font-family: monospace; font-weight: bold; pointer-events: none; }
         .panel-ctrl { display: flex; gap: 6px; margin-bottom: 10px; }
         .tab { flex: 1; padding: 12px; background: #2a2a2a; border: none; color: #aaa; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
         .tab.active { background: var(--blue); color: #000; }
         
-        .grid-scroll { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; height: 180px; overflow-y: auto; background: #161616; padding: 10px; border-radius: 10px; }
+        /* 電卓CSS */
+        .calc-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .calc-btn { background: #252525; border: 1px solid #444; border-radius: 8px; padding: 14px 0; color: white; font-size: 1.3rem; font-weight: bold; cursor: pointer; text-align: center; }
+        .calc-btn:active { background: #444; }
+        .calc-btn.op { background: #1a3a4a; color: var(--blue); border-color: var(--blue); }
+        .calc-btn.action { background: #444; color: #ccc; font-size: 1.1rem; }
+        .calc-btn.eq { background: var(--orange); color: #000; border-color: #d35400; grid-row: span 2; display: flex; align-items: center; justify-content: center; }
+        .calc-btn.zero { grid-column: span 2; }
+        
+        .grid-scroll { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; height: 210px; overflow-y: auto; background: #161616; padding: 10px; border-radius: 10px; }
         .grid-btn { background: #252525; border: 1px solid #333; border-radius: 8px; padding: 12px 0; color: var(--text); font-size: 0.85rem; text-align: center; }
         .grid-btn.highlight { border: 2px solid var(--blue); background: #1a2a3a; }
         .grid-btn.highlight span { color: var(--blue); font-weight: bold; }
         .grid-btn span { display: block; font-size: 0.6rem; color: #777; }
-        
-        .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 15px; }
 
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th { text-align: left; color: #888; padding: 12px 10px; border-bottom: 2px solid var(--border); background: #252525; font-weight: normal; }
         td { padding: 12px 10px; border-bottom: 1px solid #252525; }
 
-        /* SEOセクション */
         .article-section { margin-top: 40px; padding: 30px 20px; background: #1a1a1a; border-radius: 12px; border-top: 4px solid var(--blue); }
-        .article-section h2 { color: var(--blue); font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 40px; margin-bottom: 20px; }
-        .article-section h2:first-of-type { margin-top: 0; }
+        .article-section h2 { color: var(--blue); font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
         .article-section h3 { color: #fff; font-size: 1rem; margin-top: 25px; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
         .article-section h3 .material-symbols-outlined { color: var(--orange); }
-        .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; line-height: 1.8; text-align: justify; }
-        .article-section ul { padding-left: 20px; margin-bottom: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; }
+        .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; line-height: 1.8; }
+        .article-section ul { padding-left: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; }
         .article-section li { font-size: 0.9rem; color: #ddd; margin-bottom: 8px; }
         
-        /* 権威性プロフィール */
         .profile-card { background: #252525; border: 1px solid #444; border-radius: 10px; padding: 20px; margin-top: 30px; display: flex; gap: 15px; align-items: flex-start; }
         .profile-icon { font-size: 40px; color: var(--blue); }
         .profile-content h4 { margin: 0 0 5px 0; color: white; font-size: 1rem; }
         .profile-content p { font-size: 0.8rem; color: #aaa; margin: 0; line-height: 1.5; }
 
-        nav { 
-            position: fixed; bottom: 0; left: 0; width: 100%; 
-            background: rgba(18, 18, 18, 0.95);
-            backdrop-filter: blur(12px); 
-            border-top: 1px solid #333; 
-            display: flex; justify-content: space-around; 
-            padding-bottom: env(safe-area-inset-bottom); 
-            height: calc(60px + env(safe-area-inset-bottom)); 
-            z-index: 1000; 
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
-        }
-        .nav-item { 
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            color: #666; text-decoration: none; cursor: pointer; 
-            transition: all 0.3s ease; padding-top: 8px;
-        }
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #333; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom)); z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; text-decoration: none; padding-top: 8px; transition: color 0.3s; }
         .nav-item .material-symbols-outlined { font-size: 24px; font-weight: 300; margin-bottom: 2px; }
-        .nav-item span:last-child { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.5px; }
+        .nav-item span:last-child { font-size: 0.65rem; font-weight: 500; }
         .nav-item.active { color: var(--blue); }
         .nav-item.active .material-symbols-outlined { text-shadow: 0 0 12px rgba(0, 212, 255, 0.4); }
-
-        #elevation-svg { background: #000; border-radius: 8px; width: 100%; height: auto; margin-top: 10px; border: 1px solid #333; }
-        .con-row td { font-size: 0.8rem; border-bottom: 1px solid #333; padding: 10px 5px; }
-        .con-name { color: var(--blue); font-weight: bold; font-size: 0.9rem; }
-        .con-detail { color: #888; font-size: 0.7rem; margin-top: 2px; }
-        .con-vol { font-size: 1rem; font-weight: bold; color: white; }
-        .soil-val { color: var(--soil); font-weight: bold; }
-
-        /* モーダル */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
-            z-index: 2000; display: flex; align-items: center; justify-content: center;
-            opacity: 0; visibility: hidden; transition: all 0.4s ease;
-        }
-        .modal-overlay.show { opacity: 1; visibility: visible; }
-        .modal-box {
-            background: #252525; border: 1px solid var(--blue);
-            width: 85%; max-width: 350px; padding: 25px; border-radius: 15px;
-            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transform: translateY(20px); transition: all 0.4s ease;
-        }
-        .modal-overlay.show .modal-box { transform: translateY(0); }
-        .modal-title { color: white; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; }
-        .modal-text { color: #ccc; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.8; }
-        .modal-icon { vertical-align: middle; font-size: 1.2rem; color: var(--blue); background: rgba(0, 212, 255, 0.1); padding: 4px; border-radius: 4px; }
-        .modal-btn {
-            background: var(--blue); color: #000; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; width: 100%;
-        }
     </style>
 </head>
 
 <body>
-
 <div class="container">
-    <div id="page-diag" class="page active">
-        <header>
-            <div><h1>対角線電卓 PRO</h1><p>建築現場専用・高精度対角計算</p></div>
-            <button class="settings-btn" onclick="toggleSettings()">⚙️ 設定</button>
-        </header>
+    <header>
+        <div><h1>対角線電卓 PRO</h1><p>建築現場専用・高精度対角計算</p></div>
+        <button class="settings-btn" onclick="toggleSettings()">⚙️ 設定</button>
+    </header>
 
-        <div id="settings-panel">
-            <label style="color:var(--orange); font-size:0.8rem; font-weight:bold;">【設定】デフォルト枠外寸法 (mm)</label>
-            <div style="display:flex; gap:10px; margin-top:8px;">
-                <input type="number" id="offsetSetting" style="flex:1; background:#121212; border:1px solid var(--border); color:white; padding:10px; border-radius:5px;" placeholder="150">
-                <button onclick="saveSettings()" style="background:var(--orange); border:none; color:black; padding:0 15px; border-radius:5px; font-weight:bold;">保存</button>
-            </div>
-            <p style="font-size:0.6rem; color:#888; margin-top:8px;">※現場の「逃げ」寸法に合わせて変更してください</p>
+    <div id="settings-panel">
+        <label style="color:var(--orange); font-size:0.8rem; font-weight:bold;">【設定】デフォルト枠外寸法 (mm)</label>
+        <div style="display:flex; gap:10px; margin-top:8px;">
+            <input type="number" id="offsetSetting" style="flex:1; background:#121212; border:1px solid var(--border); color:white; padding:10px; border-radius:5px;" placeholder="150">
+            <button onclick="saveSettings()" style="background:var(--orange); border:none; color:black; padding:0 15px; border-radius:5px; font-weight:bold;">保存</button>
         </div>
-        
-        <div class="card">
-            <div class="input-group">
-                <div class="input-box active" id="boxA" onclick="setActiveDiag('A')"><label>A寸法 (mm)</label><input type="number" id="sideA" placeholder="0" inputmode="decimal"></div>
-                <div class="input-box" id="boxB" onclick="setActiveDiag('B')"><label>B寸法 (mm)</label><input type="number" id="sideB" placeholder="0" inputmode="decimal"></div>
-            </div>
-            <div class="panel-ctrl">
-                <button id="tabA" class="tab active" onclick="setActiveDiag('A')">Aを入力</button>
-                <button id="tabB" class="tab" onclick="setActiveDiag('B')">Bを入力</button>
-            </div>
-            <div class="grid-scroll" id="buttonGrid"></div>
-            <button class="main-btn" style="margin-top:15px;" onclick="addDiagRecord()">対角線を計算する</button>
-        </div>
-
-        <div class="card" style="padding:0; overflow:hidden;">
-            <table>
-                <thead><tr><th>A/B</th><th>対角</th><th id="th-outer">枠外(+150)</th><th>消去</th></tr></thead>
-                <tbody id="historyBody"></tbody>
-            </table>
-        </div>
-        
-        <article class="article-section">
-            <h2>建築・土木現場の計算を劇的に効率化</h2>
-            <p><strong>「現場計算 PRO」</strong>は、住宅の基礎工事、墨出し、型枠、外構工事に携わるプロフェッショナルのための計算機です。電卓を叩く手間を省き、スマホで直感的に<strong>生コンの立米計算</strong>や<strong>対角線（大矩）</strong>を算出します。</p>
-
-            <h3><span class="material-symbols-outlined">square_foot</span> 対角線の計算（カネ出し・大矩）</h3>
-            <p>基礎の型枠設置や木造建築の土台敷きにおいて、直角（カネ）出しは精度の要です。本ツールはピタゴラスの定理 ($a^2 + b^2 = c^2$) を用いて、斜辺の長さをミリ単位で算出します。</p>
-            <ul>
-                <li><strong>尺モジュール対応：</strong>910mm、455mm、227.5mmピッチをワンタップで入力可能。</li>
-                <li><strong>枠外（逃げ）計算：</strong>通り芯から150mmや200mm「逃げ」た位置での対角寸法を自動で同時算出。</li>
-                <li><strong>大矩（おおがね）の確認：</strong>3-4-5の比率だけでなく、あらゆる寸法で直角を確認できます。</li>
-            </ul>
-
-            <h3><span class="material-symbols-outlined">water_drop</span> 生コン積算（立米計算・m3）</h3>
-            <p>生コンの発注ミスは現場の大きな損失。符号ごとに場所名（FG1、スラブ等）を入れてリスト化できるため、図面との照合も容易です。</p>
-            <ul>
-                <li><strong>ハンチ・断面計算：</strong>断面が三角形になるハンチ部分もスイッチ一つで体積を1/2にして計算。</li>
-                <li><strong>ロス率の自動計算：</strong>ポンプ車打設やシュート打設に合わせて、3%〜10%の「ふかし（ロス）」を考慮した発注数量を算出。</li>
-            </ul>
-
-            <h3><span class="material-symbols-outlined">landscape</span> 残土・掘削土量の算出</h3>
-            <p>掘削計画や残土処分に必要な<strong>「ほぐし率（土の変化率L）」</strong>を考慮した搬出量を計算します。</p>
-            <ul>
-                <li><strong>ダンプ台数目安：</strong>計算した搬出量から、2t・3t・4t・10tダンプの必要台数を一瞬で割り出します。</li>
-                <li><strong>地山・盛土計算：</strong>現場の土質に合わせた換算係数の設定が可能です。</li>
-            </ul>
-
-            <div class="profile-card">
-                <div class="profile-icon material-symbols-outlined">verified_user</div>
-                <div class="profile-content">
-                    <h4>開発者：建築士・現役現場監督</h4>
-                    <p>
-                        建築現場での実務経験5年。戸建住宅の施工管理を行う中で、現場で最も頻繁に行われる「対角計算」や「生コン拾い」を誰でもミスなく、最速で行えるように開発しました。プロ仕様の計算精度を追求しています。
-                    </p>
-                </div>
-            </div>
-        </article>
+        <p style="font-size:0.6rem; color:#888; margin-top:8px;">※現場の「逃げ」寸法に合わせて変更してください</p>
     </div>
-
-    <div id="page-stair" class="page">
-        <header><h1>ポーチ計算 PRO</h1><p>高低差から蹴上を自動算出</p></header>
-        <div class="card">
-            <div class="input-group">
-                <div class="input-box"><label>① BM - 道路 (mm)</label><span>低いなら正</span><input type="number" id="road_bm" value="200"></div>
-                <div class="input-box"><label>② 段数</label><span>ポーチ天含む</span><input type="number" id="step_count" value="2"></div>
-            </div>
-            <div class="input-group">
-                <div class="input-box"><label>③ 基礎高 (GLから)</label><input type="number" id="gl_base" value="410"></div>
-                <div class="input-box"><label>④ 道路〜1段目(mm)</label><span>距離</span><input type="number" id="dist_road" value="2000"></div>
-            </div>
-            <div class="input-box" style="width:100%;"><label>⑤ GL - BM (mm)</label><span>高いなら正</span><input type="number" id="gl_bm" value="50"></div>
-            <button class="main-btn" style="margin-top:15px;" onclick="calculateStair()">蹴上寸法を算出</button>
-        </div>
-        <div id="stair-result" style="display:none;" class="card">
-            <div style="font-size:0.7rem; color:var(--orange);">蹴上（一段あたり）</div>
-            <div style="font-size:2rem; font-weight:bold; color:var(--orange);" id="keage_res">--- mm</div>
-            <svg id="elevation-svg" viewBox="0 0 400 350"></svg>
-        </div>
-        <article class="article-section">
-            <h3>玄関ポーチ・外構階段の割付</h3>
-            <p>道路のGL（地盤面）と玄関ドアの差を埋めるポーチタイルの割付を計算します。道路から建物までの勾配（2%推奨）を考慮し、<strong>均等な蹴上（けあげ）寸法</strong>を算出することで、歩きやすく美しい外構を実現します。</p>
-        </article>
-    </div>
-
-    <div id="page-concrete" class="page">
-        <header><h1>生コン立米計算</h1><p>図面の符号と連動して積算</p></header>
-        <div class="card">
-            <div class="input-group">
-                <div class="input-box" style="flex:2;"><label>符号 (例: FG1)</label><input type="text" id="con_name" placeholder="場所名" style="font-size:1rem;"></div>
-                <div class="input-box" style="flex:1;"><label>箇所数</label><input type="number" id="con_count" value="1" style="font-size:1.2rem;"></div>
-            </div>
-            <div class="input-group">
-                <div class="input-box"><label>縦 L (mm)</label><input type="number" id="con_l" placeholder="5000"></div>
-                <div class="input-box"><label>横 W (mm)</label><input type="number" id="con_w" placeholder="3000"></div>
-            </div>
-            <div class="input-group">
-                <div class="input-box"><label>厚み/高さ D (mm)</label><input type="number" id="con_d" value="150"></div>
-                <div class="input-box">
-                    <label>形状</label>
-                    <select id="con_shape" style="width:100%; background:transparent; border:none; color:white; font-size:1.1rem; height:40px; font-weight:bold; -webkit-appearance: none;">
-                        <option value="box" style="background:#333;">■ 四角</option>
-                        <option value="hunch" style="background:#333;">◢ ハンチ</option>
-                    </select>
-                </div>
-            </div>
-            <button class="main-btn" style="margin-top:15px;" onclick="addConcreteRecord()">＋ リストに追加</button>
-        </div>
-        <div class="card" style="padding:0; overflow:hidden;">
-            <div style="background:#252525; padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:0.8rem; color:#aaa;">計算履歴</span>
-                <button onclick="clearConcreteList()" style="font-size:0.7rem; background:#333; color:white; border:none; padding:4px 8px; border-radius:4px;">全クリア</button>
-            </div>
-            <table style="width:100%;">
-                <tbody id="concreteListBody"></tbody>
-            </table>
-            <div style="background:#2a2a2a; padding:15px; border-top:2px solid var(--border);">
-                <div class="input-group" style="align-items:center; margin-bottom:5px;">
-                    <label style="color:var(--text); font-size:0.9rem;">全体ロス率</label>
-                    <input type="number" id="con_total_loss" value="3" oninput="updateConcreteTotal()" style="width:60px; background:#121212; border:1px solid #444; color:white; padding:5px; border-radius:5px; text-align:center;">
-                    <span style="color:var(--text);">%</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:10px;">
-                    <span style="color:#aaa; font-size:0.8rem;">発注予定数量</span>
-                    <span id="con_grand_total" style="font-size:2rem; font-weight:bold; color:var(--orange);">0.000 m³</span>
-                </div>
-                <p style="text-align:right; margin:0; font-size:0.7rem; color:#666;" id="con_pure_total">（正味合計：0.000 m³）</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="page-soil" class="page">
-        <header><h1>残土・搬出計算</h1><p>ほぐし率とダンプ台数算出</p></header>
-        <div class="card">
-            <div class="input-group">
-                <div class="input-box" style="flex:2;"><label>符号 (例: 掘削1)</label><input type="text" id="soil_name" placeholder="場所名" style="font-size:1rem;"></div>
-                <div class="input-box" style="flex:1;"><label>箇所数</label><input type="number" id="soil_count" value="1" style="font-size:1.2rem;"></div>
-            </div>
-            <div class="input-group">
-                <div class="input-box"><label>縦 L (mm)</label><input type="number" id="soil_l" placeholder="5000"></div>
-                <div class="input-box"><label>横 W (mm)</label><input type="number" id="soil_w" placeholder="3000"></div>
-            </div>
-            <div class="input-group">
-                <div class="input-box"><label>深さ D (mm)</label><input type="number" id="soil_d" value="300"></div>
-                <div class="input-box">
-                    <label>形状</label>
-                    <select id="soil_shape" style="width:100%; background:transparent; border:none; color:white; font-size:1.1rem; height:40px; font-weight:bold; -webkit-appearance: none;">
-                        <option value="box" style="background:#333;">■ 四角</option>
-                        <option value="hunch" style="background:#333;">◢ ハンチ</option>
-                    </select>
-                </div>
-            </div>
-            <button class="main-btn" style="margin-top:15px; background:linear-gradient(135deg, #e67e22, #d35400);" onclick="addSoilRecord()">＋ 残土リストに追加</button>
+    
+    <div class="card">
+        <div class="input-group">
+            <div class="input-box active" id="boxA" onclick="setActiveDiag('A')"><label>A寸法 (mm)</label><input type="text" id="sideA" placeholder="0" readonly></div>
+            <div class="input-box" id="boxB" onclick="setActiveDiag('B')"><label>B寸法 (mm)</label><input type="text" id="sideB" placeholder="0" readonly></div>
         </div>
 
-        <div class="card" style="padding:0; overflow:hidden;">
-            <div style="background:#252525; padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:0.8rem; color:#aaa;">掘削履歴 (地山)</span>
-                <button onclick="clearSoilList()" style="font-size:0.7rem; background:#333; color:white; border:none; padding:4px 8px; border-radius:4px;">全クリア</button>
-            </div>
-            <table style="width:100%;">
-                <tbody id="soilListBody"></tbody>
-            </table>
+        <div class="panel-ctrl">
+            <button id="tabModeCalc" class="tab active" onclick="setMode('calc')">🔢 電卓</button>
+            <button id="tabModeMod" class="tab" onclick="setMode('mod')">📐 尺ピッチ</button>
+        </div>
+
+        <div id="calc-pad-area" class="calc-pad">
+            <button class="calc-btn action" onclick="calcAction('clear')">C</button>
+            <button class="calc-btn action" onclick="calcAction('bs')">⌫</button>
+            <button class="calc-btn op" onclick="calcInput('/')">÷</button>
+            <button class="calc-btn op" onclick="calcInput('*')">×</button>
             
-            <div style="background:#2a2a2a; padding:15px; border-top:2px solid var(--border);">
-                <div class="input-group" style="align-items:center; margin-bottom:5px;">
-                    <label style="color:var(--text); font-size:0.9rem;">ほぐし率 (土換算係数)</label>
-                    <input type="number" id="soil_factor" value="1.3" oninput="updateSoilTotal()" style="width:60px; background:#121212; border:1px solid #444; color:white; padding:5px; border-radius:5px; text-align:center;">
-                    <span style="color:var(--text); font-size:0.8rem;">倍</span>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:10px;">
-                    <span style="color:#aaa; font-size:0.8rem;">搬出予定数量</span>
-                    <span id="soil_grand_total" style="font-size:2rem; font-weight:bold; color:var(--soil);">0.000 m³</span>
-                </div>
-                <p style="text-align:right; margin:0; font-size:0.7rem; color:#666;" id="soil_pure_total">（地山合計：0.000 m³）</p>
+            <button class="calc-btn" onclick="calcInput('7')">7</button>
+            <button class="calc-btn" onclick="calcInput('8')">8</button>
+            <button class="calc-btn" onclick="calcInput('9')">9</button>
+            <button class="calc-btn op" onclick="calcInput('-')">-</button>
+            
+            <button class="calc-btn" onclick="calcInput('4')">4</button>
+            <button class="calc-btn" onclick="calcInput('5')">5</button>
+            <button class="calc-btn" onclick="calcInput('6')">6</button>
+            <button class="calc-btn op" onclick="calcInput('+')">+</button>
+            
+            <button class="calc-btn" onclick="calcInput('1')">1</button>
+            <button class="calc-btn" onclick="calcInput('2')">2</button>
+            <button class="calc-btn" onclick="calcInput('3')">3</button>
+            <button class="calc-btn eq" onclick="calcAction('eq')">=</button>
+            
+            <button class="calc-btn zero" onclick="calcInput('0')">0</button>
+            <button class="calc-btn" onclick="calcInput('.')">.</button>
+        </div>
 
-                <div style="margin-top:15px; padding-top:10px; border-top:1px solid #444;">
-                    <label style="font-size:0.7rem; color:#888;">ダンプ台数目安 (積載率100%計算)</label>
-                    <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.8rem;">
-                        <div>2t (1.5㎥): <span id="truck_2t" style="font-weight:bold; color:white;">0</span> 台</div>
-                        <div>3t (2.0㎥): <span id="truck_3t" style="font-weight:bold; color:white;">0</span> 台</div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.8rem;">
-                        <div>4t (2.5㎥): <span id="truck_4t" style="font-weight:bold; color:white;">0</span> 台</div>
-                        <div>10t (5.5㎥): <span id="truck_10t" style="font-weight:bold; color:white;">0</span> 台</div>
-                    </div>
-                </div>
+        <div class="grid-scroll" id="buttonGrid" style="display:none;"></div>
+
+        <button class="main-btn" onclick="addDiagRecord()">対角線を計算する</button>
+    </div>
+
+    <div class="card" style="padding:0; overflow:hidden;">
+        <table>
+            <thead><tr><th>A/B</th><th>対角</th><th id="th-outer">枠外(+150)</th><th>消去</th></tr></thead>
+            <tbody id="historyBody"></tbody>
+        </table>
+    </div>
+    
+    <article class="article-section">
+        <h2>建築・土木現場の計算を劇的に効率化</h2>
+        <p><strong>「現場計算 PRO」</strong>は、住宅の基礎工事、墨出し、型枠工事に携わるプロフェッショナルのための計算機です。</p>
+
+        <h3><span class="material-symbols-outlined">square_foot</span> 対角線の計算（カネ出し・大矩）</h3>
+        <p>本ツールはピタゴラスの定理を用いて、斜辺の長さをミリ単位で算出します。</p>
+        <ul>
+            <li><strong>電卓キー搭載：</strong>図面にない寸法も「9100-455」のようにそのまま入力して計算可能。</li>
+            <li><strong>尺モジュール対応：</strong>227.5mmピッチをワンタップで入力可能。</li>
+            <li><strong>枠外（逃げ）計算：</strong>通り芯から150mmや200mm「逃げ」た位置での対角寸法を自動で同時算出。</li>
+        </ul>
+
+        <div class="profile-card">
+            <div class="profile-icon material-symbols-outlined">verified_user</div>
+            <div class="profile-content">
+                <h4>開発者：建築士・現役現場監督</h4>
+                <p>建築現場での実務経験5年。手袋をしたままでも使いやすいプロ仕様の計算精度を追求しています。</p>
             </div>
         </div>
-    </div>
+    </article>
 
     <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
-        <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー・免責事項</a>
-        <span style="color: #444; margin: 0 10px;">|</span>
-        <a href="mailto:hiroki199809@gmail.com" style="color: #888; text-decoration: none;">お問い合わせ・不具合報告</a>
-        <br><br>
+        <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー・免責事項</a><span style="color: #444; margin: 0 10px;">|</span><a href="mailto:Hiroki199809@gmail.com" style="color: #888; text-decoration: none;">お問い合わせ</a><br><br>
         <span style="color: #666;">© 2026 現場計算 PRO</span>
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="showPage('diag', this)">
-            <span class="material-symbols-outlined">square_foot</span>
-            <span>対角</span>
-        </div>
-        <div class="nav-item" onclick="showPage('stair', this)">
-            <span class="material-symbols-outlined">stairs</span>
-            <span>ポーチ</span>
-        </div>
-        <div class="nav-item" onclick="showPage('concrete', this)">
-            <span class="material-symbols-outlined">water_drop</span>
-            <span>生コン</span>
-        </div>
-        <div class="nav-item" onclick="showPage('soil', this)">
-            <span class="material-symbols-outlined">landscape</span>
-            <span>残土</span>
-        </div>
+        <a href="index.html" class="nav-item active"><span class="material-symbols-outlined">square_foot</span><span>対角</span></a>
+        <a href="stair.html" class="nav-item"><span class="material-symbols-outlined">stairs</span><span>ポーチ</span></a>
+        <a href="concrete.html" class="nav-item"><span class="material-symbols-outlined">water_drop</span><span>生コン</span></a>
+        <a href="soil.html" class="nav-item"><span class="material-symbols-outlined">landscape</span><span>残土</span></a>
     </nav>
 </div>
 
-<div id="install-modal" class="modal-overlay">
-    <div class="modal-box">
-        <div class="modal-title">ホーム画面に追加して<br>アプリ化しませんか？</div>
-        <div class="modal-text" id="modal-text"></div>
-        <button class="modal-btn" onclick="closeInstallModal()">閉じる</button>
-    </div>
-</div>
-
 <script>
-    // --- 共通設定 ---
     let currentOffset = parseInt(localStorage.getItem('diagOffset')) || 150;
     document.getElementById('offsetSetting').value = currentOffset;
     updateTableHead();
 
-    function toggleSettings() {
-        document.getElementById('settings-panel').classList.toggle('open');
-    }
-
+    function toggleSettings() { document.getElementById('settings-panel').classList.toggle('open'); }
     function saveSettings() {
         const val = parseInt(document.getElementById('offsetSetting').value);
-        if (!isNaN(val)) {
-            currentOffset = val;
-            localStorage.setItem('diagOffset', val);
-            updateTableHead();
-            toggleSettings();
-        }
+        if (!isNaN(val)) { currentOffset = val; localStorage.setItem('diagOffset', val); updateTableHead(); toggleSettings(); }
     }
+    function updateTableHead() { document.getElementById('th-outer').innerText = "枠外(+" + currentOffset + ")"; }
 
-    function updateTableHead() {
-        document.getElementById('th-outer').innerText = "枠外(+" + currentOffset + ")";
-    }
-
-    function showPage(pageId, el) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById('page-' + pageId).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-        window.scrollTo(0,0);
-    }
-
-    // --- 対角計算ロジック ---
     let activeSide = 'A';
-    const grid = document.getElementById('buttonGrid');
-    for (let i = 1; i <= 48; i++) {
-        const val = i * 227.5;
-        const btn = document.createElement('button');
-        btn.className = 'grid-btn';
-        if (Math.round(val) % 910 === 0) btn.classList.add('highlight');
-        btn.innerHTML = `${(Math.round(val * 10) / 10).toLocaleString()}<span>${i * 0.25}</span>`;
-        btn.onclick = () => { document.getElementById('side' + activeSide).value = val; };
-        grid.appendChild(btn);
-    }
-
     function setActiveDiag(side) {
         activeSide = side;
-        document.getElementById('tabA').classList.toggle('active', side === 'A');
-        document.getElementById('tabB').classList.toggle('active', side === 'B');
         document.getElementById('boxA').classList.toggle('active', side === 'A');
         document.getElementById('boxB').classList.toggle('active', side === 'B');
     }
 
+    function setMode(mode) {
+        document.getElementById('tabModeCalc').classList.toggle('active', mode === 'calc');
+        document.getElementById('tabModeMod').classList.toggle('active', mode === 'mod');
+        document.getElementById('calc-pad-area').style.display = mode === 'calc' ? 'grid' : 'none';
+        document.getElementById('buttonGrid').style.display = mode === 'mod' ? 'grid' : 'none';
+    }
+
+    function calcInput(val) {
+        let el = document.getElementById('side' + activeSide);
+        if (el.value === '0' && val !== '.' && !['+','-','*','/'].includes(val)) el.value = '';
+        el.value += val;
+    }
+
+    function calcAction(action) {
+        let el = document.getElementById('side' + activeSide);
+        if (action === 'clear') el.value = '';
+        else if (action === 'bs') el.value = el.value.slice(0, -1);
+        else if (action === 'eq') { el.value = evaluateMathString(el.value); if(activeSide === 'A' && el.value !== '') setActiveDiag('B'); }
+    }
+
+    function evaluateMathString(str) {
+        if (!str) return '';
+        try { let sanitized = str.replace(/[^-()\d/*+.]/g, ''); let result = new Function('return ' + sanitized)(); return Math.round(result * 100) / 100; } 
+        catch(e) { return str; }
+    }
+
+    const grid = document.getElementById('buttonGrid');
+    for (let i = 1; i <= 48; i++) {
+        const val = i * 227.5; const btn = document.createElement('button'); btn.className = 'grid-btn';
+        if (Math.round(val) % 910 === 0) btn.classList.add('highlight');
+        btn.innerHTML = `${(Math.round(val * 10) / 10).toLocaleString()}<span>${i * 0.25}間</span>`;
+        btn.onclick = () => { document.getElementById('side' + activeSide).value = val; if(activeSide === 'A') setActiveDiag('B'); };
+        grid.appendChild(btn);
+    }
+
     function addDiagRecord() {
-        const a = parseFloat(document.getElementById('sideA').value);
-        const b = parseFloat(document.getElementById('sideB').value);
+        let aStr = document.getElementById('sideA').value; let bStr = document.getElementById('sideB').value;
+        let a = parseFloat(evaluateMathString(aStr)); let b = parseFloat(evaluateMathString(bStr));
         if (!a || !b) return;
+        document.getElementById('sideA').value = a; document.getElementById('sideB').value = b;
         const diag = Math.round(Math.sqrt(a*a + b*b));
         const outer = Math.round(Math.sqrt(Math.pow(a + currentOffset, 2) + Math.pow(b + currentOffset, 2)));
         const row = document.getElementById('historyBody').insertRow(0);
-        row.innerHTML = `<td>${a}<br>${b}</td><td style="color:var(--blue); font-weight:bold;">${diag.toLocaleString()}</td><td style="color:var(--orange); font-weight:bold;">${outer.toLocaleString()}</td><td><button onclick="this.closest('tr').remove()" style="background:none; border:none; color:#555; font-size:1.2rem;">×</button></td>`;
-    }
-
-    // --- ポーチ計算ロジック ---
-    function calculateStair() {
-        const road = parseFloat(document.getElementById('road_bm').value) || 0;
-        const gl = parseFloat(document.getElementById('gl_bm').value) || 0;
-        const baseH = parseFloat(document.getElementById('gl_base').value) || 410;
-        const steps = parseFloat(document.getElementById('step_count').value) || 1;
-        const dist = parseFloat(document.getElementById('dist_road').value) || 0;
-
-        const absGL = gl;
-        const absRoad = -road;
-        const absDomaEnd = absRoad + (dist * 0.02);
-        const absBaseTop = absGL + baseH;
-        const absPorchTop = absBaseTop - 120;
-        const keage = Math.round(((absPorchTop - absDomaEnd) / steps) * 10) / 10;
-        
-        document.getElementById('stair-result').style.display = 'block';
-        document.getElementById('keage_res').innerText = keage + " mm";
-        
-        const svg = document.getElementById('elevation-svg');
-        const bY = 320;
-        const minLvl = Math.min(absRoad, absGL, 0, absDomaEnd) - 80;
-        const maxLvl = Math.max(absBaseTop, 0) + 80;
-        const hRange = maxLvl - minLvl;
-        const getP = (v) => bY - ((v - minLvl) / hRange) * 280;
-
-        const roadX = 20; const domaX = 140; const houseX = 330;
-        let res = `
-            <rect x="${houseX}" y="${getP(absBaseTop)}" width="60" height="${(absBaseTop - minLvl) * (280/hRange)}" fill="#333" stroke="#555"/>
-            <line x1="80" y1="${getP(absBaseTop)}" x2="380" y2="${getP(absBaseTop)}" stroke="#888" stroke-dasharray="2" stroke-width="0.5"/>
-            <text x="80" y="${getP(absBaseTop)-5}" fill="#888" font-size="8">基礎天端 ±0</text>
-            <path d="M ${roadX} ${getP(absRoad)} L ${domaX} ${getP(absDomaEnd)} L ${domaX} ${getP(minLvl)} L ${roadX} ${getP(minLvl)} Z" fill="#1a2a3a"/>
-            <line x1="${roadX}" y1="${getP(absRoad)}" x2="${domaX}" y2="${getP(absDomaEnd)}" stroke="#5dade2" stroke-width="3"/>
-        `;
-
-        const stepW = (houseX - domaX) / steps;
-        for(let i=1; i<=steps; i++) {
-            const stepTopY = absPorchTop - (keage * (i-1));
-            const currX = houseX - (stepW * i);
-            res += `<rect x="${currX}" y="${getP(stepTopY)}" width="${stepW}" height="${(stepTopY - minLvl) * (280/hRange)}" fill="#7f8c8d" stroke="#111"/>`;
-            res += `<line x1="${currX}" y1="${getP(stepTopY)}" x2="${currX+stepW}" y2="${getP(stepTopY)}" stroke="var(--orange)" stroke-width="3"/>`;
-            res += `<text x="${currX+stepW-5}" y="${getP(stepTopY)-6}" fill="#fff" font-size="10" font-weight="bold" text-anchor="end">基天 -${Math.round(absBaseTop - stepTopY)}</text>`;
-        }
-
-        res += `
-            <line x1="0" y1="${getP(absGL)}" x2="400" y2="${getP(absGL)}" stroke="#22c55e" stroke-dasharray="10,5" stroke-width="2"/>
-            <text x="395" y="${getP(absGL)-8}" fill="#22c55e" font-size="14" font-weight="bold" text-anchor="end" style="paint-order: stroke; stroke: #000; stroke-width: 3px;">GL ${absGL>=0?'+':''}${absGL}</text>
-            <line x1="0" y1="${getP(0)}" x2="400" y2="${getP(0)}" stroke="#e74c3c" stroke-dasharray="4" stroke-width="1.5"/>
-            <text x="5" y="${getP(0)-5}" fill="#e74c3c" font-size="11" font-weight="bold">BM ±0</text>
-        `;
-        svg.innerHTML = res;
-    }
-
-    // --- 生コン計算ロジック（保存機能付き） ---
-    let concreteItems = JSON.parse(localStorage.getItem('concreteList')) || [];
-    let savedLoss = localStorage.getItem('concreteLoss');
-    if(savedLoss) document.getElementById('con_total_loss').value = savedLoss;
-    renderConcreteList();
-
-    function saveConcreteData() {
-        localStorage.setItem('concreteList', JSON.stringify(concreteItems));
-        localStorage.setItem('concreteLoss', document.getElementById('con_total_loss').value);
-    }
-
-    function addConcreteRecord() {
-        const name = document.getElementById('con_name').value || '名称なし';
-        const count = parseFloat(document.getElementById('con_count').value) || 1;
-        const l = parseFloat(document.getElementById('con_l').value);
-        const w = parseFloat(document.getElementById('con_w').value);
-        const d = parseFloat(document.getElementById('con_d').value);
-        const shape = document.getElementById('con_shape').value;
-        
-        if (!l || !w || !d) { alert("縦、横、厚みをすべて入力してください"); return; }
-        let singleVol = (l * w * d) / 1000000000;
-        if (shape === 'hunch') singleVol = singleVol / 2;
-        const subTotal = singleVol * count;
-        
-        concreteItems.push({ name: name, count: count, l: l, w: w, d: d, vol: subTotal, shape: shape });
-        saveConcreteData();
-        renderConcreteList();
-        
-        document.getElementById('con_name').value = '';
-        document.getElementById('con_count').value = '1';
-        document.getElementById('con_l').value = '';
-        document.getElementById('con_w').value = '';
-        document.getElementById('con_name').focus();
-    }
-
-    function renderConcreteList() {
-        const tbody = document.getElementById('concreteListBody');
-        tbody.innerHTML = '';
-        concreteItems.forEach((item, index) => {
-            const row = document.createElement('tr');
-            row.className = 'con-row';
-            const shapeLabel = item.shape === 'hunch' ? '<span style="color:#ff9500;">[ハンチ]</span>' : '';
-            row.innerHTML = `<td><div class="con-name">${item.name} ${shapeLabel} <span style="font-size:0.8rem; color:#888; font-weight:normal;">(×${item.count})</span></div><div class="con-vol">${item.vol.toFixed(3)} m³</div><div class="con-detail">L:${item.l} W:${item.w} D:${item.d}</div></td><td style="text-align:right;"><button onclick="removeConcreteItem(${index})" style="background:#333; color:#888; border:none; padding:5px 10px; border-radius:4px;">×</button></td>`;
-            tbody.insertBefore(row, tbody.firstChild);
-        });
-        updateConcreteTotal();
-    }
-
-    function removeConcreteItem(index) {
-        concreteItems.splice(index, 1);
-        saveConcreteData();
-        renderConcreteList();
-    }
-
-    function clearConcreteList() {
-        if(confirm('リストを全て消去しますか？')) {
-            concreteItems = [];
-            saveConcreteData();
-            renderConcreteList();
-        }
-    }
-
-    function updateConcreteTotal() {
-        const totalVol = concreteItems.reduce((sum, item) => sum + item.vol, 0);
-        const loss = parseFloat(document.getElementById('con_total_loss').value) || 0;
-        const grandTotal = totalVol * (1 + loss / 100);
-        document.getElementById('con_grand_total').innerText = grandTotal.toFixed(3) + " m³";
-        document.getElementById('con_pure_total').innerText = "（正味合計：" + totalVol.toFixed(3) + " m³）";
-        localStorage.setItem('concreteLoss', loss);
-    }
-
-    // --- 残土計算ロジック（保存機能付き） ---
-    let soilItems = JSON.parse(localStorage.getItem('soilList')) || [];
-    let savedFactor = localStorage.getItem('soilFactor');
-    if(savedFactor) document.getElementById('soil_factor').value = savedFactor;
-    renderSoilList();
-
-    function saveSoilData() {
-        localStorage.setItem('soilList', JSON.stringify(soilItems));
-        localStorage.setItem('soilFactor', document.getElementById('soil_factor').value);
-    }
-
-    function addSoilRecord() {
-        const name = document.getElementById('soil_name').value || '名称なし';
-        const count = parseFloat(document.getElementById('soil_count').value) || 1;
-        const l = parseFloat(document.getElementById('soil_l').value);
-        const w = parseFloat(document.getElementById('soil_w').value);
-        const d = parseFloat(document.getElementById('soil_d').value);
-        const shape = document.getElementById('soil_shape').value;
-        
-        if (!l || !w || !d) { alert("縦、横、深さをすべて入力してください"); return; }
-        
-        let singleVol = (l * w * d) / 1000000000;
-        if (shape === 'hunch') singleVol = singleVol / 2;
-        const subTotal = singleVol * count;
-        
-        soilItems.push({ name: name, count: count, l: l, w: w, d: d, vol: subTotal, shape: shape });
-        saveSoilData();
-        renderSoilList();
-        
-        document.getElementById('soil_name').value = '';
-        document.getElementById('soil_count').value = '1';
-        document.getElementById('soil_l').value = '';
-        document.getElementById('soil_w').value = '';
-        document.getElementById('soil_name').focus();
-    }
-
-    function renderSoilList() {
-        const tbody = document.getElementById('soilListBody');
-        tbody.innerHTML = '';
-        soilItems.forEach((item, index) => {
-            const row = document.createElement('tr');
-            row.className = 'con-row';
-            const shapeLabel = item.shape === 'hunch' ? '<span style="color:#ff9500;">[ハンチ]</span>' : '';
-            row.innerHTML = `<td><div class="con-name">${item.name} ${shapeLabel} <span style="font-size:0.8rem; color:#888; font-weight:normal;">(×${item.count})</span></div><div class="soil-val">${item.vol.toFixed(3)} m³</div><div class="con-detail">L:${item.l} W:${item.w} D:${item.d}</div></td><td style="text-align:right;"><button onclick="removeSoilItem(${index})" style="background:#333; color:#888; border:none; padding:5px 10px; border-radius:4px;">×</button></td>`;
-            tbody.insertBefore(row, tbody.firstChild);
-        });
-        updateSoilTotal();
-    }
-
-    function removeSoilItem(index) {
-        soilItems.splice(index, 1);
-        saveSoilData();
-        renderSoilList();
-    }
-
-    function clearSoilList() {
-        if(confirm('残土リストを全て消去しますか？')) {
-            soilItems = [];
-            saveSoilData();
-            renderSoilList();
-        }
-    }
-
-    function updateSoilTotal() {
-        const totalVol = soilItems.reduce((sum, item) => sum + item.vol, 0);
-        const factor = parseFloat(document.getElementById('soil_factor').value) || 1.0;
-        const grandTotal = totalVol * factor;
-        document.getElementById('soil_grand_total').innerText = grandTotal.toFixed(3) + " m³";
-        document.getElementById('soil_pure_total').innerText = "（地山合計：" + totalVol.toFixed(3) + " m³）";
-        
-        document.getElementById('truck_2t').innerText = Math.ceil(grandTotal / 1.5);
-        document.getElementById('truck_3t').innerText = Math.ceil(grandTotal / 2.0);
-        document.getElementById('truck_4t').innerText = Math.ceil(grandTotal / 2.5);
-        document.getElementById('truck_10t').innerText = Math.ceil(grandTotal / 5.5);
-
-        localStorage.setItem('soilFactor', factor);
-    }
-
-    // --- インストール案内 ---
-    window.addEventListener('load', function() {
-        if (localStorage.getItem('isInstalledPromptShown')) return;
-        const ua = navigator.userAgent.toLowerCase();
-        let msg = "";
-        if (ua.indexOf('iphone') > -1 || ua.indexOf('ipad') > -1) {
-            msg = '画面下の <span class="modal-icon material-symbols-outlined">ios_share</span> (共有) ボタンを押し<br>「ホーム画面に追加 <span class="material-symbols-outlined" style="font-size:1rem; vertical-align:middle;">add_box</span>」を選択してください。';
-        } else if (ua.indexOf('android') > -1) {
-            msg = '画面右上の <span class="modal-icon material-symbols-outlined">more_vert</span> (メニュー) ボタンを押し<br>「アプリをインストール」または「ホーム画面に追加」を選択してください。';
-        } else {
-            msg = 'このページをブックマークしておくと、<br>次回からすぐに計算できます。';
-        }
-        document.getElementById('modal-text').innerHTML = msg;
-        setTimeout(() => { document.getElementById('install-modal').classList.add('show'); }, 1500);
-        localStorage.setItem('isInstalledPromptShown', 'true');
-    });
-
-    function closeInstallModal() {
-        document.getElementById('install-modal').classList.remove('show');
+        row.innerHTML = `<td>A: ${a}<br>B: ${b}</td><td style="color:var(--blue); font-weight:bold; font-size:1.2rem;">${diag.toLocaleString()}</td><td style="color:var(--orange); font-weight:bold; font-size:1.1rem;">${outer.toLocaleString()}</td><td style="text-align:center;"><button onclick="this.closest('tr').remove()" style="background:none; border:none; color:#777; font-size:1.5rem;">×</button></td>`;
+        setActiveDiag('A');
     }
 </script>
 </body>
