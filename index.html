@@ -29,4 +29,262 @@
         header { display: flex; justify-content: space-between; align-items: flex-start; border-left: 5px solid var(--blue); padding-left: 15px; margin-bottom: 20px; }
         header h1 { font-size: 1.3rem; margin: 0; color: white; }
         header p { font-size: 0.7rem; color: var(--blue); margin: 0; font-weight: bold; }
-        .settings-btn { background: #2a2a2a; border: 1px
+        .settings-btn { background: #2a2a2a; border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
+        #settings-panel { display: none; background: #2a2a2a; border: 2px solid var(--orange); border-radius: 10px; padding: 15px; margin-bottom: 20px; }
+        #settings-panel.open { display: block; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .input-group { display: flex; gap: 10px; margin-bottom: 12px; }
+        .input-box { flex: 1; background: #2a2a2a; border: 2px solid var(--border); border-radius: 10px; padding: 8px 12px; cursor: pointer; }
+        .input-box.active { border-color: var(--blue); background: #333; box-shadow: 0 0 8px rgba(0, 212, 255, 0.2); }
+        .input-box label { display: block; font-size: 0.65rem; color: var(--blue); font-weight: bold; }
+        .input-box input { width: 100%; background: transparent; border: none; color: white; font-size: 1.4rem; outline: none; font-family: monospace; font-weight: bold; pointer-events: none; }
+        .panel-ctrl { display: flex; gap: 6px; margin-bottom: 10px; }
+        .tab { flex: 1; padding: 12px; background: #2a2a2a; border: none; color: #aaa; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
+        .tab.active { background: var(--blue); color: #000; }
+        
+        /* 電卓CSS */
+        .calc-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding-bottom: 5px; }
+        
+        /* ▼ 通常のボタン（立体感と動きのベース） ▼ */
+        .calc-btn { 
+            background: #252525; border: 1px solid #444; border-radius: 8px; padding: 14px 0; 
+            color: white; font-size: 1.3rem; font-weight: bold; cursor: pointer; text-align: center;
+            /* 下に影をつけて立体的にする */
+            box-shadow: 0 4px 0 #000;
+            /* アニメーションを滑らかで少し弾むようにする */
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* 押した時に影を消して、下に沈み込ませる（ポコッという動き） */
+        .calc-btn:active { 
+            background: #444; 
+            box-shadow: 0 0px 0 #000; 
+            transform: translateY(4px) scale(0.96); 
+        }
+
+        /* ▼ 記号ボタン（÷ × - +）の色と影 ▼ */
+        .calc-btn.op { background: #1a3a4a; color: var(--blue); border-color: #005a73; box-shadow: 0 4px 0 #002233; }
+        .calc-btn.op:active { background: #005a73; box-shadow: 0 0px 0 #002233; }
+
+        /* ▼ アクションボタン（C ⌫）の色と影 ▼ */
+        .calc-btn.action { background: #444; color: #ccc; font-size: 1.1rem; border-color: #555; box-shadow: 0 4px 0 #111; }
+        .calc-btn.action:active { background: #666; box-shadow: 0 0px 0 #111; }
+
+        /* ▼ イコールボタン（＝）の色と影 ▼ */
+        .calc-btn.eq { 
+            background: var(--orange); color: #000; border-color: #cc7700; 
+            grid-row: span 2; display: flex; align-items: center; justify-content: center; 
+            box-shadow: 0 4px 0 #995500; 
+        }
+        .calc-btn.eq:active { background: #ffaa33; box-shadow: 0 0px 0 #995500; transform: translateY(4px) scale(0.96); }
+        
+        .calc-btn.zero { grid-column: span 2; }
+
+        .grid-scroll { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; height: 210px; overflow-y: auto; background: #161616; padding: 10px; border-radius: 10px; }
+        .grid-btn { background: #252525; border: 1px solid #333; border-radius: 8px; padding: 12px 0; color: var(--text); font-size: 0.85rem; text-align: center; }
+        .grid-btn.highlight { border: 2px solid var(--blue); background: #1a2a3a; }
+        .grid-btn.highlight span { color: var(--blue); font-weight: bold; }
+        .grid-btn span { display: block; font-size: 0.6rem; color: #777; }
+        .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 15px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { text-align: left; color: #888; padding: 12px 10px; border-bottom: 2px solid var(--border); background: #252525; font-weight: normal; }
+        td { padding: 12px 10px; border-bottom: 1px solid #252525; }
+
+        .article-section { margin-top: 40px; padding: 30px 20px; background: #1a1a1a; border-radius: 12px; border-top: 4px solid var(--blue); }
+        .article-section h2 { color: var(--blue); font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
+        .article-section h3 { color: #fff; font-size: 1rem; margin-top: 25px; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
+        .article-section h3 .material-symbols-outlined { color: var(--orange); }
+        .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; line-height: 1.8; }
+        .article-section ul { padding-left: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; }
+        .article-section li { font-size: 0.9rem; color: #ddd; margin-bottom: 8px; }
+        
+        .profile-card { background: #252525; border: 1px solid #444; border-radius: 10px; padding: 20px; margin-top: 30px; display: flex; gap: 15px; align-items: flex-start; }
+        .profile-icon { font-size: 40px; color: var(--blue); }
+        .profile-content h4 { margin: 0 0 5px 0; color: white; font-size: 1rem; }
+        .profile-content p { font-size: 0.8rem; color: #aaa; margin: 0; line-height: 1.5; }
+
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #333; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom)); z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; text-decoration: none; padding-top: 8px; transition: color 0.3s; }
+        .nav-item .material-symbols-outlined { font-size: 24px; font-weight: 300; margin-bottom: 2px; }
+        .nav-item span:last-child { font-size: 0.65rem; font-weight: 500; }
+        .nav-item.active { color: var(--blue); }
+        .nav-item.active .material-symbols-outlined { text-shadow: 0 0 12px rgba(0, 212, 255, 0.4); }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <header>
+        <div><h1>対角線電卓 PRO</h1><p>建築現場専用・高精度対角計算</p></div>
+        <button class="settings-btn" onclick="toggleSettings()">⚙️ 設定</button>
+    </header>
+
+    <div id="settings-panel">
+        <label style="color:var(--orange); font-size:0.8rem; font-weight:bold;">【設定】デフォルト枠外寸法 (mm)</label>
+        <div style="display:flex; gap:10px; margin-top:8px;">
+            <input type="number" id="offsetSetting" style="flex:1; background:#121212; border:1px solid var(--border); color:white; padding:10px; border-radius:5px;" placeholder="150">
+            <button onclick="saveSettings()" style="background:var(--orange); border:none; color:black; padding:0 15px; border-radius:5px; font-weight:bold;">保存</button>
+        </div>
+        <p style="font-size:0.6rem; color:#888; margin-top:8px;">※現場の「逃げ」寸法に合わせて変更してください</p>
+    </div>
+    
+    <div class="card">
+        <div class="input-group">
+            <div class="input-box active" id="boxA" onclick="setActiveDiag('A')"><label>A寸法 (mm)</label><input type="text" id="sideA" placeholder="0" readonly></div>
+            <div class="input-box" id="boxB" onclick="setActiveDiag('B')"><label>B寸法 (mm)</label><input type="text" id="sideB" placeholder="0" readonly></div>
+        </div>
+
+        <div class="panel-ctrl">
+            <button id="tabModeCalc" class="tab active" onclick="setMode('calc')">🔢 電卓</button>
+            <button id="tabModeMod" class="tab" onclick="setMode('mod')">📐 尺ピッチ</button>
+        </div>
+
+        <div id="calc-pad-area" class="calc-pad">
+            <button class="calc-btn action" onclick="calcAction('clear')">C</button>
+            <button class="calc-btn action" onclick="calcAction('bs')">⌫</button>
+            <button class="calc-btn op" onclick="calcInput('/')">÷</button>
+            <button class="calc-btn op" onclick="calcInput('*')">×</button>
+            
+            <button class="calc-btn" onclick="calcInput('7')">7</button>
+            <button class="calc-btn" onclick="calcInput('8')">8</button>
+            <button class="calc-btn" onclick="calcInput('9')">9</button>
+            <button class="calc-btn op" onclick="calcInput('-')">-</button>
+            
+            <button class="calc-btn" onclick="calcInput('4')">4</button>
+            <button class="calc-btn" onclick="calcInput('5')">5</button>
+            <button class="calc-btn" onclick="calcInput('6')">6</button>
+            <button class="calc-btn op" onclick="calcInput('+')">+</button>
+            
+            <button class="calc-btn" onclick="calcInput('1')">1</button>
+            <button class="calc-btn" onclick="calcInput('2')">2</button>
+            <button class="calc-btn" onclick="calcInput('3')">3</button>
+            <button class="calc-btn eq" onclick="calcAction('eq')">=</button>
+            
+            <button class="calc-btn zero" onclick="calcInput('0')">0</button>
+            <button class="calc-btn" onclick="calcInput('.')">.</button>
+        </div>
+
+        <div class="grid-scroll" id="buttonGrid" style="display:none;"></div>
+
+        <button class="main-btn" onclick="addDiagRecord()">対角線を計算する</button>
+    </div>
+
+    <div class="card" style="padding:0; overflow:hidden;">
+        <table>
+            <thead><tr><th>A/B</th><th>対角</th><th id="th-outer">枠外(+150)</th><th>消去</th></tr></thead>
+            <tbody id="historyBody"></tbody>
+        </table>
+    </div>
+    
+    <article class="article-section">
+        <h2>建築・土木現場の計算を劇的に効率化する「現場計算 PRO」</h2>
+        <p>「現場計算 PRO」は、住宅の基礎工事、墨出し、型枠工事、外構工事などに携わるプロフェッショナルのための無料計算ツール群です。年間多数の住宅施工管理を手がけ、現場のDX（デジタルトランスフォーメーション）を推進する現役の二級建築士が、実務の中で感じた「電卓を叩く手間の削減」を目的に独自開発しました。</p>
+
+        <h3><span class="material-symbols-outlined">square_foot</span> 対角線計算（カネ出し・大矩）の重要性と計算式</h3>
+        <p>建築現場において、建物や基礎の直角（カネ）を正確に出すことは、品質管理の最重要項目のひとつです。本ツールは、ピタゴラスの定理（三平方の定理：$a^2 + b^2 = c^2$）を内部で処理し、A寸法とB寸法から斜辺（対角線）の長さをミリ単位で瞬時に算出します。</p>
+
+        <h3><span class="material-symbols-outlined">construction</span> 現場特有の「逃げ（枠外）」寸法への対応</h3>
+        <p>実際の遣方（やりかた）や型枠の組み立てでは、通り芯（柱芯）ピッタリに水糸を張ることは稀です。多くの場合、基礎の厚みや型枠のクリアランスを考慮して、150mmや200mmの「逃げ（オフセット）」を設けます。当サイトの対角線計算機は、この「枠外寸法」も自動で同時算出できる点が、一般的な電卓アプリと大きく異なるプロ専用の仕様です。</p>
+
+        <h3><span class="material-symbols-outlined">touch_app</span> 本ツールの使い方・操作手順</h3>
+        <ul>
+            <li><strong>電卓キー搭載：</strong> 図面に直接記載されていない寸法も、「9100-455」のように柱の逃げや下地材の厚みを差し引いた数式をそのまま入力して計算させることが可能です。</li>
+            <li><strong>尺モジュール対応：</strong> 画面下部の「尺ピッチ」タブを開くと、日本の木造軸組工法で多用される227.5mmピッチ（910mm、1820mmなど）をワンタップで入力できる専用キーボードが表示されます。</li>
+            <li><strong>枠外（逃げ）計算：</strong> 通り芯から150mmや200mm「逃げ」た位置での対角寸法を自動で同時算出します。「対角線を計算する」ボタンを押すと、履歴テーブルに対角寸法と枠外寸法が保存され、複数の部屋や区画の寸法を一度に比較・確認できます。</li>
+        </ul>
+
+        <h3><span class="material-symbols-outlined">quiz</span> よくある質問（FAQ）</h3>
+        <p><strong>Q. 計算結果の端数処理はどうなっていますか？</strong><br>
+        A. 建築現場での実用性を考慮し、小数点以下は四捨五入し、ミリ単位の整数で表示しています。現場のメジャー（巻尺）で追い出せる精度に最適化しています。</p>
+        <p><strong>Q. 枠外（逃げ）の寸法は変更できますか？</strong><br>
+        A. はい、画面上部の「⚙️ 設定」ボタンから、現場のルールに合わせて任意の逃げ寸法（例：200mm、300mmなど）をデフォルト設定として保存・変更することが可能です。</p>
+
+        <div class="profile-card">
+            <div class="profile-icon material-symbols-outlined">verified_user</div>
+            <div class="profile-content">
+                <h4>開発者：二級建築士 / 現役現場監督</h4>
+                <p>建築現場での実務経験5年。大規模な施工エリアで多数の現場を統括・管理する現役の施工管理者。手袋をしたままでも使いやすい、現場で「本当に使える」計算精度とUI/UXを追求しています。</p>
+            </div>
+        </div>
+    </article>
+    <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
+        <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー・免責事項</a><span style="color: #444; margin: 0 10px;">|</span><a href="mailto:Hiroki199809@gmail.com" style="color: #888; text-decoration: none;">お問い合わせ</a><br><br>
+        <span style="color: #666;">© 2026 現場計算 PRO</span>
+    </div>
+
+    <nav>
+        <a href="index.html" class="nav-item active"><span class="material-symbols-outlined">square_foot</span><span>対角</span></a>
+        <a href="stair.html" class="nav-item"><span class="material-symbols-outlined">stairs</span><span>ポーチ</span></a>
+        <a href="concrete.html" class="nav-item"><span class="material-symbols-outlined">water_drop</span><span>生コン</span></a>
+        <a href="soil.html" class="nav-item"><span class="material-symbols-outlined">landscape</span><span>残土</span></a>
+    </nav>
+</div>
+
+<script>
+    let currentOffset = parseInt(localStorage.getItem('diagOffset')) || 150;
+    document.getElementById('offsetSetting').value = currentOffset;
+    updateTableHead();
+
+    function toggleSettings() { document.getElementById('settings-panel').classList.toggle('open'); }
+    function saveSettings() {
+        const val = parseInt(document.getElementById('offsetSetting').value);
+        if (!isNaN(val)) { currentOffset = val; localStorage.setItem('diagOffset', val); updateTableHead(); toggleSettings(); }
+    }
+    function updateTableHead() { document.getElementById('th-outer').innerText = "枠外(+" + currentOffset + ")"; }
+
+    let activeSide = 'A';
+    function setActiveDiag(side) {
+        activeSide = side;
+        document.getElementById('boxA').classList.toggle('active', side === 'A');
+        document.getElementById('boxB').classList.toggle('active', side === 'B');
+    }
+
+    function setMode(mode) {
+        document.getElementById('tabModeCalc').classList.toggle('active', mode === 'calc');
+        document.getElementById('tabModeMod').classList.toggle('active', mode === 'mod');
+        document.getElementById('calc-pad-area').style.display = mode === 'calc' ? 'grid' : 'none';
+        document.getElementById('buttonGrid').style.display = mode === 'mod' ? 'grid' : 'none';
+    }
+
+    function calcInput(val) {
+        let el = document.getElementById('side' + activeSide);
+        if (el.value === '0' && val !== '.' && !['+','-','*','/'].includes(val)) el.value = '';
+        el.value += val;
+    }
+
+    function calcAction(action) {
+        let el = document.getElementById('side' + activeSide);
+        if (action === 'clear') el.value = '';
+        else if (action === 'bs') el.value = el.value.slice(0, -1);
+        else if (action === 'eq') { el.value = evaluateMathString(el.value); if(activeSide === 'A' && el.value !== '') setActiveDiag('B'); }
+    }
+
+    function evaluateMathString(str) {
+        if (!str) return '';
+        try { let sanitized = str.replace(/[^-()\d/*+.]/g, ''); let result = new Function('return ' + sanitized)(); return Math.round(result * 100) / 100; } 
+        catch(e) { return str; }
+    }
+
+    const grid = document.getElementById('buttonGrid');
+    for (let i = 1; i <= 48; i++) {
+        const val = i * 227.5; const btn = document.createElement('button'); btn.className = 'grid-btn';
+        if (Math.round(val) % 910 === 0) btn.classList.add('highlight');
+        btn.innerHTML = `${(Math.round(val * 10) / 10).toLocaleString()}<span>${i * 0.25}</span>`;
+        btn.onclick = () => { document.getElementById('side' + activeSide).value = val; if(activeSide === 'A') setActiveDiag('B'); };
+        grid.appendChild(btn);
+    }
+
+    function addDiagRecord() {
+        let aStr = document.getElementById('sideA').value; let bStr = document.getElementById('sideB').value;
+        let a = parseFloat(evaluateMathString(aStr)); let b = parseFloat(evaluateMathString(bStr));
+        if (!a || !b) return;
+        document.getElementById('sideA').value = a; document.getElementById('sideB').value = b;
+        const diag = Math.round(Math.sqrt(a*a + b*b));
+        const outer = Math.round(Math.sqrt(Math.pow(a + currentOffset, 2) + Math.pow(b + currentOffset, 2)));
+        const row = document.getElementById('historyBody').insertRow(0);
+        row.innerHTML = `<td>A: ${a}<br>B: ${b}</td><td style="color:var(--blue); font-weight:bold; font-size:1.2rem;">${diag.toLocaleString()}</td><td style="color:var(--orange); font-weight:bold; font-size:1.1rem;">${outer.toLocaleString()}</td><td style="text-align:center;"><button onclick="this.closest('tr').remove()" style="background:none; border:none; color:#777; font-size:1.5rem;">×</button></td>`;
+        setActiveDiag('A');
+    }
+</script>
+</body>
+</html>
