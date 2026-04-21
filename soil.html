@@ -36,11 +36,17 @@
         .soil-val { color: var(--soil); font-weight: bold; font-size: 1rem; }
         
         .article-section { margin-top: 40px; padding: 30px 20px; background: #1a1a1a; border-radius: 12px; border-top: 4px solid var(--blue); }
-        .article-section h3 { color: #fff; font-size: 1rem; margin-top: 0; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
+        .article-section h2 { color: var(--blue); font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
+        .article-section h3 { color: #fff; font-size: 1rem; margin-top: 25px; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
         .article-section h3 .material-symbols-outlined { color: var(--orange); }
         .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; line-height: 1.8; }
         .article-section ul { padding-left: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; }
         .article-section li { font-size: 0.9rem; color: #ddd; margin-bottom: 8px; }
+
+        .profile-card { background: #252525; border: 1px solid #444; border-radius: 10px; padding: 20px; margin-top: 30px; display: flex; gap: 15px; align-items: flex-start; }
+        .profile-icon { font-size: 40px; color: var(--blue); }
+        .profile-content h4 { margin: 0 0 5px 0; color: white; font-size: 1rem; }
+        .profile-content p { font-size: 0.8rem; color: #aaa; margin: 0; line-height: 1.5; }
 
         nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #333; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom)); z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; text-decoration: none; padding-top: 8px; }
@@ -111,15 +117,36 @@
     </div>
 
     <article class="article-section">
-        <h3><span class="material-symbols-outlined">landscape</span> 残土・掘削土量の算出</h3>
-        <p>掘削計画や残土処分に必要な<strong>「ほぐし率（土の変化率L）」</strong>を考慮した搬出量を計算します。</p>
-        <ul>
-            <li><strong>ダンプ台数目安：</strong>計算した搬出量から、2t・3t・4t・10tダンプの必要台数を一瞬で割り出します。</li>
-            <li><strong>地山・盛土計算：</strong>現場の土質に合わせた換算係数の設定が可能です。</li>
-        </ul>
-    </article>
+        <h2>掘削土量と残土搬出における「ほぐし率」の重要性</h2>
+        <p>基礎工事や外構工事に伴う掘削作業では、図面上の体積（地山土量）と、実際にダンプトラックに積み込んで搬出する土の体積（ほぐし土量）が大きく異なります。この差を正確に計算しなければ、ダンプの手配台数を見誤り、工期の遅れや追加費用が発生します。</p>
 
+        <h3><span class="material-symbols-outlined">landscape</span> 土の変化率（L値：ほぐし率）とは？</h3>
+        <p>自然状態に締め固まっていた土（地山）をバックホウ等で掘削すると、土の粒子間に空気が入り込み、体積が膨張します。この膨張率を「ほぐし率（土の変化率 L）」と呼びます。一般的な砂質土・粘性土で L=1.20〜1.30、岩や礫混じりで L=1.30〜1.50 程度となります。</p>
+
+        <h3><span class="material-symbols-outlined">touch_app</span> 本ツールの使い方・操作手順</h3>
+        <ul>
+            <li><strong>掘削箇所の入力：</strong> 掘削する部分の名称（例：駐車場スキトリ、深基礎部分など）と箇所数を入力します。</li>
+            <li><strong>掘削寸法の入力：</strong> 縦(L)、横(W)、深さ(D)をミリ単位（mm）で入力します。</li>
+            <li><strong>リストへの追加：</strong> 「残土リストに追加」ボタンを押すと、地山の純粋な体積（m³）がリスト化されます。</li>
+            <li><strong>ほぐし率の適用とダンプ台数確認：</strong> 現場の土質に合わせて「ほぐし率（土換算係数）」を入力すると、搬出予定の総土量が算出され、同時に2t・3t・4t・10tダンプそれぞれの必要台数の目安が自動計算されます。</li>
+        </ul>
+
+        <h3><span class="material-symbols-outlined">quiz</span> よくある質問（FAQ）</h3>
+        <p><strong>Q. 盛土（埋め戻し）の計算にも使えますか？</strong><br>
+        A. はい、可能です。埋め戻し時の土の変化率（C値：締固め率）は通常0.85〜0.95程度となります。「ほぐし率」の入力欄にこのC値を入力することで、埋め戻しに必要な土の量を逆算する用途にも応用できます。</p>
+        <p><strong>Q. ダンプの台数目安は過積載に対応していますか？</strong><br>
+        A. 本ツールのダンプ台数は、あくまで「荷台の容積（平積み体積）」を基準とした目安です。実際の道路交通法における過積載判定は「重量（kg）」で行われます。水分を多く含んだ泥土などは比重が重くなるため、運搬時は必ず最大積載量（重量）を確認してください。</p>
+
+        <div class="profile-card">
+            <div class="profile-icon material-symbols-outlined">verified_user</div>
+            <div class="profile-content">
+                <h4>開発者：二級建築士 / 現役現場監督</h4>
+                <p>大規模な施工エリアで多数の現場を統括・管理する現役の施工管理者。実務経験に基づき、現場で「本当に使える」計算精度とUI/UXを追求し、本ツールを公開しています。</p>
+            </div>
+        </div>
+    </article>
     <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
+        <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー・免責事項</a><span style="color: #444; margin: 0 10px;">|</span><a href="mailto:Hiroki199809@gmail.com" style="color: #888; text-decoration: none;">お問い合わせ</a><br><br>
         <span style="color: #666;">© 2026 現場計算 PRO</span>
     </div>
 
