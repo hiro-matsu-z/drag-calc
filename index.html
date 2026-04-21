@@ -109,6 +109,14 @@
         .nav-item span:last-child { font-size: 0.65rem; font-weight: 500; }
         .nav-item.active { color: var(--blue); }
         .nav-item.active .material-symbols-outlined { text-shadow: 0 0 12px rgba(0, 212, 255, 0.4); }
+        
+        /* ボトムタブ追加用のスタイル */
+body { padding-bottom: 70px; } /* 余白確保 */
+.bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; z-index: 1000; }
+.nav-item { flex: 1; text-align: center; padding: 10px 0; color: #7f8c8d; text-decoration: none; font-size: 0.85em; display: block; }
+.nav-item.active { color: #3498db; font-weight: bold; border-bottom: 3px solid #3498db; }
+.nav-icon { font-size: 22px; display: block; margin-bottom: 2px; }
+
     </style>
 </head>
 
