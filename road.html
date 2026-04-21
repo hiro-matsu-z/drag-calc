@@ -2,199 +2,230 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>道路使用許可 管理 - 現場計算 PRO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>道路使用許可 管理 | 現場計算 PRO</title>
+    <meta name="robots" content="noindex">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./favicon.ico">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+    
     <style>
-        /* ベーススタイル */
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; color: #333; padding-bottom: 70px; }
-        * { box-sizing: border-box; }
+        :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --danger: #ff4757; --success: #2ed573; --warning: #ffa502;}
+        * { box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
+        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; }
+        header { display: flex; justify-content: space-between; align-items: flex-start; border-left: 5px solid var(--orange); padding-left: 15px; margin-bottom: 20px; }
+        header h1 { font-size: 1.3rem; margin: 0; color: white; }
+        header p { font-size: 0.7rem; color: var(--orange); margin: 0; font-weight: bold; }
         
-        .header { background-color: #2c3e50; color: white; padding: 15px; text-align: center; font-size: 1.2em; font-weight: bold; }
-        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
-
-        /* フォーム */
-        .form-card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 0.9em; color: #555; }
-        input[type="text"], input[type="date"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         
-        .deadline-box { background: #eef2f5; padding: 15px; border-radius: 6px; text-align: center; margin-bottom: 15px; }
-        .deadline-value { font-size: 1.2em; font-weight: bold; color: #e74c3c; margin-top: 5px; }
+        .input-box { background: #2a2a2a; border: 2px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
+        .input-box label { display: block; font-size: 0.75rem; color: var(--orange); font-weight: bold; margin-bottom: 5px; }
+        .input-box input { width: 100%; background: transparent; border: none; color: white; font-size: 1.1rem; outline: none; font-family: sans-serif; }
+        .input-box input::placeholder { color: #666; }
+        .input-box input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 
-        .btn-submit { width: 100%; padding: 15px; background-color: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .deadline-area { background: #1a1a1a; border: 1px dashed var(--border); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; }
+        .deadline-area p { margin: 0 0 5px 0; font-size: 0.8rem; color: #888; }
+        .deadline-val { font-size: 1.3rem; font-weight: bold; color: var(--danger); }
 
-        /* ダッシュボード */
-        .section-title { font-size: 1.1em; color: #2c3e50; margin-bottom: 15px; border-bottom: 2px solid #bdc3c7; padding-bottom: 5px; }
-        .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 6px solid #2ecc71; position: relative; }
-        .card.warning { border-left-color: #f1c40f; background-color: #fffdf5; }
-        .card.danger { border-left-color: #e74c3c; background-color: #fff5f5; }
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold; background: #eee; margin-bottom: 5px; }
-        .btn-delete { position: absolute; top: 15px; right: 15px; padding: 5px 10px; background: transparent; color: #e74c3c; border: 1px solid #e74c3c; border-radius: 4px; font-size: 0.8em; cursor: pointer; }
+        .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #ff9500, #cc7700); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .main-btn:active { transform: translateY(2px); }
 
-        /* ボトムタブナビゲーション */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; z-index: 1000; }
-        .nav-item { flex: 1; text-align: center; padding: 10px 0; color: #7f8c8d; text-decoration: none; font-size: 0.85em; display: block; }
-        .nav-item.active { color: #3498db; font-weight: bold; border-bottom: 3px solid #3498db; }
-        .nav-icon { font-size: 22px; display: block; margin-bottom: 2px; }
+        .dashboard-title { font-size: 1.1rem; color: white; border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px; display: flex; align-items: center; gap: 5px; }
+        
+        .item-card { background: #2a2a2a; border-left: 5px solid var(--success); border-radius: 8px; padding: 12px; margin-bottom: 10px; position: relative; }
+        .item-card.danger { border-left-color: var(--danger); background: #3a1c1c; }
+        .item-card.warning { border-left-color: var(--warning); background: #3a2e1c; }
+        
+        .item-name { font-weight: bold; font-size: 1.1rem; color: white; margin-bottom: 5px; }
+        .item-badge { display: inline-block; padding: 3px 8px; background: #111; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 8px; }
+        .item-details { font-size: 0.85rem; color: #aaa; line-height: 1.5; }
+        .btn-delete { position: absolute; top: 12px; right: 12px; background: none; border: 1px solid #666; color: #aaa; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; }
+
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #333; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom)); z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; text-decoration: none; padding-top: 8px; transition: color 0.3s; }
+        .nav-item .material-symbols-outlined { font-size: 24px; font-weight: 300; margin-bottom: 2px; }
+        .nav-item span:last-child { font-size: 0.65rem; font-weight: 500; }
+        .nav-item.active { color: var(--blue); }
+        .nav-item.active .material-symbols-outlined { text-shadow: 0 0 12px rgba(0, 212, 255, 0.4); }
     </style>
 </head>
+
 <body>
+<div class="container">
+    <header>
+        <div><h1>道路使用 管理</h1><p>申請期限を自動逆算・現場リスト化</p></div>
+    </header>
 
-    <div class="header">🚧 道路使用許可 管理</div>
-
-    <div class="container">
-        <div class="form-card">
-            <div class="form-group">
-                <label>現場名</label>
-                <input type="text" id="site-name" placeholder="例: 〇〇邸">
-            </div>
-            <div class="form-group">
-                <label>現場住所</label>
-                <input type="text" id="site-address" placeholder="例: 荒川区町屋" oninput="autoFillPolice()">
-            </div>
-            <div class="form-group">
+    <div class="card">
+        <div class="input-box">
+            <label>現場名</label>
+            <input type="text" id="site-name" placeholder="例: 〇〇邸 新築工事">
+        </div>
+        <div class="input-box">
+            <label>現場住所</label>
+            <input type="text" id="site-address" placeholder="例: 荒川区町屋1-1" oninput="autoFillPolice()">
+        </div>
+        <div class="input-box" style="display:flex; gap:10px;">
+            <div style="flex:2;">
                 <label>管轄警察署 (自動入力)</label>
-                <input type="text" id="police-station" placeholder="住所から自動入力">
-                <input type="hidden" id="police-days" value="2">
+                <input type="text" id="police-station" placeholder="住所から推論">
             </div>
-            <div class="form-group">
-                <label>許可取得 開始希望日</label>
-                <input type="date" id="start-date" onchange="calculateDeadline()">
+            <div style="flex:1;">
+                <label>審査日数</label>
+                <input type="number" id="police-days" value="2" onchange="calculateDeadline()" style="text-align:center;">
             </div>
-            <div class="form-group">
-                <label>許可取得 終了日</label>
-                <input type="date" id="end-date">
-            </div>
-            
-            <div class="deadline-box">
-                <div style="font-size: 0.85em; color: #7f8c8d;">警察への申請期限目安 (土日除外)</div>
-                <div id="deadline-display" class="deadline-value">未計算</div>
-                <input type="hidden" id="deadline-date">
-            </div>
-            
-            <button class="btn-submit" onclick="saveData()">現場を登録する</button>
+        </div>
+        <div class="input-box">
+            <label>許可取得 開始希望日</label>
+            <input type="date" id="start-date" onchange="calculateDeadline()">
+        </div>
+        <div class="input-box">
+            <label>許可取得 終了日</label>
+            <input type="date" id="end-date">
+        </div>
+        
+        <div class="deadline-area">
+            <p>警察署への申請期限目安 (土日除外)</p>
+            <div id="deadline-display" class="deadline-val">未計算</div>
+            <input type="hidden" id="deadline-date">
         </div>
 
-        <div class="section-title">📋 申請待ち・管理リスト</div>
-        <div id="dashboard"></div>
+        <button class="main-btn" onclick="saveData()">現場を登録する</button>
     </div>
 
-    <div class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <span class="nav-icon">📐</span>対角計算
-        </a>
-        <a href="#" class="nav-item active">
-            <span class="nav-icon">🚧</span>道路使用
-        </a>
+    <div class="dashboard-title">
+        <span class="material-symbols-outlined">list_alt</span> 申請待ち・管理リスト
     </div>
+    <div id="dashboard"></div>
 
-    <script>
-        const policeData = [
-            { keywords: ["町屋", "荒川", "東日暮里", "西日暮里"], name: "荒川警察署", days: 2 },
-            { keywords: ["南千住"], name: "南千住警察署", days: 1 },
-            { keywords: ["尾久", "西尾久", "東尾久"], name: "尾久警察署", days: 1 },
-            { keywords: ["田園調布"], name: "田園調布警察署", days: 1 },
-            { keywords: ["新宿"], name: "新宿警察署", days: 2 }
-        ];
+    <nav>
+        <a href="index.html" class="nav-item"><span class="material-symbols-outlined">square_foot</span><span>対角</span></a>
+        <a href="stair.html" class="nav-item"><span class="material-symbols-outlined">stairs</span><span>ポーチ</span></a>
+        <a href="concrete.html" class="nav-item"><span class="material-symbols-outlined">water_drop</span><span>生コン</span></a>
+        <a href="soil.html" class="nav-item"><span class="material-symbols-outlined">landscape</span><span>残土</span></a>
+        <a href="road.html" class="nav-item active"><span class="material-symbols-outlined">edit_road</span><span>道路</span></a>
+    </nav>
+</div>
 
-        function autoFillPolice() {
-            const address = document.getElementById('site-address').value;
-            const policeInput = document.getElementById('police-station');
-            const daysInput = document.getElementById('police-days');
-            
-            let matched = false;
-            for (let data of policeData) {
-                if (data.keywords.some(kw => address.includes(kw))) {
-                    policeInput.value = data.name;
-                    daysInput.value = data.days;
-                    matched = true;
-                    break;
-                }
+<script>
+    // 警察署の判定データ
+    const policeData = [
+        { keywords: ["町屋", "荒川", "東日暮里", "西日暮里"], name: "荒川警察署", days: 2 },
+        { keywords: ["南千住"], name: "南千住警察署", days: 1 },
+        { keywords: ["尾久", "西尾久", "東尾久"], name: "尾久警察署", days: 1 },
+        { keywords: ["田園調布"], name: "田園調布警察署", days: 1 }
+    ];
+
+    function autoFillPolice() {
+        const address = document.getElementById('site-address').value;
+        const policeInput = document.getElementById('police-station');
+        const daysInput = document.getElementById('police-days');
+        
+        let matched = false;
+        for (let data of policeData) {
+            if (data.keywords.some(kw => address.includes(kw))) {
+                policeInput.value = data.name;
+                daysInput.value = data.days;
+                matched = true;
+                break;
             }
-            if (!matched) daysInput.value = 2;
-            calculateDeadline();
+        }
+        if (!matched) daysInput.value = 2; // デフォルトは中2日
+        calculateDeadline();
+    }
+
+    function calculateDeadline() {
+        const startStr = document.getElementById('start-date').value;
+        const middleDays = parseInt(document.getElementById('police-days').value) || 2;
+        const display = document.getElementById('deadline-display');
+        const hiddenDate = document.getElementById('deadline-date');
+
+        if (!startStr) { display.innerText = "未計算"; return; }
+
+        let date = new Date(startStr);
+        let daysToSubtract = middleDays + 1; 
+
+        while (daysToSubtract > 0) {
+            date.setDate(date.getDate() - 1);
+            if (date.getDay() !== 0 && date.getDay() !== 6) daysToSubtract--;
         }
 
-        function calculateDeadline() {
-            const startStr = document.getElementById('start-date').value;
-            const middleDays = parseInt(document.getElementById('police-days').value) || 2;
-            const display = document.getElementById('deadline-display');
-            const hiddenDate = document.getElementById('deadline-date');
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        
+        display.innerText = `${m}月${d}日 までに提出`;
+        hiddenDate.value = `${y}-${m}-${d}`;
+    }
 
-            if (!startStr) { display.innerText = "未計算"; return; }
+    let roadDataList = JSON.parse(localStorage.getItem('roadPermitsPro')) || [];
 
-            let date = new Date(startStr);
-            let daysToSubtract = middleDays + 1; 
+    function saveData() {
+        const name = document.getElementById('site-name').value;
+        const address = document.getElementById('site-address').value;
+        const start = document.getElementById('start-date').value;
+        const end = document.getElementById('end-date').value;
+        const deadline = document.getElementById('deadline-date').value;
+        const police = document.getElementById('police-station').value;
 
-            while (daysToSubtract > 0) {
-                date.setDate(date.getDate() - 1);
-                if (date.getDay() !== 0 && date.getDay() !== 6) daysToSubtract--;
-            }
+        if (!name || !start || !deadline) { alert("現場名と開始日は必須です。"); return; }
 
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            
-            display.innerText = `${m}月${d}日 までに提出 (中${middleDays}日)`;
-            hiddenDate.value = `${y}-${m}-${d}`;
+        roadDataList.push({ id: Date.now(), name, address, start, end, deadline, police });
+        localStorage.setItem('roadPermitsPro', JSON.stringify(roadDataList));
+        
+        // 入力リセット
+        document.querySelectorAll('input[type="text"], input[type="date"]').forEach(i => i.value = '');
+        document.getElementById('police-days').value = 2;
+        document.getElementById('deadline-display').innerText = "未計算";
+        renderDashboard();
+    }
+
+    function renderDashboard() {
+        const board = document.getElementById('dashboard');
+        board.innerHTML = '';
+        
+        if (roadDataList.length === 0) {
+            board.innerHTML = '<p style="text-align:center; color:#666; font-size:0.9rem;">登録された現場はありません</p>';
+            return;
         }
 
-        let roadDataList = JSON.parse(localStorage.getItem('roadPermitsPro')) || [];
+        roadDataList.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        const today = new Date(); today.setHours(0,0,0,0);
 
-        function saveData() {
-            const name = document.getElementById('site-name').value;
-            const start = document.getElementById('start-date').value;
-            const end = document.getElementById('end-date').value;
-            const deadline = document.getElementById('deadline-date').value;
-            const police = document.getElementById('police-station').value;
+        roadDataList.forEach(data => {
+            const diffDays = Math.ceil((new Date(data.deadline) - today) / (1000 * 60 * 60 * 24));
+            let cardClass = 'item-card'; 
+            let badge = `<span style="color:var(--success)">✅ あと ${diffDays} 日で提出</span>`;
+            
+            if (diffDays < 0) { cardClass += ' danger'; badge = `<span style="color:var(--danger)">🚨 期限超過</span>`; } 
+            else if (diffDays <= 2) { cardClass += ' warning'; badge = `<span style="color:var(--warning)">⚠️ あと ${diffDays} 日で提出</span>`; }
 
-            if (!name || !start || !deadline) { alert("現場名と開始日は必須です。"); return; }
+            board.innerHTML += `
+                <div class="${cardClass}">
+                    <button class="btn-delete" onclick="deleteData(${data.id})">削除</button>
+                    <div class="item-name">${data.name}</div>
+                    <div class="item-badge">${badge}</div>
+                    <div class="item-details">
+                        管轄: ${data.police || '未入力'}<br>
+                        期限: <strong style="color:var(--danger);">${data.deadline} 必着</strong><br>
+                        期間: ${data.start} 〜 ${data.end || '未定'}
+                    </div>
+                </div>`;
+        });
+    }
 
-            roadDataList.push({ id: Date.now(), name, start, end, deadline, police });
+    function deleteData(id) {
+        if(confirm("このデータを削除しますか？")) {
+            roadDataList = roadDataList.filter(d => d.id !== id);
             localStorage.setItem('roadPermitsPro', JSON.stringify(roadDataList));
-            
-            document.querySelectorAll('input[type="text"], input[type="date"]').forEach(i => i.value = '');
-            document.getElementById('deadline-display').innerText = "未計算";
             renderDashboard();
         }
+    }
 
-        function renderDashboard() {
-            const board = document.getElementById('dashboard');
-            board.innerHTML = '';
-            
-            roadDataList.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-            const today = new Date(); today.setHours(0,0,0,0);
-
-            roadDataList.forEach(data => {
-                const diffDays = Math.ceil((new Date(data.deadline) - today) / (1000 * 60 * 60 * 24));
-                let cardClass = 'card'; let badge = `✅ あと ${diffDays} 日`;
-                
-                if (diffDays < 0) { cardClass += ' danger'; badge = '🚨 期限超過'; } 
-                else if (diffDays <= 2) { cardClass += ' warning'; badge = `⚠️ あと ${diffDays} 日`; }
-
-                board.innerHTML += `
-                    <div class="${cardClass}">
-                        <button class="btn-delete" onclick="deleteData(${data.id})">削除</button>
-                        <div style="font-weight:bold; font-size:1.1em; margin-bottom:8px;">${data.name}</div>
-                        <div class="badge">${badge}</div>
-                        <div style="font-size:0.9em; color:#555; line-height:1.6;">
-                            管轄: ${data.police || '未入力'}<br>
-                            期限: <strong style="color:#e74c3c;">${data.deadline} 提出</strong><br>
-                            期間: ${data.start} 〜 ${data.end || '未定'}
-                        </div>
-                    </div>`;
-            });
-        }
-
-        function deleteData(id) {
-            if(confirm("削除しますか？")) {
-                roadDataList = roadDataList.filter(d => d.id !== id);
-                localStorage.setItem('roadPermitsPro', JSON.stringify(roadDataList));
-                renderDashboard();
-            }
-        }
-
-        renderDashboard();
-    </script>
+    renderDashboard();
+</script>
 </body>
 </html>
