@@ -35,11 +35,17 @@
         .con-vol { font-size: 1rem; font-weight: bold; color: white; }
         
         .article-section { margin-top: 40px; padding: 30px 20px; background: #1a1a1a; border-radius: 12px; border-top: 4px solid var(--blue); }
-        .article-section h3 { color: #fff; font-size: 1rem; margin-top: 0; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
+        .article-section h2 { color: var(--blue); font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
+        .article-section h3 { color: #fff; font-size: 1rem; margin-top: 25px; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
         .article-section h3 .material-symbols-outlined { color: var(--orange); }
         .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; line-height: 1.8; }
         .article-section ul { padding-left: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; }
         .article-section li { font-size: 0.9rem; color: #ddd; margin-bottom: 8px; }
+        
+        .profile-card { background: #252525; border: 1px solid #444; border-radius: 10px; padding: 20px; margin-top: 30px; display: flex; gap: 15px; align-items: flex-start; }
+        .profile-icon { font-size: 40px; color: var(--blue); }
+        .profile-content h4 { margin: 0 0 5px 0; color: white; font-size: 1rem; }
+        .profile-content p { font-size: 0.8rem; color: #aaa; margin: 0; line-height: 1.5; }
 
         nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #333; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom)); z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; text-decoration: none; padding-top: 8px; }
@@ -95,15 +101,39 @@
     </div>
 
     <article class="article-section">
-        <h3><span class="material-symbols-outlined">water_drop</span> 生コン積算（立米計算・m3）</h3>
-        <p>生コンの発注ミスは現場の大きな損失。符号ごとに場所名を入れてリスト化できるため、図面との照合も容易です。</p>
-        <ul>
-            <li><strong>ハンチ・断面計算：</strong>断面が三角形になるハンチ部分もスイッチ一つで体積を1/2にして計算。</li>
-            <li><strong>ロス率の自動計算：</strong>ポンプ車打設やシュート打設に合わせて、3%〜10%の「ふかし」を考慮した発注数量を算出。</li>
-        </ul>
-    </article>
+        <h2>生コンクリートの立米（m³）積算と発注の基礎知識</h2>
+        <p>基礎工事や土間コンクリート打設において、生コンクリート（フレッシュコンクリート）の正確な発注数量を算出することは、コスト管理と施工不良を防ぐために極めて重要です。本ツールは、図面の符号（FG1、スラブ等）ごとに体積をリスト化し、現場での積算業務をサポートする専用の計算アプリです。</p>
 
+        <h3><span class="material-symbols-outlined">water_drop</span> ハンチ部分の体積計算とロス率（ふかし）</h3>
+        <p>基礎の強度を高めるために設けられるハンチ（斜め部分）は、断面が直角三角形になるため、通常の直方体の体積計算（縦×横×高さ）の半分（1/2）になります。当ツールでは形状で「ハンチ」を選択するだけで、自動的に正確な体積を算出します。</p>
+        
+        <h3><span class="material-symbols-outlined">percent</span> なぜ全体ロス率（割増し）が必要なのか？</h3>
+        <p>図面から拾い出した純粋な体積（設計数量）で生コンを発注すると、必ず現場で「コンクリートが足りない」という事態に陥ります。ポンプ車の配管内残留、砕石の不陸への流れ込み、打設側圧による型枠の膨らみなどを吸収するため、3%〜10%の「ロス率（ふかし）」を掛けて発注するのがセオリーです。</p>
+
+        <h3><span class="material-symbols-outlined">touch_app</span> 本ツールの使い方・操作手順</h3>
+        <ul>
+            <li><strong>符号の入力：</strong> 基礎伏図などの図面を見ながら、該当する箇所名（例：深基礎A、玄関土間など）と箇所数を入力します。</li>
+            <li><strong>寸法の入力：</strong> 縦(L)、横(W)、厚み・高さ(D)をミリ単位（mm）で入力します。ツール内部で自動的にメートル(m)に換算し、立米(m³)を計算します。</li>
+            <li><strong>形状の選択：</strong> 通常の地中梁やスラブは「四角」、ハンチ部分は「ハンチ」をドロップダウンから選択します。</li>
+            <li><strong>リストへの追加とロス率調整：</strong> 「リストに追加」ボタンを押すと下部の表に計算結果が蓄積されます。「全体ロス率」の数値を変更することで、総発注予定数量がリアルタイムに再計算されます。</li>
+        </ul>
+
+        <h3><span class="material-symbols-outlined">quiz</span> よくある質問（FAQ）</h3>
+        <p><strong>Q. ロス率は何パーセントに設定すべきですか？</strong><br>
+        A. 現場の状況によりますが、一般的な住宅基礎のポンプ打設であれば3%〜5%、不陸の大きい捨てコンクリートや長距離配管の場合は5%〜10%程度を見込むことが多いです。</p>
+        <p><strong>Q. 計算結果を保存できますか？</strong><br>
+        A. 当ツールはブラウザのローカルストレージ機能を使用しており、誤ってタブを閉じても、同じ端末・ブラウザであれば入力したリストとロス率の設定が保持されます。</p>
+
+        <div class="profile-card">
+            <div class="profile-icon material-symbols-outlined">verified_user</div>
+            <div class="profile-content">
+                <h4>開発者：二級建築士 / 現役現場監督</h4>
+                <p>大規模な施工エリアで多数の現場を統括・管理する現役の施工管理者。実務経験に基づき、現場で「本当に使える」計算精度とUI/UXを追求し、本ツールを公開しています。</p>
+            </div>
+        </div>
+    </article>
     <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
+        <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー・免責事項</a><span style="color: #444; margin: 0 10px;">|</span><a href="mailto:Hiroki199809@gmail.com" style="color: #888; text-decoration: none;">お問い合わせ</a><br><br>
         <span style="color: #666;">© 2026 現場計算 PRO</span>
     </div>
 
