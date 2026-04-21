@@ -44,39 +44,14 @@
         
         /* 電卓CSS */
         .calc-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding-bottom: 5px; }
-        
-        /* ▼ 通常のボタン（立体感と動きのベース） ▼ */
-        .calc-btn { 
-            background: #252525; border: 1px solid #444; border-radius: 8px; padding: 14px 0; 
-            color: white; font-size: 1.3rem; font-weight: bold; cursor: pointer; text-align: center;
-            /* 下に影をつけて立体的にする */
-            box-shadow: 0 4px 0 #000;
-            /* アニメーションを滑らかで少し弾むようにする */
-            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        /* 押した時に影を消して、下に沈み込ませる（ポコッという動き） */
-        .calc-btn:active { 
-            background: #444; 
-            box-shadow: 0 0px 0 #000; 
-            transform: translateY(4px) scale(0.96); 
-        }
-
-        /* ▼ 記号ボタン（÷ × - +）の色と影 ▼ */
+        .calc-btn { background: #252525; border: 1px solid #444; border-radius: 8px; padding: 14px 0; color: white; font-size: 1.3rem; font-weight: bold; cursor: pointer; text-align: center; box-shadow: 0 4px 0 #000; transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .calc-btn:active { background: #444; box-shadow: 0 0px 0 #000; transform: translateY(4px) scale(0.96); }
         .calc-btn.op { background: #1a3a4a; color: var(--blue); border-color: #005a73; box-shadow: 0 4px 0 #002233; }
         .calc-btn.op:active { background: #005a73; box-shadow: 0 0px 0 #002233; }
-
-        /* ▼ アクションボタン（C ⌫）の色と影 ▼ */
         .calc-btn.action { background: #444; color: #ccc; font-size: 1.1rem; border-color: #555; box-shadow: 0 4px 0 #111; }
         .calc-btn.action:active { background: #666; box-shadow: 0 0px 0 #111; }
-
-        /* ▼ イコールボタン（＝）の色と影 ▼ */
-        .calc-btn.eq { 
-            background: var(--orange); color: #000; border-color: #cc7700; 
-            grid-row: span 2; display: flex; align-items: center; justify-content: center; 
-            box-shadow: 0 4px 0 #995500; 
-        }
+        .calc-btn.eq { background: var(--orange); color: #000; border-color: #cc7700; grid-row: span 2; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 0 #995500; }
         .calc-btn.eq:active { background: #ffaa33; box-shadow: 0 0px 0 #995500; transform: translateY(4px) scale(0.96); }
-        
         .calc-btn.zero { grid-column: span 2; }
 
         .grid-scroll { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; height: 210px; overflow-y: auto; background: #161616; padding: 10px; border-radius: 10px; }
@@ -109,14 +84,6 @@
         .nav-item span:last-child { font-size: 0.65rem; font-weight: 500; }
         .nav-item.active { color: var(--blue); }
         .nav-item.active .material-symbols-outlined { text-shadow: 0 0 12px rgba(0, 212, 255, 0.4); }
-        
-        /* ボトムタブ追加用のスタイル */
-body { padding-bottom: 70px; } /* 余白確保 */
-.bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; z-index: 1000; }
-.nav-item { flex: 1; text-align: center; padding: 10px 0; color: #7f8c8d; text-decoration: none; font-size: 0.85em; display: block; }
-.nav-item.active { color: #3498db; font-weight: bold; border-bottom: 3px solid #3498db; }
-.nav-icon { font-size: 22px; display: block; margin-bottom: 2px; }
-
     </style>
 </head>
 
@@ -187,26 +154,21 @@ body { padding-bottom: 70px; } /* 余白確保 */
     <article class="article-section">
         <h2>建築・土木現場の計算を劇的に効率化する「現場計算 PRO」</h2>
         <p>「現場計算 PRO」は、住宅の基礎工事、墨出し、型枠工事、外構工事などに携わるプロフェッショナルのための無料計算ツール群です。年間多数の住宅施工管理を手がけ、現場のDX（デジタルトランスフォーメーション）を推進する現役の二級建築士が、実務の中で感じた「電卓を叩く手間の削減」を目的に独自開発しました。</p>
-
         <h3><span class="material-symbols-outlined">square_foot</span> 対角線計算（カネ出し・大矩）の重要性と計算式</h3>
         <p>建築現場において、建物や基礎の直角（カネ）を正確に出すことは、品質管理の最重要項目のひとつです。本ツールは、ピタゴラスの定理（三平方の定理：$a^2 + b^2 = c^2$）を内部で処理し、A寸法とB寸法から斜辺（対角線）の長さをミリ単位で瞬時に算出します。</p>
-
         <h3><span class="material-symbols-outlined">construction</span> 現場特有の「逃げ（枠外）」寸法への対応</h3>
         <p>実際の遣方（やりかた）や型枠の組み立てでは、通り芯（柱芯）ピッタリに水糸を張ることは稀です。多くの場合、基礎の厚みや型枠のクリアランスを考慮して、150mmや200mmの「逃げ（オフセット）」を設けます。当サイトの対角線計算機は、この「枠外寸法」も自動で同時算出できる点が、一般的な電卓アプリと大きく異なるプロ専用の仕様です。</p>
-
         <h3><span class="material-symbols-outlined">touch_app</span> 本ツールの使い方・操作手順</h3>
         <ul>
             <li><strong>電卓キー搭載：</strong> 図面に直接記載されていない寸法も、「9100-455」のように柱の逃げや下地材の厚みを差し引いた数式をそのまま入力して計算させることが可能です。</li>
             <li><strong>尺モジュール対応：</strong> 画面下部の「尺ピッチ」タブを開くと、日本の木造軸組工法で多用される227.5mmピッチ（910mm、1820mmなど）をワンタップで入力できる専用キーボードが表示されます。</li>
             <li><strong>枠外（逃げ）計算：</strong> 通り芯から150mmや200mm「逃げ」た位置での対角寸法を自動で同時算出します。「対角線を計算する」ボタンを押すと、履歴テーブルに対角寸法と枠外寸法が保存され、複数の部屋や区画の寸法を一度に比較・確認できます。</li>
         </ul>
-
         <h3><span class="material-symbols-outlined">quiz</span> よくある質問（FAQ）</h3>
         <p><strong>Q. 計算結果の端数処理はどうなっていますか？</strong><br>
         A. 建築現場での実用性を考慮し、小数点以下は四捨五入し、ミリ単位の整数で表示しています。現場のメジャー（巻尺）で追い出せる精度に最適化しています。</p>
         <p><strong>Q. 枠外（逃げ）の寸法は変更できますか？</strong><br>
         A. はい、画面上部の「⚙️ 設定」ボタンから、現場のルールに合わせて任意の逃げ寸法（例：200mm、300mmなど）をデフォルト設定として保存・変更することが可能です。</p>
-
         <div class="profile-card">
             <div class="profile-icon material-symbols-outlined">verified_user</div>
             <div class="profile-content">
@@ -225,6 +187,7 @@ body { padding-bottom: 70px; } /* 余白確保 */
         <a href="stair.html" class="nav-item"><span class="material-symbols-outlined">stairs</span><span>ポーチ</span></a>
         <a href="concrete.html" class="nav-item"><span class="material-symbols-outlined">water_drop</span><span>生コン</span></a>
         <a href="soil.html" class="nav-item"><span class="material-symbols-outlined">landscape</span><span>残土</span></a>
+        <a href="road.html" class="nav-item"><span class="material-symbols-outlined">edit_road</span><span>道路</span></a>
     </nav>
 </div>
 
