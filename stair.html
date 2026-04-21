@@ -33,9 +33,17 @@
         #elevation-svg { background: #000; border-radius: 8px; width: 100%; height: auto; margin-top: 10px; border: 1px solid #333; }
         
         .article-section { margin-top: 40px; padding: 30px 20px; background: #1a1a1a; border-radius: 12px; border-top: 4px solid var(--blue); }
-        .article-section h3 { color: #fff; font-size: 1rem; margin-top: 0; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
+        .article-section h2 { color: var(--blue); font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
+        .article-section h3 { color: #fff; font-size: 1rem; margin-top: 25px; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
         .article-section h3 .material-symbols-outlined { color: var(--orange); }
         .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; line-height: 1.8; }
+        .article-section ul { padding-left: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; }
+        .article-section li { font-size: 0.9rem; color: #ddd; margin-bottom: 8px; }
+        
+        .profile-card { background: #252525; border: 1px solid #444; border-radius: 10px; padding: 20px; margin-top: 30px; display: flex; gap: 15px; align-items: flex-start; }
+        .profile-icon { font-size: 40px; color: var(--blue); }
+        .profile-content h4 { margin: 0 0 5px 0; color: white; font-size: 1rem; }
+        .profile-content p { font-size: 0.8rem; color: #aaa; margin: 0; line-height: 1.5; }
 
         nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #333; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom)); z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; text-decoration: none; padding-top: 8px; }
@@ -68,11 +76,45 @@
     </div>
 
     <article class="article-section">
-        <h3><span class="material-symbols-outlined">stairs</span> 玄関ポーチ・外構階段の割付</h3>
-        <p>道路のGL（地盤面）と玄関ドアの差を埋めるポーチタイルの割付を計算します。道路から建物までの勾配（2%推奨）を考慮し、<strong>均等な蹴上（けあげ）寸法</strong>を算出することで、歩きやすく美しい外構を実現します。</p>
-    </article>
+        <h2>玄関ポーチ・外構階段の蹴上（けあげ）自動割付ツール</h2>
+        <p>建物の顔となる玄関ポーチやアプローチ階段は、安全性と美観を両立させる緻密な割付計算が求められます。本ツールは、道路のベンチマーク（BM）と建物の設計GL（地盤面）、および基礎高から、階段一段あたりの最適な蹴上寸法をミリ単位で自動算出するプロフェッショナル向けの外構用計算機です。</p>
 
+        <h3><span class="material-symbols-outlined">stairs</span> 歩きやすい階段の寸法基準（蹴上と踏面）</h3>
+        <p>建築基準法において、住宅の階段の寸法は「蹴上（けあげ）230mm以下、踏面（ふみづら）150mm以上」と定められています。しかし、これはあくまで室内の最低基準であり、外部のポーチ階段において一般的に上り下りしやすいとされる理想的な寸法は以下の通りです。</p>
+        <ul>
+            <li><strong>理想の蹴上（高さ）：</strong> 150mm 〜 180mm 程度</li>
+            <li><strong>理想の踏面（奥行）：</strong> 300mm 程度（300角タイルが綺麗に納まる寸法）</li>
+        </ul>
+        <p>人間工学に基づいた「蹴上×2 ＋ 踏面 ＝ 600mm〜650mm（日本人の標準的な歩幅）」の法則に則り、現場の状況に合わせて段数を調整し、最適な寸法を導き出します。</p>
+
+        <h3><span class="material-symbols-outlined">water_drop</span> 水勾配（2%）の考慮と土間コンクリート</h3>
+        <p>屋外のポーチやアプローチの土間コンクリートには、雨水を適切に排水するための「水勾配（一般的に1%〜2%）」を設ける必要があります。当ツールでは、道路境界から階段1段目の立ち上がりまでの距離（水引き距離）に応じた勾配分の高低差も内部で自動処理します。これにより、図面上の計算だけでなく、現場で職人がそのまま水糸を張って使える実用的な仕上がり寸法を提供します。</p>
+
+        <h3><span class="material-symbols-outlined">touch_app</span> 本ツールの使い方・操作手順</h3>
+        <ul>
+            <li><strong>① BM - 道路：</strong> 基準となるBM（ベンチマーク）に対する道路の高さを入力します。（道路が低い場合は正の数）</li>
+            <li><strong>② 段数：</strong> ポーチの一番上の段（玄関ドア前の平らな部分）を含めた総段数を入力します。</li>
+            <li><strong>③ 基礎高：</strong> GL（地盤面）から基礎天端（ポーチ天端の基準）までの寸法を入力します。（ベタ基礎では400mm〜410mm程度が一般的です）。</li>
+            <li><strong>④ 道路〜1段目：</strong> 道路境界から階段の1段目までの距離を入力します。ここで水勾配（2%）が計算されます。</li>
+            <li><strong>⑤ GL - BM：</strong> BMに対する設計GLの高さを入力します。</li>
+        </ul>
+
+        <h3><span class="material-symbols-outlined">quiz</span> よくある質問（FAQ）</h3>
+        <p><strong>Q. 道路がBMより高い（プラス）の場合はどう入力しますか？</strong><br>
+        A. 道路がBMより低い場合は正の数（そのまま200など）、道路がBMより高い場合は負の数（-100など）を入力してください。GLの設定欄も同様のルールで計算に対応しています。</p>
+        <p><strong>Q. 断面図の「基天 -〇〇」とは何ですか？</strong><br>
+        A. 「基礎天端からの下がり寸法」を意味しています。現場でのブロック積みや土間コンクリート打設時、基礎の天端からスケール（メジャー）を下げて高さを確認・墨出しする際の実用的な数値として表示しています。</p>
+
+        <div class="profile-card">
+            <div class="profile-icon material-symbols-outlined">verified_user</div>
+            <div class="profile-content">
+                <h4>開発者：二級建築士 / 現役現場監督</h4>
+                <p>大規模な施工エリアで多数の現場を統括・管理する現役の施工管理者。実務経験に基づき、現場で「本当に使える」計算精度とUI/UXを追求し、本ツールを公開しています。</p>
+            </div>
+        </div>
+    </article>
     <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
+        <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー・免責事項</a><span style="color: #444; margin: 0 10px;">|</span><a href="mailto:Hiroki199809@gmail.com" style="color: #888; text-decoration: none;">お問い合わせ</a><br><br>
         <span style="color: #666;">© 2026 現場計算 PRO</span>
     </div>
 
