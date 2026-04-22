@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
     
     <style>
-        :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --danger: #ff4757; --success: #2ed573; --warning: #ffa502;}
+        :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --danger: #ff4757; --success: #2ed573; --warning: #ffa502; --applied: #3498db; }
         * { box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
         .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; }
@@ -35,14 +35,29 @@
 
         .dashboard-title { font-size: 1.1rem; color: white; border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px; display: flex; align-items: center; gap: 5px; }
         
-        .item-card { background: #2a2a2a; border-left: 5px solid var(--success); border-radius: 8px; padding: 12px; margin-bottom: 10px; position: relative; }
-        .item-card.danger { border-left-color: var(--danger); background: #3a1c1c; }
-        .item-card.warning { border-left-color: var(--warning); background: #3a2e1c; }
+        /* ステータス別カードデザイン */
+        .item-card { background: #2a2a2a; border-left: 6px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; }
+        .item-card.pending { border-left-color: var(--warning); background: #2d2618; }
+        .item-card.pending-danger { border-left-color: var(--danger); background: #3a1c1c; }
+        .item-card.applied { border-left-color: var(--applied); background: #1a2a3a; }
+        .item-card.received { border-left-color: var(--success); background: #1a3320; }
         
-        .item-name { font-weight: bold; font-size: 1.1rem; color: white; margin-bottom: 5px; }
-        .item-badge { display: inline-block; padding: 3px 8px; background: #111; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 8px; }
-        .item-details { font-size: 0.85rem; color: #aaa; line-height: 1.5; }
+        .item-name { font-weight: bold; font-size: 1.1rem; color: white; margin-bottom: 8px; padding-right: 40px; }
+        .item-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; }
+        .badge-pending { background: #443300; color: var(--warning); }
+        .badge-danger { background: #550000; color: var(--danger); }
+        .badge-applied { background: #003355; color: var(--applied); }
+        .badge-received { background: #004411; color: var(--success); }
+
+        .item-details { font-size: 0.9rem; color: #ddd; line-height: 1.6; margin-bottom: 15px;}
+        .highlight-text { font-size: 1.05rem; font-weight: bold; }
+
         .btn-delete { position: absolute; top: 12px; right: 12px; background: none; border: 1px solid #666; color: #aaa; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; }
+        
+        /* ステータス変更ボタン */
+        .status-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;}
+        .btn-to-apply { background: var(--applied); color: white; }
+        .btn-to-receive { background: var(--success); color: #000; }
 
         nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #333; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom)); z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; text-decoration: none; padding-top: 8px; transition: color 0.3s; }
@@ -56,7 +71,7 @@
 <body>
 <div class="container">
     <header>
-        <div><h1>道路使用 管理</h1><p>申請期限を自動逆算・現場リスト化</p></div>
+        <div><h1>道路使用 管理</h1><p>申請から受取、許可期間を完全管理</p></div>
     </header>
 
     <div class="card">
@@ -97,7 +112,7 @@
     </div>
 
     <div class="dashboard-title">
-        <span class="material-symbols-outlined">list_alt</span> 申請待ち・管理リスト
+        <span class="material-symbols-outlined">list_alt</span> 現場ステータス一覧
     </div>
     <div id="dashboard"></div>
 
@@ -111,12 +126,49 @@
 </div>
 
 <script>
-    // 警察署の判定データ
+    // 警察署データ（都内広域カバー版）※上が優先して検索されます
     const policeData = [
-        { keywords: ["町屋", "荒川", "東日暮里", "西日暮里"], name: "荒川警察署", days: 2 },
+        // カスタム・特定エリア（優先）
         { keywords: ["南千住"], name: "南千住警察署", days: 1 },
         { keywords: ["尾久", "西尾久", "東尾久"], name: "尾久警察署", days: 1 },
-        { keywords: ["田園調布"], name: "田園調布警察署", days: 1 }
+        { keywords: ["町屋", "荒川", "東日暮里", "西日暮里"], name: "荒川警察署", days: 2 },
+        { keywords: ["田園調布"], name: "田園調布警察署", days: 1 },
+        { keywords: ["丸の内", "大手町", "有楽町"], name: "丸の内警察署", days: 2 },
+        { keywords: ["歌舞伎町", "大久保"], name: "新宿警察署", days: 2 },
+        
+        // 23区名ベース（複数の署がある区は代表署または「要確認」を表示）
+        { keywords: ["千代田区"], name: "麹町警察署 (他管轄あり)", days: 2 },
+        { keywords: ["中央区"], name: "中央警察署 (他管轄あり)", days: 2 },
+        { keywords: ["港区"], name: "愛宕警察署 (他管轄あり)", days: 2 },
+        { keywords: ["新宿区"], name: "新宿警察署 (他管轄あり)", days: 2 },
+        { keywords: ["文京区"], name: "富坂警察署 (他管轄あり)", days: 2 },
+        { keywords: ["台東区"], name: "上野警察署 (他管轄あり)", days: 2 },
+        { keywords: ["墨田区"], name: "本所警察署 (他管轄あり)", days: 2 },
+        { keywords: ["江東区"], name: "江東警察署 (他管轄あり)", days: 2 },
+        { keywords: ["品川区"], name: "品川警察署 (他管轄あり)", days: 2 },
+        { keywords: ["目黒区"], name: "目黒警察署", days: 2 },
+        { keywords: ["大田区"], name: "蒲田警察署 (他管轄あり)", days: 2 },
+        { keywords: ["世田谷区"], name: "世田谷警察署 (他管轄あり)", days: 2 },
+        { keywords: ["渋谷区"], name: "渋谷警察署 (他管轄あり)", days: 2 },
+        { keywords: ["中野区"], name: "中野警察署 (他管轄あり)", days: 2 },
+        { keywords: ["杉並区"], name: "杉並警察署 (他管轄あり)", days: 2 },
+        { keywords: ["豊島区"], name: "池袋警察署 (他管轄あり)", days: 2 },
+        { keywords: ["北区"], name: "赤羽警察署 (他管轄あり)", days: 2 },
+        { keywords: ["板橋区"], name: "板橋警察署 (他管轄あり)", days: 2 },
+        { keywords: ["練馬区"], name: "練馬警察署 (他管轄あり)", days: 2 },
+        { keywords: ["足立区"], name: "千住警察署 (他管轄あり)", days: 2 },
+        { keywords: ["葛飾区"], name: "葛飾警察署 (他管轄あり)", days: 2 },
+        { keywords: ["江戸川区"], name: "江戸川警察署 (他管轄あり)", days: 2 },
+        
+        // 主要市（多摩地域）
+        { keywords: ["八王子市"], name: "八王子警察署 (他管轄あり)", days: 2 },
+        { keywords: ["立川市"], name: "立川警察署", days: 2 },
+        { keywords: ["武蔵野市"], name: "武蔵野警察署", days: 2 },
+        { keywords: ["三鷹市"], name: "三鷹警察署", days: 2 },
+        { keywords: ["府中市"], name: "府中警察署", days: 2 },
+        { keywords: ["調布市"], name: "調布警察署", days: 2 },
+        { keywords: ["町田市"], name: "町田警察署 (他管轄あり)", days: 2 },
+        { keywords: ["西東京市"], name: "田無警察署", days: 2 }
     ];
 
     function autoFillPolice() {
@@ -133,7 +185,7 @@
                 break;
             }
         }
-        if (!matched) daysInput.value = 2; // デフォルトは中2日
+        if (!matched) daysInput.value = 2; // デフォルト
         calculateDeadline();
     }
 
@@ -170,16 +222,47 @@
         const end = document.getElementById('end-date').value;
         const deadline = document.getElementById('deadline-date').value;
         const police = document.getElementById('police-station').value;
+        const policeDays = document.getElementById('police-days').value;
 
         if (!name || !start || !deadline) { alert("現場名と開始日は必須です。"); return; }
 
-        roadDataList.push({ id: Date.now(), name, address, start, end, deadline, police });
+        roadDataList.push({ 
+            id: Date.now(), 
+            name, address, start, end, deadline, police, policeDays,
+            status: 'pending' // ステータス初期値
+        });
         localStorage.setItem('roadPermitsPro', JSON.stringify(roadDataList));
         
-        // 入力リセット
         document.querySelectorAll('input[type="text"], input[type="date"]').forEach(i => i.value = '');
         document.getElementById('police-days').value = 2;
         document.getElementById('deadline-display').innerText = "未計算";
+        renderDashboard();
+    }
+
+    // ステータスを変更する関数
+    function changeStatus(id, newStatus) {
+        const idx = roadDataList.findIndex(d => d.id === id);
+        if (idx === -1) return;
+        
+        roadDataList[idx].status = newStatus;
+        
+        // 「申請完了」にした場合、今日の日付から受取日（中◯日）を計算する
+        if (newStatus === 'applied') {
+            let date = new Date(); // 今日の日付
+            let daysToAdd = parseInt(roadDataList[idx].policeDays) || 2;
+            
+            while (daysToAdd > 0) {
+                date.setDate(date.getDate() + 1);
+                // 土日はカウントしない
+                if (date.getDay() !== 0 && date.getDay() !== 6) daysToAdd--;
+            }
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            roadDataList[idx].receiveDate = `${y}-${m}-${d}`;
+        }
+        
+        localStorage.setItem('roadPermitsPro', JSON.stringify(roadDataList));
         renderDashboard();
     }
 
@@ -192,33 +275,91 @@
             return;
         }
 
-        roadDataList.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        // 期限または受取日が近い順にソート
+        roadDataList.sort((a, b) => {
+            let dateA = a.status === 'applied' ? a.receiveDate : a.deadline;
+            let dateB = b.status === 'applied' ? b.receiveDate : b.deadline;
+            return new Date(dateA) - new Date(dateB);
+        });
+
         const today = new Date(); today.setHours(0,0,0,0);
 
         roadDataList.forEach(data => {
-            const diffDays = Math.ceil((new Date(data.deadline) - today) / (1000 * 60 * 60 * 24));
-            let cardClass = 'item-card'; 
-            let badge = `<span style="color:var(--success)">✅ あと ${diffDays} 日で提出</span>`;
-            
-            if (diffDays < 0) { cardClass += ' danger'; badge = `<span style="color:var(--danger)">🚨 期限超過</span>`; } 
-            else if (diffDays <= 2) { cardClass += ' warning'; badge = `<span style="color:var(--warning)">⚠️ あと ${diffDays} 日で提出</span>`; }
+            // 旧データ互換用
+            if(!data.status) data.status = 'pending';
 
-            board.innerHTML += `
-                <div class="${cardClass}">
-                    <button class="btn-delete" onclick="deleteData(${data.id})">削除</button>
-                    <div class="item-name">${data.name}</div>
-                    <div class="item-badge">${badge}</div>
-                    <div class="item-details">
-                        管轄: ${data.police || '未入力'}<br>
-                        期限: <strong style="color:var(--danger);">${data.deadline} 必着</strong><br>
-                        期間: ${data.start} 〜 ${data.end || '未定'}
-                    </div>
-                </div>`;
+            let cardHtml = '';
+            let endText = data.end ? data.end : '未定';
+
+            // ----------------------------------------
+            // 状態1: 未申請 (pending)
+            // ----------------------------------------
+            if (data.status === 'pending') {
+                const diffDays = Math.ceil((new Date(data.deadline) - today) / (1000 * 60 * 60 * 24));
+                let cardClass = 'item-card pending'; 
+                let badgeClass = 'badge-pending';
+                let badgeText = `⚠️ 申請まであと ${diffDays} 日`;
+                
+                if (diffDays < 0) { 
+                    cardClass = 'item-card pending-danger'; 
+                    badgeClass = 'badge-danger';
+                    badgeText = `🚨 申請期限超過`; 
+                }
+
+                cardHtml = `
+                    <div class="${cardClass}">
+                        <button class="btn-delete" onclick="deleteData(${data.id})">削除</button>
+                        <div class="item-name">${data.name}</div>
+                        <div class="item-badge ${badgeClass}">${badgeText}</div>
+                        <div class="item-details">
+                            申請先: ${data.police || '未入力'} (中${data.policeDays || 2}日)<br>
+                            期限: <span class="highlight-text" style="color:var(--danger);">${data.deadline} 必着</span>
+                        </div>
+                        <button class="status-btn btn-to-apply" onclick="changeStatus(${data.id}, 'applied')">
+                            <span class="material-symbols-outlined" style="font-size:1.2rem;">send</span> 警察署へ申請した
+                        </button>
+                    </div>`;
+            } 
+            // ----------------------------------------
+            // 状態2: 申請済・受取待ち (applied)
+            // ----------------------------------------
+            else if (data.status === 'applied') {
+                cardHtml = `
+                    <div class="item-card applied">
+                        <button class="btn-delete" onclick="deleteData(${data.id})">削除</button>
+                        <div class="item-name">${data.name}</div>
+                        <div class="item-badge badge-applied">🎫 審査中・受取待ち</div>
+                        <div class="item-details">
+                            申請先: ${data.police || '未入力'}<br>
+                            受取: <span class="highlight-text" style="color:var(--blue);">${data.receiveDate} 以降</span>
+                        </div>
+                        <button class="status-btn btn-to-receive" onclick="changeStatus(${data.id}, 'received')">
+                            <span class="material-symbols-outlined" style="font-size:1.2rem;">task_alt</span> 許可証を受け取った
+                        </button>
+                    </div>`;
+            } 
+            // ----------------------------------------
+            // 状態3: 許可取得済・有効期間 (received)
+            // ----------------------------------------
+            else if (data.status === 'received') {
+                cardHtml = `
+                    <div class="item-card received">
+                        <button class="btn-delete" onclick="deleteData(${data.id})">削除</button>
+                        <div class="item-name">${data.name}</div>
+                        <div class="item-badge badge-received">✅ 道路使用 許可取得済</div>
+                        <div class="item-details">
+                            取得: ${data.police || '未入力'}<br>
+                            <span class="highlight-text" style="color:var(--success);">期間: ${data.start} 〜 ${endText}</span>
+                        </div>
+                    </div>`;
+            }
+
+            board.innerHTML += cardHtml;
         });
     }
 
     function deleteData(id) {
-        if(confirm("このデータを削除しますか？")) {
+        if(confirm("この現場データを削除しますか？")) {
             roadDataList = roadDataList.filter(d => d.id !== id);
             localStorage.setItem('roadPermitsPro', JSON.stringify(roadDataList));
             renderDashboard();
