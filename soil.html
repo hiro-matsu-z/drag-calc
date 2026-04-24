@@ -66,11 +66,11 @@
             <div class="input-box" style="flex:1;"><label>箇所数</label><input type="number" id="soil_count" value="1"></div>
         </div>
         <div class="input-group">
-            <div class="input-box"><label>縦 L (mm)</label><input type="number" id="soil_l" placeholder="5000"></div>
-            <div class="input-box"><label>横 W (mm)</label><input type="number" id="soil_w" placeholder="3000"></div>
+            <div class="input-box"><label>縦 L (mm)</label><input type="text" id="soil_l" placeholder="5000"></div>
+            <div class="input-box"><label>横 W (mm)</label><input type="text" id="soil_w" placeholder="3000"></div>
         </div>
         <div class="input-group">
-            <div class="input-box"><label>深さ D (mm)</label><input type="number" id="soil_d" value="300"></div>
+            <div class="input-box"><label>深さ D (mm)</label><input type="text" id="soil_d" value="300"></div>
             <div class="input-box">
                 <label>形状</label>
                 <select id="soil_shape" style="-webkit-appearance: none;">
@@ -155,8 +155,6 @@
         <a href="stair.html" class="nav-item"><span class="material-symbols-outlined">stairs</span><span>ポーチ</span></a>
         <a href="concrete.html" class="nav-item"><span class="material-symbols-outlined">water_drop</span><span>生コン</span></a>
         <a href="soil.html" class="nav-item active"><span class="material-symbols-outlined">landscape</span><span>残土</span></a>
-        <a href="road.html" class="nav-item"><span class="material-symbols-outlined">edit_road</span><span>道路</span></a>
-
     </nav>
 </div>
 
@@ -166,6 +164,17 @@
     if(savedFactor) document.getElementById('soil_factor').value = savedFactor;
     renderSoilList();
 
+    // ▼ 数式を計算する関数を追加しました ▼
+    function evaluateMathString(str) {
+        if (!str) return '';
+        try { 
+            let sanitized = str.replace(/[^-()\d/*+.]/g, ''); 
+            let result = new Function('return ' + sanitized)(); 
+            return Math.round(result * 100) / 100; 
+        } 
+        catch(e) { return str; }
+    }
+
     function saveSoilData() {
         localStorage.setItem('soilList', JSON.stringify(soilItems));
         localStorage.setItem('soilFactor', document.getElementById('soil_factor').value);
@@ -174,12 +183,14 @@
     function addSoilRecord() {
         const name = document.getElementById('soil_name').value || '名称なし';
         const count = parseFloat(document.getElementById('soil_count').value) || 1;
-        const l = parseFloat(document.getElementById('soil_l').value);
-        const w = parseFloat(document.getElementById('soil_w').value);
-        const d = parseFloat(document.getElementById('soil_d').value);
+        
+        // ▼ 入力欄の値を evaluateMathString に通してから数値化するように変更しました ▼
+        const l = parseFloat(evaluateMathString(document.getElementById('soil_l').value));
+        const w = parseFloat(evaluateMathString(document.getElementById('soil_w').value));
+        const d = parseFloat(evaluateMathString(document.getElementById('soil_d').value));
         const shape = document.getElementById('soil_shape').value;
         
-        if (!l || !w || !d) { alert("縦、横、深さをすべて入力してください"); return; }
+        if (!l || !w || !d) { alert("縦、横、深さをすべて正しく入力してください"); return; }
         let singleVol = (l * w * d) / 1000000000;
         if (shape === 'hunch') singleVol = singleVol / 2;
         const subTotal = singleVol * count;
