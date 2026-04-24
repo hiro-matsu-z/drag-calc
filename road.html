@@ -12,8 +12,8 @@
     <style>
         :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --danger: #ff4757; --success: #2ed573; --warning: #ffa502; --applied: #3498db; }
         * { box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
-        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-bottom)); line-height: 1.6; }
+        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; padding-bottom: 100px; }
         header { display: flex; justify-content: space-between; align-items: flex-start; border-left: 5px solid var(--orange); padding-left: 15px; margin-bottom: 20px; }
         header h1 { font-size: 1.3rem; margin: 0; color: white; }
         header p { font-size: 0.7rem; color: var(--orange); margin: 0; font-weight: bold; }
@@ -33,7 +33,7 @@
         .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #ff9500, #cc7700); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; }
         .main-btn:active { transform: translateY(2px); }
 
-        .dashboard-title { font-size: 1.1rem; color: white; border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px; display: flex; align-items: center; gap: 5px; }
+        .dashboard-title { font-size: 1.1rem; color: white; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
         
         .item-card { background: #2a2a2a; border-left: 6px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; }
         .item-card.pending { border-left-color: var(--warning); background: #2d2618; }
@@ -98,7 +98,16 @@
         <button class="main-btn" onclick="saveData()">新規登録する</button>
     </div>
 
-    <div class="dashboard-title"><span class="material-symbols-outlined">list_alt</span> 現場ステータス一覧</div>
+    <div class="dashboard-title">
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <span class="material-symbols-outlined">list_alt</span> 現場ステータス一覧
+        </div>
+        <select id="sort-select" onchange="renderDashboard()" style="background:#2a2a2a; color:white; border:1px solid #444; padding:6px 10px; border-radius:6px; outline:none; font-size:0.85rem; cursor:pointer;">
+            <option value="deadline">🚨 期限が近い順</option>
+            <option value="status">📝 未申請を優先</option>
+            <option value="name">🔤 現場名順</option>
+        </select>
+    </div>
     <div id="dashboard"></div>
 
     <div id="edit-modal" class="modal-overlay">
@@ -197,7 +206,11 @@
             status: 'pending'
         });
         localStorage.setItem('roadPermitsPro', JSON.stringify(roadDataList));
-        location.reload();
+        
+        // 登録後にフォームをクリアしてリロードせずに描画
+        document.getElementById('site-name').value = '';
+        document.getElementById('site-address').value = '';
+        renderDashboard();
     }
 
     function changeStatus(id, nextStatus) {
@@ -267,7 +280,33 @@
 
     function renderDashboard() {
         const board = document.getElementById('dashboard'); board.innerHTML = '';
-        roadDataList.sort((a,b) => new Date(a.status==='applied'?a.receiveDate:a.deadline) - new Date(b.status==='applied'?b.receiveDate:b.deadline));
+        
+        // ▼▼ ここから並び替えロジック ▼▼
+        const sortType = document.getElementById('sort-select').value;
+        
+        roadDataList.sort((a, b) => {
+            if (sortType === 'deadline') {
+                // 完了済み(received)は一番下に避ける
+                if (a.status === 'received' && b.status !== 'received') return 1;
+                if (a.status !== 'received' && b.status === 'received') return -1;
+                // 日付の近い順
+                let dA = new Date(a.status === 'applied' ? a.receiveDate : a.deadline);
+                let dB = new Date(b.status === 'applied' ? b.receiveDate : b.deadline);
+                return dA - dB;
+            } else if (sortType === 'status') {
+                // 未申請(1) -> 申請済(2) -> 完了(3) の順
+                const order = { 'pending': 1, 'applied': 2, 'received': 3 };
+                if (order[a.status] !== order[b.status]) {
+                    return order[a.status] - order[b.status];
+                }
+                return new Date(a.deadline) - new Date(b.deadline);
+            } else if (sortType === 'name') {
+                // 五十音順
+                return a.name.localeCompare(b.name, 'ja');
+            }
+        });
+        // ▲▲ ここまで並び替えロジック ▲▲
+
         const today = new Date(); today.setHours(0,0,0,0);
 
         roadDataList.forEach(data => {
