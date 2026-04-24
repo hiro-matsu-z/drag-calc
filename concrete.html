@@ -65,11 +65,11 @@
             <div class="input-box" style="flex:1;"><label>箇所数</label><input type="number" id="con_count" value="1"></div>
         </div>
         <div class="input-group">
-            <div class="input-box"><label>縦 L (mm)</label><input type="text" id="con_l" placeholder="5000"></div>
-            <div class="input-box"><label>横 W (mm)</label><input type="text" id="con_w" placeholder="3000"></div>
+            <div class="input-box"><label>縦 L (mm)</label><input type="text" inputmode="tel" id="con_l" placeholder="5000"></div>
+            <div class="input-box"><label>横 W (mm)</label><input type="text" inputmode="tel" id="con_w" placeholder="3000"></div>
         </div>
         <div class="input-group">
-            <div class="input-box"><label>厚み/高さ D (mm)</label><input type="text" id="con_d" value="150"></div>
+            <div class="input-box"><label>厚み/高さ D (mm)</label><input type="text" inputmode="tel" id="con_d" value="150"></div>
             <div class="input-box">
                 <label>形状</label>
                 <select id="con_shape" style="-webkit-appearance: none;">
@@ -142,6 +142,7 @@
         <a href="stair.html" class="nav-item"><span class="material-symbols-outlined">stairs</span><span>ポーチ</span></a>
         <a href="concrete.html" class="nav-item active"><span class="material-symbols-outlined">water_drop</span><span>生コン</span></a>
         <a href="soil.html" class="nav-item"><span class="material-symbols-outlined">landscape</span><span>残土</span></a>
+        <a href="road.html" class="nav-item"><span class="material-symbols-outlined">edit_road</span><span>道路</span></a>
     </nav>
 </div>
 
@@ -151,7 +152,6 @@
     if(savedLoss) document.getElementById('con_total_loss').value = savedLoss;
     renderConcreteList();
 
-    // ▼ 数式を計算する関数を追加しました ▼
     function evaluateMathString(str) {
         if (!str) return '';
         try { 
@@ -171,7 +171,6 @@
         const name = document.getElementById('con_name').value || '名称なし';
         const count = parseFloat(document.getElementById('con_count').value) || 1;
         
-        // ▼ 入力欄の値を evaluateMathString に通してから数値化するように変更しました ▼
         const l = parseFloat(evaluateMathString(document.getElementById('con_l').value));
         const w = parseFloat(evaluateMathString(document.getElementById('con_w').value));
         const d = parseFloat(evaluateMathString(document.getElementById('con_d').value));
