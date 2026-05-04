@@ -34,15 +34,27 @@
         .con-detail { color: #888; font-size: 0.7rem; margin-top: 2px; }
         .con-vol { font-size: 1rem; font-weight: bold; color: white; }
         
+        /* 記事セクションのスタイルを強化 */
         .article-section { margin-top: 40px; padding: 30px 20px; background: #1a1a1a; border-radius: 12px; border-top: 4px solid var(--blue); }
-        .article-section h2 { color: var(--blue); font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
-        .article-section h3 { color: #fff; font-size: 1rem; margin-top: 25px; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
+        .article-section h2 { color: var(--blue); font-size: 1.3rem; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; line-height: 1.4; }
+        .article-section h3 { color: #fff; font-size: 1.05rem; margin-top: 30px; margin-bottom: 12px; display: flex; align-items: center; gap:8px; }
         .article-section h3 .material-symbols-outlined { color: var(--orange); }
-        .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; line-height: 1.8; }
-        .article-section ul { padding-left: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; }
-        .article-section li { font-size: 0.9rem; color: #ddd; margin-bottom: 8px; }
+        .article-section p { font-size: 0.95rem; color: #ccc; margin-bottom: 15px; line-height: 1.8; }
         
-        .profile-card { background: #252525; border: 1px solid #444; border-radius: 10px; padding: 20px; margin-top: 30px; display: flex; gap: 15px; align-items: flex-start; }
+        .article-list { padding-left: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; margin-bottom: 20px;}
+        .article-list li { font-size: 0.95rem; color: #ddd; margin-bottom: 10px; line-height: 1.6; }
+        .article-list li strong { color: #fff; }
+        
+        /* 手順用の番号付きリスト */
+        .step-list { counter-reset: step-counter; list-style-type: none; padding-left: 0; background: #222; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .step-list li { position: relative; padding-left: 35px; margin-bottom: 15px; font-size: 0.95rem; color: #ddd; line-height: 1.6; }
+        .step-list li::before { content: counter(step-counter); counter-increment: step-counter; position: absolute; left: 0; top: 0; background: var(--blue); color: #000; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; }
+        .step-list li strong { color: #fff; display: block; margin-bottom: 4px; }
+        
+        .highlight-box { background: rgba(0, 212, 255, 0.1); border-left: 4px solid var(--blue); padding: 15px; margin-bottom: 20px; border-radius: 0 8px 8px 0; }
+        .highlight-box p { margin: 0; color: #e0e0e0; }
+
+        .profile-card { background: #252525; border: 1px solid #444; border-radius: 10px; padding: 20px; margin-top: 40px; display: flex; gap: 15px; align-items: flex-start; }
         .profile-icon { font-size: 40px; color: var(--blue); }
         .profile-content h4 { margin: 0 0 5px 0; color: white; font-size: 1rem; }
         .profile-content p { font-size: 0.8rem; color: #aaa; margin: 0; line-height: 1.5; }
@@ -65,11 +77,11 @@
             <div class="input-box" style="flex:1;"><label>箇所数</label><input type="number" id="con_count" value="1"></div>
         </div>
         <div class="input-group">
-            <div class="input-box"><label>縦 L (mm)</label><input type="text" inputmode="tel" id="con_l" placeholder="5000"></div>
-            <div class="input-box"><label>横 W (mm)</label><input type="text" inputmode="tel" id="con_w" placeholder="3000"></div>
+            <div class="input-box"><label>縦 L (mm)</label><input type="text" id="con_l" placeholder="5000"></div>
+            <div class="input-box"><label>横 W (mm)</label><input type="text" id="con_w" placeholder="3000"></div>
         </div>
         <div class="input-group">
-            <div class="input-box"><label>厚み/高さ D (mm)</label><input type="text" inputmode="tel" id="con_d" value="150"></div>
+            <div class="input-box"><label>厚み/高さ D (mm)</label><input type="text" id="con_d" value="150"></div>
             <div class="input-box">
                 <label>形状</label>
                 <select id="con_shape" style="-webkit-appearance: none;">
@@ -100,29 +112,70 @@
         </div>
     </div>
 
+    <!-- ▼ アドセンス審査対応の専門記事 ▼ -->
     <article class="article-section">
-        <h2>生コンクリートの立米（m³）積算と発注の基礎知識</h2>
-        <p>基礎工事や土間コンクリート打設において、生コンクリート（フレッシュコンクリート）の正確な発注数量を算出することは、コスト管理と施工不良を防ぐために極めて重要です。本ツールは、図面の符号（FG1、スラブ等）ごとに体積をリスト化し、現場での積算業務をサポートする専用の計算アプリです。</p>
+        <h2>木造住宅を支える「基礎コンクリート」の完全ガイド</h2>
+        <div class="highlight-box">
+            <p>木造戸建て住宅において、建物の全荷重を地盤に伝え、地震や台風、不同沈下から家族を守る「基礎」はまさに建物の要（かなめ）です。木造建築であっても、下部構造である鉄筋コンクリート（RC）の品質が建物の寿命を決定づけると言っても過言ではありません。</p>
+        </div>
+        <p>専門機関の指針、建築実務者のブログ、行政の施工管理基準などから、木造戸建てのコンクリート工事（基礎工事）に関する専門知識、知っておくべき品質管理のポイント、そして興味深い雑学までを網羅的にまとめました。</p>
 
-        <h3><span class="material-symbols-outlined">water_drop</span> ハンチ部分の体積計算とロス率（ふかし）</h3>
-        <p>基礎の強度を高めるために設けられるハンチ（斜め部分）は、断面が直角三角形になるため、通常の直方体の体積計算（縦×横×高さ）の半分（1/2）になります。当ツールでは形状で「ハンチ」を選択するだけで、自動的に正確な体積を算出します。</p>
-        
-        <h3><span class="material-symbols-outlined">percent</span> なぜ全体ロス率（割増し）が必要なのか？</h3>
-        <p>図面から拾い出した純粋な体積（設計数量）で生コンを発注すると、必ず現場で「コンクリートが足りない」という事態に陥ります。ポンプ車の配管内残留、砕石の不陸への流れ込み、打設側圧による型枠の膨らみなどを吸収するため、3%〜10%の「ロス率（ふかし）」を掛けて発注するのがセオリーです。</p>
-
-        <h3><span class="material-symbols-outlined">touch_app</span> 本ツールの使い方・操作手順</h3>
-        <ul>
-            <li><strong>符号の入力：</strong> 基礎伏図などの図面を見ながら、該当する箇所名（例：深基礎A、玄関土間など）と箇所数を入力します。</li>
-            <li><strong>寸法の入力：</strong> 縦(L)、横(W)、厚み・高さ(D)をミリ単位（mm）で入力します。ツール内部で自動的にメートル(m)に換算し、立米(m³)を計算します。</li>
-            <li><strong>形状の選択：</strong> 通常の地中梁やスラブは「四角」、ハンチ部分は「ハンチ」をドロップダウンから選択します。</li>
-            <li><strong>リストへの追加とロス率調整：</strong> 「リストに追加」ボタンを押すと下部の表に計算結果が蓄積されます。「全体ロス率」の数値を変更することで、総発注予定数量がリアルタイムに再計算されます。</li>
+        <h3><span class="material-symbols-outlined">foundation</span> 1. 木造戸建ての基礎の種類とトレンド</h3>
+        <p>まずは、コンクリートを流し込む「基礎の形状」についての基本知識です。</p>
+        <ul class="article-list">
+            <li><strong>ベタ基礎（現在の主流）</strong><br>建物の底面全体に鉄筋コンクリートの板（底盤・スラブ）を造り、面で建物を支える方式です。<br>
+            <span style="color:#888; font-size:0.85rem;">【メリット】荷重が分散されるため不同沈下に強い。地面をコンクリートで覆うため、シロアリの侵入や地面からの湿気を防ぎ、木材の腐朽を防ぐ効果が高い。<br>【デメリット】コンクリートと鉄筋の使用量が多くなるため、コストがやや高くなる。</span></li>
+            
+            <li><strong>布基礎（ぬのぎそ・伝統的な手法）</strong><br>建物の壁の下（立ち上がり部分）にのみ、逆T字型の鉄筋コンクリートを連続して設ける方式です。<br>
+            <span style="color:#888; font-size:0.85rem;">【メリット】コンクリートや鉄筋の量が少なく、コストを抑えられる。地盤が非常に強固な場合は有効。<br>【デメリット】面ではなく線で支えるため、軟弱地盤には不向き。床下は土のまま（または薄い防湿コンクリートのみ）になることが多く、湿気対策が別途必要。</span></li>
         </ul>
 
-        <h3><span class="material-symbols-outlined">quiz</span> よくある質問（FAQ）</h3>
-        <p><strong>Q. ロス率は何パーセントに設定すべきですか？</strong><br>
-        A. 現場の状況によりますが、一般的な住宅基礎のポンプ打設であれば3%〜5%、不陸の大きい捨てコンクリートや長距離配管の場合は5%〜10%程度を見込むことが多いです。</p>
-        <p><strong>Q. 計算結果を保存できますか？</strong><br>
-        A. 当ツールはブラウザのローカルストレージ機能を使用しており、誤ってタブを閉じても、同じ端末・ブラウザであれば入力したリストとロス率の設定が保持されます。</p>
+        <h3><span class="material-symbols-outlined">science</span> 2. コンクリートの基本知識と専門用語</h3>
+        <p>現場で飛び交う専門用語を理解しておくことは、品質をチェックする上で非常に重要です。</p>
+        
+        <h4 style="color:#fff; font-size:0.95rem; margin-bottom:5px;">コンクリートを構成する材料</h4>
+        <p style="font-size:0.9rem; margin-top:0;">コンクリートは「セメント」「水」「細骨材（砂）」「粗骨材（砂利）」を練り混ぜたものです。ちなみに、セメントと水と砂だけを混ぜたものは「モルタル」、セメントと水だけのものは「セメントペースト」と呼ばれます。</p>
+        
+        <h4 style="color:#fff; font-size:0.95rem; margin-bottom:5px;">知っておくべき重要指標</h4>
+        <ul class="article-list">
+            <li><strong>水セメント比（W/C）</strong><br>コンクリートに含まれるセメントに対する水の質量の割合。<strong>ここが最も重要</strong>です。水が少ない（W/Cが低い）ほど高強度で耐久性の高いコンクリートになりますが、ドロドロして施工が難しくなります。木造住宅の基礎では55%〜60%以下が一般的です。</li>
+            <li><strong>スランプ</strong><br>まだ固まっていない生コンクリートの「柔らかさ（流動性）」を示す数値。スランプコーンという筒に生コンを詰め、筒を抜いた時に何cm沈み込んだかを測ります。住宅基礎では「15cm〜18cm」が標準です。数字が大きいほどシャブシャブ（作業しやすいが強度低下のリスク）、小さいほどボソボソ（作業しにくいが密実）になります。</li>
+            <li><strong>呼び強度（配合強度）</strong><br>コンクリート工場（プラント）に発注する際の強度の数値。建物の「設計基準強度（通常21N/㎟など）」に対し、気温による強度補正（温度補正）を加算して発注します。冬場は寒さで強度が発現しにくいため、補正値を大きくして「27N/㎟」などで発注するのがセオリーです。</li>
+        </ul>
+
+        <h3><span class="material-symbols-outlined">format_list_numbered</span> 3. コンクリート打設の正しい手順（ベタ基礎の場合）</h3>
+        <p>コンクリート工事は「やり直しが効かない」一発勝負の工程です。一般的な施工手順は以下の通りです。</p>
+        <ol class="step-list">
+            <li><strong>遣り方（やりかた）～根切り（ねぎり）</strong>建物の正確な位置を出し、基礎の形状に合わせて重機で土を掘削します。</li>
+            <li><strong>砕石地業・防湿シート</strong>砕石を敷いて転圧（締め固め）し、地面からの湿気を防ぐ防湿フィルムを全面に敷き詰めます。</li>
+            <li><strong>捨てコンクリート打設</strong>構造的な強度は持ちませんが、正確な墨出し（基準線引き）や型枠の固定のために、厚さ5cmほどの薄いコンクリートを流します。</li>
+            <li><strong>配筋（鉄筋組み）</strong>構造計算に基づき、鉄筋を網目状に組んでいきます。（ここで瑕疵保険などの「配筋検査」が行われます）。</li>
+            <li><strong>底盤（スラブ）コンクリート打設</strong>基礎の底面部分のコンクリートをポンプ車を使って流し込みます。</li>
+            <li><strong>立ち上がり型枠組み～アンカーボルト設置</strong>木台と基礎を繋ぐ「アンカーボルト」や、柱を基礎と直結する「ホールダウン金物」を正確な位置にセットし、鋼製型枠を組みます。</li>
+            <li><strong>立ち上がりコンクリート打設</strong>枠の中にコンクリートを流し込みます。</li>
+            <li><strong>養生（ようじょう）と型枠外し</strong>コンクリートが所定の強度に達するまで一定期間置き（養生）、その後型枠を外します。</li>
+        </ol>
+
+        <h3><span class="material-symbols-outlined">warning</span> 4. 品質を左右する！現場の注意点と知るべきリスク</h3>
+        <p>コンクリートの品質不良は、クラック（ひび割れ）や強度不足を招きます。以下の点は行政の監査やプロの現場監督が特に目を光らせるポイントです。</p>
+        <ul class="article-list">
+            <li><strong>コールドジョイントの防止</strong><br>先に打ったコンクリートが固まり始めた後に、新しいコンクリートを打ち継ぐと、その境目が一体化せずに隙間や弱点になってしまいます。これをコールドジョイントと呼びます。外気温が25度以上の場合は「1.5時間以内」、25度未満の場合は「2時間以内」に次の層を打ち重ねるルール（JASS5）があります。ミキサー車の到着間隔（配車計画）の管理が監督の腕の見せ所です。</li>
+            <li><strong>バイブレーターの適切な使用（締め固め）</strong><br>コンクリートを型枠の隅々まで行き渡らせ、内部の空気を抜くために「内部振動機（バイブレーター）」を差し込みます。しかし、1箇所に長くかけすぎると、重い砂利が沈み、軽い水やセメントペーストが浮き上がる「材料分離」を起こすため、約50cm間隔で5～15秒ずつ、素早く抜くという熟練の技術が必要です。</li>
+            <li><strong>レイタンスの処理</strong><br>底盤コンクリートを打った後、表面に水と共に微細な不純物が浮き上がって白い膜（レイタンス）を形成します。この上に立ち上がりのコンクリートを打つと接着不良を起こすため、高圧洗浄機などでレイタンスを除去（目荒らし）してから打ち継ぐのが高品質な施工です。</li>
+            <li><strong>シャブコン（加水）の絶対禁止</strong><br>作業員がコンクリートを柔らかくして作業を楽にするため、現場で勝手に水を足してしまうことを「シャブコン」と呼びます。これは水セメント比を破壊し、強度を著しく低下させるため絶対にNGです。</li>
+            <li><strong>落下高さの制限</strong><br>ポンプ車のホースからコンクリートを落とす際、高すぎると材料分離を起こします。原則として落下高さは「1.5m以内」に抑えるよう、ホースの先端を型枠の奥まで差し込む必要があります。</li>
+        </ul>
+
+        <h3><span class="material-symbols-outlined">lightbulb</span> 5. コンクリートの雑学と科学（プロの視点）</h3>
+        <ul class="article-list">
+            <li><strong>コンクリートは「乾燥して固まる」のではない</strong><br>泥や粘土のように水が蒸発して固まるわけではありません。セメントと水が化学反応（水和反応）を起こして結晶化することで硬化します。そのため、むしろ水中で養生する方が強度がよく出ます。打設後の急激な乾燥はひび割れの原因になるため、夏場は散水養生（水をまく）を行うこともあります。</li>
+            <li><strong>強度は28日目が基準</strong><br>コンクリートの強度は打設後、何年にもわたってゆっくりと上がり続けますが、建築基準法などでは「打設から28日後の強度（材齢28日強度）」を品質の保証基準としています。</li>
+            <li><strong>コンクリートが鉄筋をサビから守るメカニズム</strong><br>鉄筋は空気や水に触れるとすぐに錆びて膨張し、コンクリートを内側から破壊します（爆裂）。しかし、コンクリートは強い「アルカリ性（pH12〜13）」を持っています。鉄筋はこの強アルカリに包まれることで表面に不動態皮膜を形成し、錆びなくなります。</li>
+            <li><strong>建物の寿命＝コンクリートの「中性化」</strong><br>コンクリートは空気中の二酸化炭素（CO2）と長年反応し、表面から徐々にアルカリ性を失い「中性化」していきます。この中性化が内部の鉄筋まで到達すると鉄筋が錆び始め、寿命を迎えます。鉄筋の表面からコンクリートの表面までの厚さ（かぶり厚さ）をしっかり確保することが、建物の長寿命化に直結するのはこのためです。</li>
+        </ul>
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #444;">
+            <p style="margin:0;">コンクリート打設は、気象条件、プラントからの運搬時間、職人の技術など、多くの変動要素をコントロールする高度なマネジメントの結晶です。これらの知識を持った上で現場の打設風景を見ると、職人たちの動きの意図が手に取るようにわかるようになります。</p>
+        </div>
 
         <div class="profile-card">
             <div class="profile-icon material-symbols-outlined">verified_user</div>
@@ -132,6 +185,8 @@
             </div>
         </div>
     </article>
+    <!-- ▲ ここまで ▲ -->
+
     <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
         <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー・免責事項</a><span style="color: #444; margin: 0 10px;">|</span><a href="mailto:Hiroki199809@gmail.com" style="color: #888; text-decoration: none;">お問い合わせ</a><br><br>
         <span style="color: #666;">© 2026 現場計算 PRO</span>
