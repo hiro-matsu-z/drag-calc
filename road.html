@@ -12,7 +12,7 @@
     <style>
         :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --danger: #ff4757; --success: #2ed573; --warning: #ffa502; --applied: #3498db; }
         * { box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-bottom)); line-height: 1.6; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
         .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; padding-bottom: 100px; }
         header { display: flex; justify-content: space-between; align-items: flex-start; border-left: 5px solid var(--orange); padding-left: 15px; margin-bottom: 20px; }
         header h1 { font-size: 1.3rem; margin: 0; color: white; }
@@ -72,6 +72,18 @@
         .nav-item span:last-child { font-size: 0.65rem; font-weight: 500; }
         .nav-item.active { color: var(--blue); }
         .nav-item.active .material-symbols-outlined { text-shadow: 0 0 12px rgba(0, 212, 255, 0.4); }
+
+        /* 追加した記事用のCSS */
+        .article-section { margin-top: 40px; padding: 30px 20px; background: #1a1a1a; border-radius: 12px; border-top: 4px solid var(--orange); }
+        .article-section h2 { color: var(--orange); font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
+        .article-section h3 { color: #fff; font-size: 1rem; margin-top: 25px; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
+        .article-section h3 .material-symbols-outlined { color: var(--blue); }
+        .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; line-height: 1.8; }
+        .article-section ul { padding-left: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; margin-bottom: 15px;}
+        .article-section li { font-size: 0.9rem; color: #ddd; margin-bottom: 8px; }
+        .article-section table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 0.85rem; }
+        .article-section th, .article-section td { border: 1px solid #444; padding: 8px; text-align: left; }
+        .article-section th { background-color: #333; color: white; }
     </style>
 </head>
 
@@ -98,6 +110,7 @@
         <button class="main-btn" onclick="saveData()">新規登録する</button>
     </div>
 
+    <!-- ▼ 並び替えUIを追加しました ▼ -->
     <div class="dashboard-title">
         <div style="display: flex; align-items: center; gap: 5px;">
             <span class="material-symbols-outlined">list_alt</span> 現場ステータス一覧
@@ -108,6 +121,8 @@
             <option value="name">🔤 現場名順</option>
         </select>
     </div>
+    <!-- ▲ ここまで ▲ -->
+    
     <div id="dashboard"></div>
 
     <div id="edit-modal" class="modal-overlay">
@@ -129,6 +144,116 @@
             </div>
         </div>
     </div>
+
+    <!-- ▼ アドセンス審査用の記事を追加 ▼ -->
+    <article class="article-section">
+        <h2>建築現場における道路使用許可の完全ガイド</h2>
+        <p>道路管理・交通管理の専門家として、建築工事に伴う道路関連の手続きや安全対策について詳細に解説いたします。建築工事において、資材の搬入出、コンクリート打設、クレーン作業、あるいは足場の設置などを行う際、公道にはみ出して作業をする場合は、法令に基づいた適切な許可の取得と、厳格な安全管理（保安設備の設置）が求められます。行政のガイドラインや警察庁の基準、および実務上のセオリーを網羅的にまとめましたので、現場管理のマスターガイドとしてご活用ください。</p>
+
+        <h3><span class="material-symbols-outlined">rule</span> 1. 道路使用許可と道路占用許可の明確な違い（最重要）</h3>
+        <p>建築工事において道路を利用する場合、管轄が異なる「2つの許可」が存在します。ここを混同すると重大なコンプライアンス違反となるため注意が必要です。</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>許可の名称</th>
+                    <th>道路使用許可（道路交通法第77条）</th>
+                    <th>道路占用許可（道路法第32条）</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>管轄</strong></td>
+                    <td>警察署（所轄の警察署長）</td>
+                    <td>道路管理者（国、都道府県、市区町村）</td>
+                </tr>
+                <tr>
+                    <td><strong>目的</strong></td>
+                    <td>交通の妨害となる「行為」に対する許可</td>
+                    <td>道路に一定の施設を設け、継続して「場所」を使用する許可</td>
+                </tr>
+                <tr>
+                    <td><strong>建築工事での具体例</strong></td>
+                    <td>・生コン車、ポンプ車の駐車作業<br>・レッカー（クレーン）の設置と吊り上げ作業<br>・資材搬入車両の一時的な駐停車<br>・足場の組立・解体作業（一時的）</td>
+                    <td>・朝顔（防護棚）や仮囲いが道路上空に出る場合<br>・工事用の足場が道路上（歩道含む）に設置される場合<br>・仮設水道管などの埋設</td>
+                </tr>
+                <tr>
+                    <td><strong>期間</strong></td>
+                    <td>一時的（数日～数週間程度、作業時のみ）</td>
+                    <td>継続的（工事期間中ずっと）</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>※ <strong>【実務上のポイント】</strong><br>足場が道路上空にはみ出す場合などは、道路管理者から「道路占用許可」を得た上で、その許可書を添付して警察署へ「道路使用許可」を申請する<strong>「同時申請（経由申請）」</strong>のフローになることが一般的です。</p>
+
+        <h3><span class="material-symbols-outlined">construction</span> 2. 道路使用許可が必要な「建築工事の作業内容」</h3>
+        <p>道路交通法第77条第1項第1号における「道路において工事若しくは作業をしようとする者」に該当するケースは以下の通りです。</p>
+        <ul>
+            <li><strong>コンクリート打設:</strong> ミキサー車、ポンプ車の道路上でのアウトリガー張り出し、配管の敷設。</li>
+            <li><strong>揚重作業:</strong> ラフタークレーン等の道路上での据え付け、旋回範囲が道路にかかる作業。</li>
+            <li><strong>資材搬入・搬出:</strong> トラック等を道路上に駐停車させ、ユニックや手運びで資材を搬入出する作業。</li>
+            <li><strong>インフラ引き込み工事:</strong> 水道、ガス、電気等の宅内引き込みに伴う前面道路の掘削・埋戻し・舗装復旧。</li>
+        </ul>
+
+        <h3><span class="material-symbols-outlined">edit_document</span> 3. 申請方法と必要書類の詳細</h3>
+        <p>道路使用許可の申請は、<strong>作業を行う場所を管轄する警察署の交通課</strong>の窓口で行います。</p>
+        <h4>基本的な必要書類（各2部提出）</h4>
+        <ol style="padding-left: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; margin-bottom: 15px; color: #ddd; font-size: 0.9rem;">
+            <li><strong>道路使用許可申請書:</strong> 警察署の窓口、または各都道府県警のウェブサイトからダウンロード可能です。</li>
+            <li><strong>位置図（広域図）:</strong> 現場周辺の目標物がわかる地図（Googleマップ等のコピーでも可の場合が多い）。</li>
+            <li><strong>現況図・計画図（詳細図）:</strong>
+                <ul style="margin-top: 5px; margin-bottom: 5px;">
+                    <li>道路の幅員（車道・歩道・路肩）を正確に記載。</li>
+                    <li>工事車両（クレーン車やポンプ車）の配置位置と寸法、アウトリガーの張り出し幅。</li>
+                    <li>残りの有効幅員（車や歩行者が通れる幅）を明記。<strong>※車道は最低3.0m（すれ違いが必要な場合は5.5m以上）、歩道は最低1.0m～1.5mの確保を求められるのが一般的です。</strong></li>
+                </ul>
+            </li>
+            <li><strong>保安図（交通規制図）:</strong> ※後述の「工事帯」に関する最も重要な図面。</li>
+            <li><strong>工程表:</strong> いつ、何の作業のために道路を使用するのかを示すスケジュール。</li>
+            <li><strong>仕様書・カタログ（必要に応じて）:</strong> 使用する重機の車両寸法や重量がわかる車検証のコピーやカタログ。</li>
+        </ol>
+        <h4>申請のフローと期間</h4>
+        <ul>
+            <li><strong>申請手数料:</strong> 都道府県により異なりますが、概ね2,000円〜2,500円程度（警察署で証紙を購入）。</li>
+            <li><strong>標準処理期間:</strong> 申請から許可証の交付まで、<strong>中2日〜1週間程度</strong>かかります。突発的な申請は受理されないため、工程会議の段階で早めの手配が必須です。</li>
+        </ul>
+
+        <h3><span class="material-symbols-outlined">traffic</span> 4. 工事帯（保安施設）と交通規制のレイアウト基準</h3>
+        <p>警察が許可を出す最大の判断基準は<strong>「一般交通に著しい影響を与えず、安全が担保されているか」</strong>です。申請書類の中核となる「保安図（交通規制図）」は、以下の基準を満たす必要があります。</p>
+        <h4 style="color: #fff; margin-bottom: 5px; font-size: 0.95rem;">① 保安施設（カラーコーン等）の設置</h4>
+        <ul>
+            <li><strong>テーパー部の設置:</strong> 走行してくる車両に対し、急に工事帯が現れないよう、徐々に車線を絞る「すりつけ区間（テーパー）」を設けます。一般道では、制限速度×1.0〜1.5m程度の長さが目安です。</li>
+            <li><strong>コーンとバーの配置:</strong> 作業帯と一般交通を物理的に分離するため、カラーコーン（パイロン）とコーンバーを設置します。歩行者の飛び出しや車両の誤進入を防ぐため、隙間を空けすぎない（ピッチ2m以内など）ことが重要です。</li>
+        </ul>
+        <h4 style="color: #fff; margin-bottom: 5px; font-size: 0.95rem;">② 交通誘導警備員の適切な配置</h4>
+        <ul>
+            <li><strong>配置基準:</strong> 作業車両により死角ができる場所、片側交互通行を行う場合、歩行者を迂回させる場所には、必ず交通誘導警備員を配置します。</li>
+            <li><strong>警備員の資格:</strong> 幹線道路（都道府県公安委員会が指定する路線）において交通規制を行う場合は、「交通誘導警備業務検定（1級または2級）」の資格を持つ警備員の配置が義務付けられています。</li>
+        </ul>
+        <h4 style="color: #fff; margin-bottom: 5px; font-size: 0.95rem;">③ 歩行者・自転車の安全確保</h4>
+        <ul>
+            <li>歩道を塞ぐ場合、車道側に<strong>仮設の歩行者用通路</strong>を設ける必要があります。</li>
+            <li>仮設通路は、カラーコーンだけでなく、単管バリケードやプラスチックフェンス等を用いて、車両と歩行者を堅牢に分離します。</li>
+            <li>段差が生じる場合は、段差解消スロープや鉄板、ゴムマットを敷設し、転倒防止措置（つまづき注意の看板等）を講じます。</li>
+        </ul>
+        <h4 style="color: #fff; margin-bottom: 5px; font-size: 0.95rem;">④ 看板類（工事用標識）の設置</h4>
+        <ul>
+            <li><strong>予告看板:</strong> 工事区間の手前（50m〜100m手前）に「この先工事中」「車線減少」などの予告看板を設置し、ドライバーに早期の減速を促します。</li>
+            <li><strong>迂回看板:</strong> 全面通行止め等の場合、交差点の入り口に迂回路を示す看板を設置します。</li>
+        </ul>
+
+        <h3><span class="material-symbols-outlined">warning</span> 5. 行政・警察からの指導が入りやすい「よくある不備」</h3>
+        <p>道路管理者や警察のパトロール、または近隣住民からの通報により、現場指導（最悪の場合は許可取り消しや工事ストップ）に発展しやすいポイントです。現場責任者は以下の点に細心の注意を払ってください。</p>
+        <ol style="padding-left: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; margin-bottom: 15px; color: #ddd; font-size: 0.9rem;">
+            <li><strong>許可条件の違反（有効幅員の不足）:</strong> 申請図面では「有効幅員3.0m確保」としているのに、実際の現場では資材が散乱したり、重機の止め方が悪く2.5mしかなく、消防車や救急車が通行できない状態になっているケース。</li>
+            <li><strong>許可時間の超過:</strong> 「9:00〜17:00」の許可にもかかわらず、コンクリートの打設が長引き、18:00を過ぎても道路上にポンプ車を停めているケース。（やむを得ない延長が見込まれる場合は、事前に警察への相談が必要です）。</li>
+            <li><strong>歩行者への配慮不足:</strong> クレーンの吊り荷の下を一般歩行者が通過するような動線になっている。または、誘導員が車両の誘導に掛かりきりで、歩行者（特に高齢者やベビーカー、車椅子）の安全確保がおろそかになっている。</li>
+            <li><strong>道路の汚損・破損:</strong> アウトリガーの下に敷盤（プラシキや鉄板）を敷かず、アスファルトを陥没させる。または、生コンや泥で道路を汚したまま清掃せずに作業を終了する（道路法第43条違反に問われる可能性があります）。</li>
+        </ol>
+
+        <h3 style="color: #fff; border-top: 1px solid #444; padding-top: 20px; margin-top: 30px;">まとめ</h3>
+        <p>道路使用・占用の手続きは、単なる「お役所仕事の書類提出」ではなく、第三者災害を未然に防ぎ、地域住民とのトラブルを回避するための<strong>現場管理の根幹</strong>です。図面通りの規制が現場で確実に実施されているか、現場監督による毎朝の保安設備のチェックと警備員との綿密な打ち合わせが、プロフェッショナルとしての第一歩となります。</p>
+    </article>
+    <!-- ▲ ここまで ▲ -->
 
     <nav>
         <a href="index.html" class="nav-item"><span class="material-symbols-outlined">square_foot</span><span>対角</span></a>
