@@ -1,0 +1,1848 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" href="./favicon.ico" />
+    <title>道路使用許可 書類作成 | 現場計算 PRO</title>
+    <!--
+      道路使用許可 書類作成（静的版）
+      Genba Keisan PRO（zawa.click / GitHub Pages）へ「1機能＝1HTMLファイル」
+      として配置するための単一ファイル版。サーバー保存は使わず、固定設定と
+      下書きはすべてこの端末の localStorage に保存する。
+      地図は実行時に国土地理院API・地理院タイルへクライアント側で通信する。
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f4f2ed;
+        --surface: #ffffff;
+        --text: #1c1a17;
+        --dim: #6f6a61;
+        --border: #ddd8cf;
+        --accent: #ea580c;
+        --accent-dark: #c2410c;
+        --accent-soft: #fff7ed;
+        --warn: #b45309;
+        --error: #b91c1c;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #14120f;
+          --surface: #201d19;
+          --text: #f2efe9;
+          --dim: #a39c90;
+          --border: #3a362f;
+          --accent: #f97316;
+          --accent-dark: #fb923c;
+          --accent-soft: #2a1c10;
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", YuGothic, "Noto Sans JP", sans-serif;
+        -webkit-text-size-adjust: 100%;
+      }
+      html { scroll-padding-bottom: 180px; }
+      .screen-only { max-width: 560px; margin: 0 auto; padding: 0 16px 200px; }
+      .screen-only.pdf-done { padding-bottom: 380px; }
+      .summary { padding-top: 12px; }
+      .summary .site-name { font-size: 20px; font-weight: 700; line-height: 1.4; margin: 0; }
+      .summary .site-sub { margin: 2px 0 0; font-size: 13.5px; color: var(--dim); }
+      section.block { margin-top: 24px; }
+      section.block > h2 {
+        display: flex; align-items: center; gap: 8px;
+        font-size: 15px; font-weight: 700; margin: 0 0 12px;
+      }
+      section.block > h2::before {
+        content: ""; display: inline-block; width: 4px; height: 16px;
+        border-radius: 2px; background: var(--accent); flex: none;
+      }
+      .fields { display: flex; flex-direction: column; gap: 16px; }
+      .fields.tight { gap: 10px; }
+      .fields.tight input { height: 48px; }
+      .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      label.field { display: block; }
+      .field-label { display: block; font-size: 13px; font-weight: 600; color: var(--dim); margin-bottom: 6px; }
+      .field-hint { display: block; font-size: 12px; color: var(--dim); margin-top: 4px; }
+      input, select {
+        width: 100%; height: 52px; padding: 0 14px;
+        border: 1px solid var(--border); border-radius: 8px;
+        background: var(--surface); color: var(--text);
+        font-size: 17px; outline: none; font-family: inherit;
+      }
+      input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(234,88,12,.3); }
+      .btn {
+        height: 46px; border-radius: 8px; border: 1px solid var(--border);
+        background: var(--surface); color: var(--text);
+        font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer;
+      }
+      .btn:active { background: var(--bg); }
+      .btn-row { display: flex; gap: 8px; }
+      .btn-row .btn, .btn-row .toggle-btn { flex: 1; }
+      .toggle-btn {
+        height: 48px; border-radius: 8px; font-size: 15px; font-weight: 600;
+        font-family: inherit; cursor: pointer;
+        border: 1px solid var(--border); background: var(--surface); color: var(--text);
+      }
+      .toggle-btn[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+      .toggle-btn.blue[aria-pressed="true"] { background: #1d4ed8; border-color: #1d4ed8; }
+      .toggle-btn.small { height: 44px; font-size: 13.5px; }
+      .toggle-btn.small[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+      .mode-detour[aria-pressed="true"] { background: #1d4ed8 !important; border-color: #1d4ed8 !important; }
+      .mode-closure[aria-pressed="true"] { background: #dc2626 !important; border-color: #dc2626 !important; }
+      .mode-toggle[aria-pressed="true"] { background: #0f766e !important; border-color: #0f766e !important; }
+      .mode-delete[aria-pressed="true"] { background: #374151 !important; border-color: #374151 !important; }
+      .mode-work[aria-pressed="true"] { background: #ea580c !important; border-color: #ea580c !important; }
+      .mode-guard[aria-pressed="true"] { background: #111827 !important; border-color: #111827 !important; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+      .chip {
+        height: 40px; padding: 0 14px; border-radius: 999px; cursor: pointer;
+        font-size: 14px; font-weight: 600; font-family: inherit;
+        border: 1px solid var(--accent); background: var(--surface); color: var(--accent-dark);
+      }
+      .chip[aria-pressed="true"] { background: var(--accent); color: #fff; }
+      .note { font-size: 12.5px; line-height: 1.7; color: var(--dim); margin: 0; }
+      .note.warn { color: var(--warn); font-size: 13.5px; }
+      .subhead { font-size: 13px; font-weight: 600; color: var(--dim); margin: 0; }
+      .editor-map {
+        position: relative; width: 100%; overflow: hidden; border-radius: 6px;
+        border: 1px solid var(--border); background: #e8e4da; touch-action: none;
+      }
+      .editor-map .scaler { transform-origin: top left; pointer-events: none; }
+      .map-link-btn {
+        display: flex; height: 44px; flex: 1; align-items: center; justify-content: center;
+        border-radius: 8px; border: 1px solid var(--border); background: var(--surface);
+        color: var(--text); font-size: 14.5px; font-weight: 600; text-decoration: none;
+      }
+      /* preview scaling */
+      #scaled-wrap { width: 100%; overflow: hidden; border-radius: 6px; }
+      #scaled-inner { transform-origin: top left; box-shadow: 0 2px 14px rgba(0,0,0,.25); width: 794px; height: 1123px; }
+      .preview-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+      .preview-tabs .toggle-btn { flex: 1; height: 42px; font-size: 15px; }
+      /* sticky action bar */
+      .action-bar {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+        border-top: 1px solid var(--border); background: var(--surface);
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .action-bar-inner { max-width: 560px; margin: 0 auto; padding: 12px 16px; }
+      #missing-line { margin: 0 0 8px; font-size: 12.5px; font-weight: 500; color: var(--warn); }
+      #pdf-btn {
+        width: 100%; height: 54px; border: none; border-radius: 12px; cursor: pointer;
+        background: var(--accent); color: #fff; font-size: 17px; font-weight: 700; font-family: inherit;
+      }
+      #pdf-btn:active { background: var(--accent-dark); }
+      #pdf-btn:disabled { opacity: .6; }
+      #pdf-hint { margin: 6px 0 0; text-align: center; font-size: 11.5px; color: var(--dim); }
+      #pdf-error { margin: 8px 0 0; text-align: center; font-size: 12.5px; line-height: 1.6; font-weight: 500; color: var(--error); }
+      #pdf-done {
+        margin-top: 12px; border: 2px solid var(--accent); border-radius: 12px;
+        background: var(--accent-soft); padding: 12px;
+      }
+      #pdf-done .done-title { margin: 0; text-align: center; font-size: 15px; font-weight: 700; color: #9a3412; }
+      #pdf-done .done-sub { margin: 4px 0 0; text-align: center; font-size: 12.5px; line-height: 1.6; color: #7c2d12; }
+      @media (prefers-color-scheme: dark) {
+        #pdf-done .done-title { color: #fdba74; }
+        #pdf-done .done-sub { color: #fed7aa; }
+      }
+      #pdf-done .done-btns { display: flex; gap: 8px; margin-top: 12px; }
+      #pdf-open, #pdf-save {
+        display: flex; height: 56px; flex: 1; align-items: center; justify-content: center;
+        border-radius: 12px; font-size: 17px; font-weight: 700; text-decoration: none;
+      }
+      #pdf-open { background: var(--accent); color: #fff; }
+      #pdf-save { border: 2px solid var(--accent); background: #fff; color: var(--accent-dark); }
+      /* PDF生成用シート置き場：画面外で描画だけ行う */
+      .print-only { position: fixed; left: -10000px; top: 0; pointer-events: none; }
+      .footer-note { margin-top: 32px; font-size: 12px; color: var(--dim); line-height: 1.7; }
+      .footer-note a { color: var(--dim); }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <div class="screen-only" id="screen-root">
+      <div style="background:#121212; padding:10px 14px; margin:-0px -0px 10px -0px;"><a href="./road.html" style="color:#00d4ff; text-decoration:none; font-size:14px; font-weight:bold;">← 現場計算 PRO｜道路使用許可 管理へ戻る</a></div>
+      <div class="summary">
+        <p class="site-name" id="summary-name">現場名未入力</p>
+        <p class="site-sub" id="summary-sub">住所未入力</p>
+      </div>
+
+      <!-- 固定設定 -->
+      <section class="block">
+        <h2>固定設定（会社情報・現場責任者）</h2>
+        <div class="fields tight">
+          <label class="field">
+            <span class="field-label">会社名</span>
+            <input id="s-companyName" placeholder="例：（株）○○建設" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span class="field-label">申請者住所（会社所在地）</span>
+            <input id="s-companyAddress" placeholder="例：東京都○○区○○ ○-○-○" autocomplete="off" />
+          </label>
+          <div class="grid2">
+            <label class="field">
+              <span class="field-label">代表者名（申請者名）</span>
+              <input id="s-representative" placeholder="例：代表取締役 ○○ ○○" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span class="field-label">電話番号</span>
+              <input id="s-phone" inputmode="tel" placeholder="例：03-0000-0000" autocomplete="off" />
+            </label>
+          </div>
+          <p class="subhead">現場責任者（固定設定として保存され、毎回の申請書に自動で入ります）</p>
+          <label class="field">
+            <span class="field-label">現場責任者の氏名</span>
+            <input id="s-managerName" placeholder="例：山田 太郎" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span class="field-label">現場責任者の住所</span>
+            <input id="s-managerAddress" placeholder="例：東京都○○区○○ ○-○-○" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span class="field-label">現場責任者の電話番号</span>
+            <input id="s-managerPhone" inputmode="tel" placeholder="例：090-0000-0000" autocomplete="off" />
+            <span class="field-hint">現場責任者の各欄は、空欄の場合は様式でも空欄のままになります</span>
+          </label>
+          <button type="button" class="btn" id="save-settings-btn" style="height:46px">固定設定を保存</button>
+        </div>
+      </section>
+
+      <!-- 申請内容 -->
+      <section class="block">
+        <h2>申請内容</h2>
+        <div class="fields">
+          <div>
+            <span class="field-label">管轄警察署</span>
+            <div id="station-suggest-wrap" hidden>
+              <p class="note" id="station-suggest-title" style="margin-bottom:6px"></p>
+              <div class="chips" id="station-suggest-chips" style="margin-bottom:8px"></div>
+            </div>
+            <p class="note" id="station-suggest-empty" style="margin-bottom:8px">
+              下の「場所と期間」で住所を入れると、その市区町村を管轄する警察署が候補としてここに表示されます。
+            </p>
+            <div class="btn-row" role="group" aria-label="警察署の都県を選ぶ" id="station-pref-btns" style="margin-bottom:8px">
+              <button type="button" class="toggle-btn small" data-pref="東京都" aria-pressed="true">東京都</button>
+              <button type="button" class="toggle-btn small" data-pref="埼玉県" aria-pressed="false">埼玉県</button>
+              <button type="button" class="toggle-btn small" data-pref="神奈川県" aria-pressed="false">神奈川県</button>
+            </div>
+            <input id="station-search" placeholder="署名で検索（例：中野）" autocomplete="off" style="margin-bottom:8px" aria-label="警察署名で検索" />
+            <select id="station-select" aria-label="管轄警察署"></select>
+            <span class="field-hint" id="station-count-note"></span>
+          </div>
+          <label class="field" id="police-custom-field" hidden>
+            <span class="field-label">警察署名（自由入力）</span>
+            <input id="police-custom" placeholder="例：○○警察署" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span class="field-label">申請日</span>
+            <input id="application-date" type="date" />
+          </label>
+          <label class="field">
+            <span class="field-label">使用の目的</span>
+            <select id="purpose-select">
+              <option value="">選択してください</option>
+              <option value="資材搬入出">資材搬入出</option>
+              <option value="生コン打設">生コン打設</option>
+              <option value="その他（自由入力）">その他（自由入力）</option>
+            </select>
+          </label>
+          <label class="field" id="purpose-custom-field" hidden>
+            <span class="field-label">目的（自由入力）</span>
+            <input id="purpose-custom" autocomplete="off" />
+          </label>
+        </div>
+      </section>
+
+      <!-- 場所と期間 -->
+      <section class="block">
+        <h2>場所と期間</h2>
+        <div class="fields">
+          <label class="field">
+            <span class="field-label">使用する場所（住所）</span>
+            <input id="site-address" placeholder="例：東京都○○区○○ ○-○-○" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span class="field-label">現場名・建物名</span>
+            <input id="site-name" placeholder="例：○○ビル新築工事" autocomplete="off" />
+          </label>
+          <div class="grid2">
+            <label class="field">
+              <span class="field-label">開始日</span>
+              <input id="start-date" type="date" />
+            </label>
+            <label class="field">
+              <span class="field-label">終了日</span>
+              <input id="end-date" type="date" />
+            </label>
+          </div>
+          <div class="grid2">
+            <label class="field">
+              <span class="field-label">開始時刻</span>
+              <input id="start-time" type="time" />
+            </label>
+            <label class="field">
+              <span class="field-label">終了時刻</span>
+              <input id="end-time" type="time" />
+            </label>
+          </div>
+          <p class="note" id="days-note" aria-live="polite" style="font-size:13.5px">開始日・終了日を入れると日数が自動計算されます</p>
+        </div>
+      </section>
+
+      <!-- 使用の方法・保安図の数値 -->
+      <section class="block">
+        <h2>使用の方法・保安図の数値</h2>
+        <div class="fields">
+          <div>
+            <span class="field-label">歩道</span>
+            <div class="btn-row" role="group" aria-label="歩道の有無を選ぶ">
+              <button type="button" class="toggle-btn" id="sw-yes" aria-pressed="true">歩道あり</button>
+              <button type="button" class="toggle-btn" id="sw-no" aria-pressed="false">歩道なし</button>
+            </div>
+            <span class="field-hint">保安図に反映されます。歩道なしの場合は歩道帯を描かず、車道の外側を路肩・敷地境界として表示します。</span>
+          </div>
+          <div class="grid2">
+            <label class="field">
+              <span class="field-label">規制方法</span>
+              <select id="regulation-select">
+                <option value="">選択してください</option>
+                <option value="車道一部規制">車道一部規制</option>
+                <option value="片側交互通行">片側交互通行</option>
+                <option value="車両通行止め">車両通行止め</option>
+                <option value="歩道一部規制">歩道一部規制</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field-label">交通誘導員の人数</span>
+              <input id="guards" inputmode="numeric" placeholder="例：2" autocomplete="off" />
+            </label>
+          </div>
+          <div class="grid2">
+            <label class="field">
+              <span class="field-label">車道幅員（m）</span>
+              <input id="road-width" inputmode="decimal" placeholder="例：4" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span class="field-label">車線数</span>
+              <input id="lanes" inputmode="numeric" placeholder="例：2" autocomplete="off" />
+            </label>
+          </div>
+          <div class="grid2">
+            <label class="field">
+              <span class="field-label">作業帯の幅（m）</span>
+              <input id="work-width" inputmode="decimal" placeholder="例：2.0" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span class="field-label">作業帯の延長（m）</span>
+              <input id="work-length" inputmode="decimal" placeholder="例：15" autocomplete="off" />
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- 案内図・迂回路図 -->
+      <section class="block">
+        <h2>案内図・迂回路図（住所から自動作成）</h2>
+        <div class="fields">
+          <div>
+            <p class="note" id="geo-status" aria-live="polite" style="font-size:13.5px">「使用する場所（住所）」を入れると、案内図の地図が自動で作成されます。</p>
+            <div class="btn-row" style="margin-top:8px">
+              <a class="map-link-btn" id="gmap-link" href="https://www.google.com/maps" target="_blank" rel="noreferrer">Googleマップで確認</a>
+              <button type="button" class="btn" id="geo-retry-btn" style="height:44px">地図を再取得</button>
+            </div>
+          </div>
+
+          <div>
+            <span class="field-label">案内図の編集（作業帯・誘導員・現場の位置）</span>
+            <div id="guide-editor">
+              <div class="btn-row" style="margin-bottom:8px">
+                <button type="button" class="toggle-btn small mode-work" data-gmode="work" aria-pressed="true">作業帯を置く</button>
+                <button type="button" class="toggle-btn small mode-guard" data-gmode="guard" aria-pressed="false">誘導員を置く</button>
+                <button type="button" class="toggle-btn small mode-delete" data-gmode="deleteMarker" aria-pressed="false">マーカーを消す</button>
+              </div>
+              <div class="editor-map" id="guide-map" role="application" aria-label="案内図の編集地図。作業帯と誘導員のマーカーをタップで置き、ドラッグで移動できます。現場の赤い丸印と現場ラベルもドラッグで移動できます">
+                <div class="scaler" id="guide-map-inner"></div>
+              </div>
+              <p class="note" id="guide-help" style="margin-top:8px"></p>
+              <div class="btn-row" style="margin-top:8px">
+                <button type="button" class="btn" id="guide-undo">1つ戻す</button>
+                <button type="button" class="btn" id="guide-clear" style="color:var(--error)">すべて消す</button>
+                <button type="button" class="btn" id="guide-reset-site">現場を初期位置へ</button>
+              </div>
+              <p class="note" id="guide-counts" aria-live="polite" style="margin-top:8px"></p>
+            </div>
+            <p class="note warn" id="guide-editor-unavailable">
+              案内図の編集地図は、住所から地図を取得できると表示されます。作業帯・誘導員の配置と現場の位置の移動は、その地図で行います（迂回路図を付けるかどうかには関係なく使えます）。
+            </p>
+          </div>
+
+          <div id="detour-toggle-wrap" hidden>
+            <span class="field-label">迂回路図</span>
+            <div class="btn-row" role="group" aria-label="迂回路図を付けるか選ぶ">
+              <button type="button" class="toggle-btn" id="detour-yes" aria-pressed="true">迂回路図を付ける</button>
+              <button type="button" class="toggle-btn" id="detour-no" aria-pressed="false">付けない</button>
+            </div>
+            <span class="field-hint">通行止めでも迂回路図が不要な案件では「付けない」を選んでください。頭紙の添付書類欄の記載も連動します。</span>
+          </div>
+
+          <div id="detour-editor" hidden>
+            <span class="field-label">迂回路図の編集（矢印・通行止め区間）</span>
+            <div class="btn-row" style="margin-bottom:8px">
+              <button type="button" class="toggle-btn small mode-detour" data-dmode="detour" aria-pressed="true">矢印を置く</button>
+              <button type="button" class="toggle-btn small mode-closure" data-dmode="closure" aria-pressed="false">通行止め区間</button>
+            </div>
+            <div class="btn-row" style="margin-bottom:8px">
+              <button type="button" class="toggle-btn small mode-toggle" data-dmode="toggleDirection" aria-pressed="false">両・片切替</button>
+              <button type="button" class="toggle-btn small mode-delete" data-dmode="deleteArrow" aria-pressed="false">矢印を消す</button>
+            </div>
+            <div id="ddir-group" style="margin-bottom:8px">
+              <span class="field-label" style="font-size:12.5px">新しく置く矢印の種類</span>
+              <div class="btn-row" role="group" aria-label="新しく置く矢印の種類を選ぶ">
+                <button type="button" class="toggle-btn small blue" data-ddir="both" aria-pressed="true">両矢印（双方向）</button>
+                <button type="button" class="toggle-btn small blue" data-ddir="single" aria-pressed="false">片矢印（一方向）</button>
+              </div>
+            </div>
+            <div class="editor-map" id="detour-map" role="application" aria-label="迂回路図の編集地図。矢印を置くモードではタップした場所に矢印が置かれ、置いてある矢印はドラッグで移動、タップで45度回転します">
+              <div class="scaler" id="detour-map-inner"></div>
+            </div>
+            <p class="note" id="detour-help" style="margin-top:8px"></p>
+            <div class="btn-row" style="margin-top:8px">
+              <button type="button" class="btn" id="detour-undo">1つ戻す</button>
+              <button type="button" class="btn" id="detour-clear" style="color:var(--error)">すべて消す</button>
+            </div>
+            <p class="note" id="detour-counts" aria-live="polite" style="margin-top:8px"></p>
+          </div>
+          <p class="note" id="detour-msg">規制方法で「車両通行止め」を選ぶと、迂回路図を付けるかどうかを選べるようになります。</p>
+        </div>
+      </section>
+
+      <!-- プレビュー -->
+      <section class="block" style="margin-top:32px">
+        <h2>書類プレビュー（A4・提出様式）</h2>
+        <div class="preview-tabs" role="tablist" aria-label="プレビューのページ" id="preview-tabs"></div>
+        <div id="scaled-wrap"><div id="scaled-inner"></div></div>
+        <p class="note" id="preview-note" style="margin-top:8px"></p>
+      </section>
+
+      <p class="footer-note">
+        Genba Keisan PRO 用の単一ファイル版です。このファイル1つをサイトに置けば動作します。入力内容はこの端末の中（localStorage）にだけ保存されます。<br />
+        <a href="https://zawa.click/" target="_blank" rel="noreferrer">Genba Keisan PRO トップへ</a>
+      </p>
+    </div>
+
+    <!-- sticky action bar -->
+    <div class="action-bar">
+      <div class="action-bar-inner">
+        <p id="missing-line" hidden></p>
+        <button type="button" id="pdf-btn">PDFにする</button>
+        <div id="pdf-done" hidden>
+          <p class="done-title">PDFを作成しました</p>
+          <p class="done-sub">下のボタンから、作成したPDFをそのまま開けます。保存もこちらからできます。</p>
+          <div class="done-btns">
+            <a id="pdf-open" href="#" target="_blank" rel="noreferrer">PDFを開く</a>
+            <a id="pdf-save" href="#" download="">保存する</a>
+          </div>
+        </div>
+        <p id="pdf-error" role="alert" hidden></p>
+      </div>
+    </div>
+
+    <!-- PDF生成用：全ページシート（画面外で描画） -->
+    <div class="print-only" id="sheets-all" aria-hidden="true"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   モデル：警察署リスト・日付ヘルパー・初期値
+   ===================================================================== */
+var OTHER = "その他（自由入力）";
+var PREFECTURES = ["東京都", "埼玉県", "神奈川県"];
+var STATIONS = [{"name": "赤坂警察署", "pref": "東京都", "areas": ["港区"]}, {"name": "赤羽警察署", "pref": "東京都", "areas": ["北区"]}, {"name": "昭島警察署", "pref": "東京都", "areas": ["昭島市"]}, {"name": "麻布警察署", "pref": "東京都", "areas": ["港区"]}, {"name": "浅草警察署", "pref": "東京都", "areas": ["台東区"]}, {"name": "愛宕警察署", "pref": "東京都", "areas": ["港区"]}, {"name": "綾瀬警察署", "pref": "東京都", "areas": ["足立区"]}, {"name": "荒川警察署", "pref": "東京都", "areas": ["荒川区"]}, {"name": "池上警察署", "pref": "東京都", "areas": ["大田区"]}, {"name": "池袋警察署", "pref": "東京都", "areas": ["豊島区"]}, {"name": "板橋警察署", "pref": "東京都", "areas": ["板橋区"]}, {"name": "五日市警察署", "pref": "東京都", "areas": ["あきる野市", "檜原村", "日の出町"]}, {"name": "上野警察署", "pref": "東京都", "areas": ["台東区"]}, {"name": "牛込警察署", "pref": "東京都", "areas": ["新宿区"]}, {"name": "荏原警察署", "pref": "東京都", "areas": ["品川区"]}, {"name": "青梅警察署", "pref": "東京都", "areas": ["青梅市", "奥多摩町"]}, {"name": "大井警察署", "pref": "東京都", "areas": ["品川区"]}, {"name": "大崎警察署", "pref": "東京都", "areas": ["品川区"]}, {"name": "王子警察署", "pref": "東京都", "areas": ["北区"]}, {"name": "大島警察署", "pref": "東京都", "areas": ["大島町"]}, {"name": "大塚警察署", "pref": "東京都", "areas": ["文京区"]}, {"name": "大森警察署", "pref": "東京都", "areas": ["大田区"]}, {"name": "小笠原警察署", "pref": "東京都", "areas": ["小笠原村"]}, {"name": "荻窪警察署", "pref": "東京都", "areas": ["杉並区"]}, {"name": "尾久警察署", "pref": "東京都", "areas": ["荒川区"]}, {"name": "葛西警察署", "pref": "東京都", "areas": ["江戸川区"]}, {"name": "葛飾警察署", "pref": "東京都", "areas": ["葛飾区"]}, {"name": "蒲田警察署", "pref": "東京都", "areas": ["大田区"]}, {"name": "亀有警察署", "pref": "東京都", "areas": ["葛飾区"]}, {"name": "神田警察署", "pref": "東京都", "areas": ["千代田区"]}, {"name": "北沢警察署", "pref": "東京都", "areas": ["世田谷区"]}, {"name": "蔵前警察署", "pref": "東京都", "areas": ["台東区"]}, {"name": "小岩警察署", "pref": "東京都", "areas": ["江戸川区"]}, {"name": "麹町警察署", "pref": "東京都", "areas": ["千代田区"]}, {"name": "小金井警察署", "pref": "東京都", "areas": ["小金井市", "国分寺市"]}, {"name": "小平警察署", "pref": "東京都", "areas": ["小平市"]}, {"name": "駒込警察署", "pref": "東京都", "areas": ["文京区"]}, {"name": "小松川警察署", "pref": "東京都", "areas": ["江戸川区"]}, {"name": "下谷警察署", "pref": "東京都", "areas": ["台東区"]}, {"name": "渋谷警察署", "pref": "東京都", "areas": ["渋谷区"]}, {"name": "品川警察署", "pref": "東京都", "areas": ["品川区"]}, {"name": "志村警察署", "pref": "東京都", "areas": ["板橋区"]}, {"name": "石神井警察署", "pref": "東京都", "areas": ["練馬区"]}, {"name": "城東警察署", "pref": "東京都", "areas": ["江東区"]}, {"name": "新宿警察署", "pref": "東京都", "areas": ["新宿区"]}, {"name": "巣鴨警察署", "pref": "東京都", "areas": ["豊島区"]}, {"name": "杉並警察署", "pref": "東京都", "areas": ["杉並区"]}, {"name": "成城警察署", "pref": "東京都", "areas": ["世田谷区", "狛江市"]}, {"name": "世田谷警察署", "pref": "東京都", "areas": ["世田谷区"]}, {"name": "千住警察署", "pref": "東京都", "areas": ["足立区"]}, {"name": "高井戸警察署", "pref": "東京都", "areas": ["杉並区"]}, {"name": "高尾警察署", "pref": "東京都", "areas": ["八王子市"]}, {"name": "高島平警察署", "pref": "東京都", "areas": ["板橋区"]}, {"name": "高輪警察署", "pref": "東京都", "areas": ["港区"]}, {"name": "滝野川警察署", "pref": "東京都", "areas": ["北区"]}, {"name": "竹の塚警察署", "pref": "東京都", "areas": ["足立区"]}, {"name": "立川警察署", "pref": "東京都", "areas": ["立川市", "国立市"]}, {"name": "玉川警察署", "pref": "東京都", "areas": ["世田谷区"]}, {"name": "田無警察署", "pref": "東京都", "areas": ["西東京市", "東久留米市"]}, {"name": "多摩中央警察署", "pref": "東京都", "areas": ["多摩市", "稲城市"]}, {"name": "中央警察署", "pref": "東京都", "areas": ["中央区"]}, {"name": "調布警察署", "pref": "東京都", "areas": ["調布市", "狛江市"]}, {"name": "月島警察署", "pref": "東京都", "areas": ["中央区"]}, {"name": "築地警察署", "pref": "東京都", "areas": ["中央区"]}, {"name": "田園調布警察署", "pref": "東京都", "areas": ["大田区", "世田谷区"]}, {"name": "東京空港警察署", "pref": "東京都", "areas": ["大田区"]}, {"name": "東京湾岸警察署", "pref": "東京都", "areas": ["江東区", "港区", "江戸川区"]}, {"name": "戸塚警察署", "pref": "東京都", "areas": ["新宿区"]}, {"name": "富坂警察署", "pref": "東京都", "areas": ["文京区"]}, {"name": "中野警察署", "pref": "東京都", "areas": ["中野区"]}, {"name": "新島警察署", "pref": "東京都", "areas": ["新島村", "神津島村", "利島村"]}, {"name": "西新井警察署", "pref": "東京都", "areas": ["足立区"]}, {"name": "練馬警察署", "pref": "東京都", "areas": ["練馬区"]}, {"name": "野方警察署", "pref": "東京都", "areas": ["中野区"]}, {"name": "八王子警察署", "pref": "東京都", "areas": ["八王子市"]}, {"name": "八丈島警察署", "pref": "東京都", "areas": ["八丈町", "青ヶ島村"]}, {"name": "原宿警察署", "pref": "東京都", "areas": ["渋谷区"]}, {"name": "東村山警察署", "pref": "東京都", "areas": ["東村山市", "清瀬市"]}, {"name": "東大和警察署", "pref": "東京都", "areas": ["東大和市", "武蔵村山市"]}, {"name": "光が丘警察署", "pref": "東京都", "areas": ["練馬区"]}, {"name": "久松警察署", "pref": "東京都", "areas": ["中央区"]}, {"name": "日野警察署", "pref": "東京都", "areas": ["日野市"]}, {"name": "碑文谷警察署", "pref": "東京都", "areas": ["目黒区"]}, {"name": "深川警察署", "pref": "東京都", "areas": ["江東区"]}, {"name": "府中警察署", "pref": "東京都", "areas": ["府中市"]}, {"name": "福生警察署", "pref": "東京都", "areas": ["福生市", "羽村市", "瑞穂町"]}, {"name": "本所警察署", "pref": "東京都", "areas": ["墨田区"]}, {"name": "町田警察署", "pref": "東京都", "areas": ["町田市"]}, {"name": "丸の内警察署", "pref": "東京都", "areas": ["千代田区"]}, {"name": "万世橋警察署", "pref": "東京都", "areas": ["千代田区"]}, {"name": "三田警察署", "pref": "東京都", "areas": ["港区"]}, {"name": "三鷹警察署", "pref": "東京都", "areas": ["三鷹市"]}, {"name": "南大沢警察署", "pref": "東京都", "areas": ["八王子市"]}, {"name": "南千住警察署", "pref": "東京都", "areas": ["荒川区"]}, {"name": "三宅島警察署", "pref": "東京都", "areas": ["三宅村", "御蔵島村"]}, {"name": "向島警察署", "pref": "東京都", "areas": ["墨田区"]}, {"name": "武蔵野警察署", "pref": "東京都", "areas": ["武蔵野市"]}, {"name": "目黒警察署", "pref": "東京都", "areas": ["目黒区"]}, {"name": "目白警察署", "pref": "東京都", "areas": ["豊島区"]}, {"name": "本富士警察署", "pref": "東京都", "areas": ["文京区"]}, {"name": "四谷警察署", "pref": "東京都", "areas": ["新宿区"]}, {"name": "代々木警察署", "pref": "東京都", "areas": ["渋谷区"]}, {"name": "浦和警察署", "pref": "埼玉県", "areas": ["さいたま市浦和区", "さいたま市南区", "浦和区", "南区"]}, {"name": "浦和東警察署", "pref": "埼玉県", "areas": ["さいたま市緑区", "緑区"]}, {"name": "浦和西警察署", "pref": "埼玉県", "areas": ["さいたま市桜区", "桜区"]}, {"name": "大宮警察署", "pref": "埼玉県", "areas": ["さいたま市大宮区", "さいたま市北区", "大宮区", "北区"]}, {"name": "大宮東警察署", "pref": "埼玉県", "areas": ["さいたま市見沼区", "見沼区"]}, {"name": "大宮西警察署", "pref": "埼玉県", "areas": ["さいたま市西区", "西区"]}, {"name": "蕨警察署", "pref": "埼玉県", "areas": ["蕨市", "戸田市"]}, {"name": "川口警察署", "pref": "埼玉県", "areas": ["川口市"]}, {"name": "武南警察署", "pref": "埼玉県", "areas": ["川口市"]}, {"name": "朝霞警察署", "pref": "埼玉県", "areas": ["朝霞市", "志木市", "和光市"]}, {"name": "新座警察署", "pref": "埼玉県", "areas": ["新座市"]}, {"name": "草加警察署", "pref": "埼玉県", "areas": ["草加市", "八潮市"]}, {"name": "上尾警察署", "pref": "埼玉県", "areas": ["上尾市", "桶川市", "伊奈町"]}, {"name": "鴻巣警察署", "pref": "埼玉県", "areas": ["鴻巣市", "北本市"]}, {"name": "川越警察署", "pref": "埼玉県", "areas": ["川越市"]}, {"name": "東入間警察署", "pref": "埼玉県", "areas": ["富士見市", "ふじみ野市", "三芳町"]}, {"name": "所沢警察署", "pref": "埼玉県", "areas": ["所沢市"]}, {"name": "狭山警察署", "pref": "埼玉県", "areas": ["狭山市", "入間市"]}, {"name": "西入間警察署", "pref": "埼玉県", "areas": ["坂戸市", "鶴ヶ島市", "越生町", "毛呂山町", "鳩山町"]}, {"name": "飯能警察署", "pref": "埼玉県", "areas": ["飯能市", "日高市"]}, {"name": "東松山警察署", "pref": "埼玉県", "areas": ["東松山市", "吉見町", "川島町", "滑川町"]}, {"name": "小川警察署", "pref": "埼玉県", "areas": ["小川町", "嵐山町", "ときがわ町", "東秩父村"]}, {"name": "秩父警察署", "pref": "埼玉県", "areas": ["秩父市", "皆野町", "長瀞町", "横瀬町"]}, {"name": "小鹿野警察署", "pref": "埼玉県", "areas": ["小鹿野町", "秩父市"]}, {"name": "本庄警察署", "pref": "埼玉県", "areas": ["本庄市", "上里町"]}, {"name": "児玉警察署", "pref": "埼玉県", "areas": ["本庄市", "美里町", "神川町"]}, {"name": "熊谷警察署", "pref": "埼玉県", "areas": ["熊谷市"]}, {"name": "深谷警察署", "pref": "埼玉県", "areas": ["深谷市"]}, {"name": "寄居警察署", "pref": "埼玉県", "areas": ["寄居町", "深谷市"]}, {"name": "行田警察署", "pref": "埼玉県", "areas": ["行田市"]}, {"name": "羽生警察署", "pref": "埼玉県", "areas": ["羽生市"]}, {"name": "加須警察署", "pref": "埼玉県", "areas": ["加須市"]}, {"name": "岩槻警察署", "pref": "埼玉県", "areas": ["さいたま市岩槻区", "岩槻区", "蓮田市"]}, {"name": "春日部警察署", "pref": "埼玉県", "areas": ["春日部市"]}, {"name": "越谷警察署", "pref": "埼玉県", "areas": ["越谷市"]}, {"name": "久喜警察署", "pref": "埼玉県", "areas": ["久喜市", "白岡市"]}, {"name": "幸手警察署", "pref": "埼玉県", "areas": ["幸手市", "久喜市"]}, {"name": "杉戸警察署", "pref": "埼玉県", "areas": ["杉戸町", "宮代町"]}, {"name": "吉川警察署", "pref": "埼玉県", "areas": ["三郷市", "吉川市", "松伏町"]}, {"name": "青葉警察署", "pref": "神奈川県", "areas": ["横浜市青葉区", "青葉区"]}, {"name": "麻生警察署", "pref": "神奈川県", "areas": ["川崎市麻生区", "麻生区"]}, {"name": "旭警察署", "pref": "神奈川県", "areas": ["横浜市旭区", "旭区"]}, {"name": "厚木警察署", "pref": "神奈川県", "areas": ["厚木市", "愛川町", "清川村"]}, {"name": "泉警察署", "pref": "神奈川県", "areas": ["横浜市泉区", "泉区"]}, {"name": "伊勢佐木警察署", "pref": "神奈川県", "areas": ["横浜市中区", "中区"]}, {"name": "伊勢原警察署", "pref": "神奈川県", "areas": ["伊勢原市"]}, {"name": "磯子警察署", "pref": "神奈川県", "areas": ["横浜市磯子区", "磯子区"]}, {"name": "海老名警察署", "pref": "神奈川県", "areas": ["海老名市"]}, {"name": "大磯警察署", "pref": "神奈川県", "areas": ["大磯町", "二宮町"]}, {"name": "大船警察署", "pref": "神奈川県", "areas": ["鎌倉市"]}, {"name": "小田原警察署", "pref": "神奈川県", "areas": ["小田原市", "箱根町", "真鶴町", "湯河原町"]}, {"name": "加賀町警察署", "pref": "神奈川県", "areas": ["横浜市中区", "中区"]}, {"name": "神奈川警察署", "pref": "神奈川県", "areas": ["横浜市神奈川区", "神奈川区"]}, {"name": "金沢警察署", "pref": "神奈川県", "areas": ["横浜市金沢区", "金沢区"]}, {"name": "鎌倉警察署", "pref": "神奈川県", "areas": ["鎌倉市"]}, {"name": "川崎警察署", "pref": "神奈川県", "areas": ["川崎市川崎区", "川崎区"]}, {"name": "川崎臨港警察署", "pref": "神奈川県", "areas": ["川崎市川崎区", "川崎区", "横浜市鶴見区"]}, {"name": "港南警察署", "pref": "神奈川県", "areas": ["横浜市港南区", "港南区"]}, {"name": "港北警察署", "pref": "神奈川県", "areas": ["横浜市港北区", "港北区"]}, {"name": "幸警察署", "pref": "神奈川県", "areas": ["川崎市幸区", "幸区"]}, {"name": "栄警察署", "pref": "神奈川県", "areas": ["横浜市栄区", "栄区"]}, {"name": "相模原警察署", "pref": "神奈川県", "areas": ["相模原市中央区", "中央区"]}, {"name": "相模原北警察署", "pref": "神奈川県", "areas": ["相模原市緑区", "緑区"]}, {"name": "相模原南警察署", "pref": "神奈川県", "areas": ["相模原市南区", "南区"]}, {"name": "座間警察署", "pref": "神奈川県", "areas": ["座間市"]}, {"name": "逗子警察署", "pref": "神奈川県", "areas": ["逗子市"]}, {"name": "瀬谷警察署", "pref": "神奈川県", "areas": ["横浜市瀬谷区", "瀬谷区"]}, {"name": "田浦警察署", "pref": "神奈川県", "areas": ["横須賀市"]}, {"name": "高津警察署", "pref": "神奈川県", "areas": ["川崎市高津区", "高津区"]}, {"name": "多摩警察署", "pref": "神奈川県", "areas": ["川崎市多摩区", "多摩区"]}, {"name": "茅ケ崎警察署", "pref": "神奈川県", "areas": ["茅ヶ崎市", "茅ケ崎市", "寒川町"]}, {"name": "津久井警察署", "pref": "神奈川県", "areas": ["相模原市緑区", "緑区"]}, {"name": "都筑警察署", "pref": "神奈川県", "areas": ["横浜市都筑区", "都筑区"]}, {"name": "鶴見警察署", "pref": "神奈川県", "areas": ["横浜市鶴見区", "鶴見区"]}, {"name": "戸塚警察署", "pref": "神奈川県", "areas": ["横浜市戸塚区", "戸塚区"]}, {"name": "戸部警察署", "pref": "神奈川県", "areas": ["横浜市西区", "西区"]}, {"name": "中原警察署", "pref": "神奈川県", "areas": ["川崎市中原区", "中原区"]}, {"name": "秦野警察署", "pref": "神奈川県", "areas": ["秦野市"]}, {"name": "葉山警察署", "pref": "神奈川県", "areas": ["葉山町"]}, {"name": "平塚警察署", "pref": "神奈川県", "areas": ["平塚市"]}, {"name": "藤沢警察署", "pref": "神奈川県", "areas": ["藤沢市"]}, {"name": "藤沢北警察署", "pref": "神奈川県", "areas": ["藤沢市"]}, {"name": "保土ケ谷警察署", "pref": "神奈川県", "areas": ["横浜市保土ケ谷区", "保土ヶ谷区", "保土ケ谷区"]}, {"name": "松田警察署", "pref": "神奈川県", "areas": ["松田町", "大井町", "開成町", "中井町", "山北町", "南足柄市"]}, {"name": "三崎警察署", "pref": "神奈川県", "areas": ["三浦市"]}, {"name": "緑警察署", "pref": "神奈川県", "areas": ["横浜市緑区", "緑区"]}, {"name": "南警察署", "pref": "神奈川県", "areas": ["横浜市南区", "南区"]}, {"name": "宮前警察署", "pref": "神奈川県", "areas": ["川崎市宮前区", "宮前区"]}, {"name": "山手警察署", "pref": "神奈川県", "areas": ["横浜市中区", "中区"]}, {"name": "大和警察署", "pref": "神奈川県", "areas": ["大和市", "綾瀬市"]}, {"name": "横須賀警察署", "pref": "神奈川県", "areas": ["横須賀市"]}, {"name": "横須賀南警察署", "pref": "神奈川県", "areas": ["横須賀市"]}, {"name": "横浜水上警察署", "pref": "神奈川県", "areas": ["横浜市中区", "中区"]}];
+var PURPOSE_PRESETS = ["資材搬入出", "生コン打設", "その他（自由入力）"];
+var REGULATIONS = ["車道一部規制", "片側交互通行", "車両通行止め", "歩道一部規制"];
+var DEFAULT_SITE_PIN_POS = { x: 0.5, y: 0.5 };
+var DEFAULT_SITE_LABEL_POS = { x: 0.5, y: 0.408 };
+var WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
+
+function stationsForPrefecture(pref) { return STATIONS.filter(function (s) { return s.pref === pref; }); }
+function detectPrefecture(address) {
+  var a = (address || "").trim();
+  if (!a) return null;
+  if (a.indexOf("埼玉県") >= 0) return "埼玉県";
+  if (a.indexOf("神奈川県") >= 0) return "神奈川県";
+  if (a.indexOf("東京都") >= 0) return "東京都";
+  if (/横浜市|川崎市|相模原市|横須賀市|藤沢市|茅ヶ崎市|茅ケ崎市|平塚市|鎌倉市|小田原市|厚木市|大和市|伊勢原市|海老名市|座間市|秦野市|逗子市|三浦市|南足柄市|綾瀬市/.test(a)) return "神奈川県";
+  if (/さいたま市|川越市|熊谷市|川口市|所沢市|春日部市|越谷市|上尾市|草加市|蕨市|戸田市|朝霞市|新座市/.test(a)) return "埼玉県";
+  return null;
+}
+function suggestStationsForAddress(address) {
+  var a = (address || "").trim();
+  if (!a) return [];
+  var pref = detectPrefecture(a);
+  return STATIONS.filter(function (s) {
+    if (pref && s.pref !== pref) return false;
+    return s.areas.some(function (area) { return a.indexOf(area) >= 0; });
+  });
+}
+function prefectureOfStation(name) {
+  var f = STATIONS.filter(function (s) { return s.name === name; });
+  return f.length ? f[0].pref : null;
+}
+function parseDate(s) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s || "")) return null;
+  var d = new Date(s + "T00:00:00");
+  return isNaN(d.getTime()) ? null : d;
+}
+function addDays(d, n) { var c = new Date(d.getFullYear(), d.getMonth(), d.getDate()); c.setDate(c.getDate() + n); return c; }
+function dayCount(start, end) {
+  if (!start || !end) return 0;
+  var ms = end.getTime() - start.getTime();
+  if (ms < 0) return 0;
+  return Math.round(ms / 86400000) + 1;
+}
+function eraOf(d) { var y = d.getFullYear(); if (y >= 2019) return { name: "令和", year: y - 2018 }; return { name: "平成", year: y - 1988 }; }
+function warekiFull(d) {
+  if (!d) return "＿＿年＿月＿日";
+  var era = eraOf(d);
+  return era.name + era.year + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日（" + (WEEKDAYS[d.getDay()] || "") + "）";
+}
+function wareki(d) {
+  if (!d) return "＿＿年＿月＿日";
+  var era = eraOf(d);
+  return era.name + era.year + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日";
+}
+function hourLabel(t) {
+  var m = /^(\d{1,2}):(\d{2})$/.exec(t || "");
+  if (!m) return "＿時";
+  var h = Number(m[1]), min = m[2] || "00";
+  return min === "00" ? h + "時" : h + "時" + min + "分";
+}
+function timeLabel(t) {
+  var m = /^(\d{1,2}):(\d{2})$/.exec(t || "");
+  if (!m) return "＿時＿分";
+  var h = Number(m[1]), min = m[2] || "00";
+  if (h === 0) return "午前0時" + min + "分";
+  if (h < 12) return "午前" + h + "時" + min + "分";
+  if (h === 12) return "午後0時" + min + "分";
+  return "午後" + (h - 12) + "時" + min + "分";
+}
+function numLabel(n) {
+  if (!isFinite(n) || n <= 0) return "＿";
+  return String(Math.round(n * 100) / 100);
+}
+function numOr(s, fallback) { var n = parseFloat(s); return isFinite(n) && n >= 0 ? n : fallback; }
+function esc(s) {
+  return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/* 固定設定・下書きの初期値は全項目空白（会社を特定できる情報はプリセットしない） */
+function defaultSettings() {
+  return { companyName: "", companyAddress: "", representative: "", phone: "", managerName: "", managerAddress: "", managerPhone: "" };
+}
+function defaultDraft() {
+  return {
+    policeStation: "", policeCustom: "", applicationDate: "",
+    purposePreset: "", purposeCustom: "",
+    managerAddress: "", managerName: "", managerPhone: "",
+    siteAddress: "", siteName: "",
+    startDate: "", endDate: "", startTime: "", endTime: "",
+    regulation: "", hasSidewalk: true, includeDetour: true,
+    guards: "", roadWidth: "4", lanes: "", workWidth: "", workLength: "",
+    detourArrows: [], closurePoints: [], guideMarkers: [],
+    sitePinPos: { x: DEFAULT_SITE_PIN_POS.x, y: DEFAULT_SITE_PIN_POS.y },
+    siteLabelPos: { x: DEFAULT_SITE_LABEL_POS.x, y: DEFAULT_SITE_LABEL_POS.y }
+  };
+}
+/* 旧方式（点を線でつないだ迂回路）の点列を、区間ごとの個別矢印へ変換する */
+function legacyDetourPointsToArrows(points) {
+  var arrows = [];
+  for (var i = 0; i + 1 < points.length; i++) {
+    var a = points[i], b = points[i + 1];
+    if (!a || !b) continue;
+    var dx = b.x - a.x, dy = b.y - a.y;
+    if (Math.hypot(dx, dy) < 0.005) continue;
+    var angle = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
+    arrows.push({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, angle: angle, direction: "both" });
+  }
+  return arrows;
+}
+function normalizeDraft(raw) {
+  var d = defaultDraft();
+  if (!raw || typeof raw !== "object") return d;
+  Object.keys(d).forEach(function (k) { if (raw[k] !== undefined && raw[k] !== null) d[k] = raw[k]; });
+  d.hasSidewalk = d.hasSidewalk !== false;
+  d.includeDetour = d.includeDetour !== false;
+  d.detourArrows = (Array.isArray(d.detourArrows) ? d.detourArrows : []).map(function (a) {
+    return { x: +a.x || 0, y: +a.y || 0, angle: (((+a.angle || 0) % 360) + 360) % 360, direction: a.direction === "single" ? "single" : "both" };
+  });
+  if (d.detourArrows.length === 0 && Array.isArray(raw.detourPoints) && raw.detourPoints.length) {
+    d.detourArrows = legacyDetourPointsToArrows(raw.detourPoints);
+  }
+  d.closurePoints = (Array.isArray(d.closurePoints) ? d.closurePoints : []).map(function (p) { return { x: +p.x || 0, y: +p.y || 0 }; });
+  d.guideMarkers = (Array.isArray(d.guideMarkers) ? d.guideMarkers : []).map(function (m) {
+    return { x: +m.x || 0, y: +m.y || 0, kind: m.kind === "guard" ? "guard" : "work", angle: (((+m.angle || 0) % 360) + 360) % 360 };
+  });
+  if (!d.sitePinPos || typeof d.sitePinPos.x !== "number") d.sitePinPos = { x: 0.5, y: 0.5 };
+  if (!d.siteLabelPos || typeof d.siteLabelPos.x !== "number") d.siteLabelPos = { x: 0.5, y: 0.408 };
+  /* 旧バージョンの目的プリセットは「その他（自由入力）」に寄せて文言を残す */
+  if (d.purposePreset && PURPOSE_PRESETS.indexOf(d.purposePreset) < 0) {
+    if (!d.purposeCustom) d.purposeCustom = d.purposePreset;
+    d.purposePreset = OTHER;
+  }
+  return d;
+}
+function toPermitData(settings, draft) {
+  var station = draft.policeStation === OTHER ? draft.policeCustom.trim() : draft.policeStation;
+  var purpose = draft.purposePreset === OTHER ? draft.purposeCustom.trim() : draft.purposePreset;
+  return {
+    settings: settings,
+    station: station,
+    applicationDate: parseDate(draft.applicationDate),
+    purpose: purpose,
+    purposePreset: draft.purposePreset,
+    /* 現場責任者は固定設定の値のみを使う。空欄のときは代表者・会社の情報で代替しない（空白のまま様式に出す） */
+    managerAddress: (settings.managerAddress || "").trim(),
+    managerName: (settings.managerName || "").trim(),
+    managerPhone: (settings.managerPhone || "").trim(),
+    siteAddress: draft.siteAddress.trim(),
+    siteName: draft.siteName.trim(),
+    startDate: parseDate(draft.startDate),
+    endDate: parseDate(draft.endDate),
+    startTime: draft.startTime,
+    endTime: draft.endTime,
+    regulation: draft.regulation,
+    hasSidewalk: draft.hasSidewalk !== false,
+    includeDetour: draft.includeDetour !== false,
+    guards: Math.round(numOr(draft.guards, 0)),
+    roadWidth: numOr(draft.roadWidth, 4),
+    lanes: Math.max(1, Math.round(numOr(draft.lanes, 1))),
+    workWidth: numOr(draft.workWidth, 0),
+    workLength: numOr(draft.workLength, 0),
+    detourArrows: draft.detourArrows || [],
+    closurePoints: draft.closurePoints || [],
+    guideMarkers: draft.guideMarkers || [],
+    sitePinPos: draft.sitePinPos || { x: 0.5, y: 0.5 },
+    siteLabelPos: draft.siteLabelPos || { x: 0.5, y: 0.408 },
+    isClosure: draft.regulation === "車両通行止め",
+    hasDetourSheet: draft.regulation === "車両通行止め" && draft.includeDetour !== false
+  };
+}
+</script>
+<script>
+"use strict";
+/* =====================================================================
+   地図：国土地理院APIでジオコーディング＋地理院タイル表示
+   編集・プレビュー・印刷はすべてシート同一解像度（666×520）で描画し、
+   CSSで縮小表示する（矢印・マーカーの位置が編集画面と印刷でずれない）。
+   ===================================================================== */
+var MAP_ZOOM = 18;
+var SHEET_MAP_W = 666;
+var SHEET_MAP_H = 520;
+var TILE = 256;
+
+function lonToTileX(lon, zoom) { return ((lon + 180) / 360) * Math.pow(2, zoom); }
+function latToTileY(lat, zoom) {
+  var rad = (lat * Math.PI) / 180;
+  return ((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2) * Math.pow(2, zoom);
+}
+
+var geoCache = {};
+function geocodeAddress(q, cb) {
+  if (Object.prototype.hasOwnProperty.call(geoCache, q)) { cb(geoCache[q]); return; }
+  var done = function (geo) { geoCache[q] = geo; cb(geo); };
+  var gsiUrl = "https://msearch.gsi.go.jp/address-search/AddressSearch?q=" + encodeURIComponent(q);
+  fetch(gsiUrl, { headers: { Accept: "application/json" } })
+    .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+    .then(function (json) {
+      var arr = Array.isArray(json) ? json : [];
+      var first = arr[0];
+      var coords = first && first.geometry && first.geometry.coordinates;
+      var lon = coords && coords[0], lat = coords && coords[1];
+      if (typeof lat === "number" && typeof lon === "number" && isFinite(lat) && isFinite(lon)) {
+        done({ lat: lat, lon: lon, displayName: (first.properties && first.properties.title) || q });
+        return;
+      }
+      var nomUrl = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=" + encodeURIComponent(q);
+      return fetch(nomUrl, { headers: { Accept: "application/json" } })
+        .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+        .then(function (json2) {
+          var arr2 = Array.isArray(json2) ? json2 : [];
+          var f2 = arr2[0];
+          var lat2 = f2 && f2.lat ? parseFloat(f2.lat) : NaN;
+          var lon2 = f2 && f2.lon ? parseFloat(f2.lon) : NaN;
+          if (isFinite(lat2) && isFinite(lon2)) done({ lat: lat2, lon: lon2, displayName: f2.display_name || q });
+          else done(null);
+        });
+    })
+    .catch(function () { done(null); });
+}
+
+function mapTilesHTML(lat, lon, width, height, zoom) {
+  zoom = zoom || MAP_ZOOM;
+  var cx = lonToTileX(lon, zoom) * TILE;
+  var cy = latToTileY(lat, zoom) * TILE;
+  var left = cx - width / 2, top = cy - height / 2;
+  var x0 = Math.floor(left / TILE), x1 = Math.floor((left + width) / TILE);
+  var y0 = Math.floor(top / TILE), y1 = Math.floor((top + height) / TILE);
+  var maxTile = Math.pow(2, zoom) - 1;
+  var out = '<div style="position:absolute;inset:0;overflow:hidden;background:#e8e4da" aria-hidden="true">';
+  for (var x = x0; x <= x1; x++) {
+    for (var y = y0; y <= y1; y++) {
+      if (x < 0 || y < 0 || x > maxTile || y > maxTile) continue;
+      out += '<img src="https://cyberjapandata.gsi.go.jp/xyz/std/' + zoom + "/" + x + "/" + y + '.png" alt="" crossorigin="anonymous" draggable="false" style="position:absolute;left:' + (x * TILE - left) + "px;top:" + (y * TILE - top) + 'px;width:256px;height:256px;user-select:none" />';
+    }
+  }
+  return out + "</div>";
+}
+
+function sitePinSVG(width, height, pinPos, labelPos, highlight) {
+  var pin = pinPos || DEFAULT_SITE_PIN_POS;
+  var label = labelPos || DEFAULT_SITE_LABEL_POS;
+  var x = pin.x * width, y = pin.y * height;
+  var lx = label.x * width, ly = label.y * height;
+  var s = '<g pointer-events="none">';
+  s += '<line x1="' + lx + '" y1="' + ly + '" x2="' + x + '" y2="' + y + '" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" opacity="0.85" />';
+  s += '<circle cx="' + x + '" cy="' + y + '" r="27" fill="rgba(220,38,38,0.12)" />';
+  s += '<circle cx="' + x + '" cy="' + y + '" r="20" fill="rgba(255,255,255,0.25)" stroke="#dc2626" stroke-width="4" />';
+  s += '<circle cx="' + x + '" cy="' + y + '" r="4.5" fill="#dc2626" stroke="#ffffff" stroke-width="1.5" />';
+  if (highlight === "pin") s += '<circle cx="' + x + '" cy="' + y + '" r="34" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="6 4" opacity="0.9" />';
+  s += '<g transform="translate(' + lx + ", " + ly + ')">';
+  if (highlight === "label") s += '<rect x="-40" y="-23" width="80" height="46" rx="8" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="6 4" opacity="0.9" />';
+  s += '<rect x="-32" y="-15" width="64" height="30" rx="5" fill="#dc2626" stroke="#ffffff" stroke-width="2" />';
+  s += '<text x="0" y="5.5" text-anchor="middle" font-size="15" font-weight="800" fill="#ffffff" letter-spacing="2">現場</text>';
+  s += "</g></g>";
+  return s;
+}
+
+function detourArrowShapeSVG(direction) {
+  var points = direction === "both"
+    ? "-21,0 -5,-12 -5,-5.5 5,-5.5 5,-12 21,0 5,12 5,5.5 -5,5.5 -5,12"
+    : "-19,-5.5 5,-5.5 5,-12 21,0 5,12 5,5.5 -19,5.5";
+  return '<polygon points="' + points + '" fill="#1d4ed8" stroke="#ffffff" stroke-width="2.2" stroke-linejoin="round" />';
+}
+
+function routeOverlaySVG(width, height, detourArrows, closurePoints, highlightArrowIndex) {
+  var arrows = (detourArrows || []).map(function (a) {
+    return { x: a.x * width, y: a.y * height, angle: a.angle, direction: a.direction === "single" ? "single" : "both" };
+  });
+  var closure = (closurePoints || []).map(function (p) { return { x: p.x * width, y: p.y * height }; });
+  var s = '<svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + " " + height + '" style="position:absolute;inset:0" aria-hidden="true">';
+  if (closure.length >= 2) {
+    var pts = closure.map(function (p) { return p.x + "," + p.y; }).join(" ");
+    s += '<polyline points="' + pts + '" fill="none" stroke="#dc2626" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.85" />';
+  }
+  closure.forEach(function (p) {
+    s += '<g stroke="#dc2626" stroke-width="3.5" stroke-linecap="round"><line x1="' + (p.x - 8) + '" y1="' + (p.y - 8) + '" x2="' + (p.x + 8) + '" y2="' + (p.y + 8) + '" /><line x1="' + (p.x + 8) + '" y1="' + (p.y - 8) + '" x2="' + (p.x - 8) + '" y2="' + (p.y + 8) + '" /></g>';
+  });
+  if (closure.length) {
+    var mid = closure[Math.floor(closure.length / 2)];
+    s += '<g transform="translate(' + mid.x + ", " + (mid.y - 22) + ')"><rect x="-52" y="-13" width="104" height="24" fill="#dc2626" /><text x="0" y="4" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffffff">通行止め区間</text></g>';
+  }
+  arrows.forEach(function (a) {
+    s += '<g transform="translate(' + a.x + ", " + a.y + ") rotate(" + a.angle + ')">' + detourArrowShapeSVG(a.direction) + "</g>";
+  });
+  if (highlightArrowIndex >= 0 && arrows[highlightArrowIndex]) {
+    var hl = arrows[highlightArrowIndex];
+    s += '<circle cx="' + hl.x + '" cy="' + hl.y + '" r="32" fill="none" stroke="#1d4ed8" stroke-width="2.5" stroke-dasharray="6 4" opacity="0.9" />';
+  }
+  if (arrows.length) {
+    var fa = arrows[0];
+    s += '<g transform="translate(' + fa.x + ", " + (fa.y + 30) + ')"><rect x="-34" y="-13" width="68" height="24" fill="#1d4ed8" /><text x="0" y="4" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffffff">迂 回 路</text></g>';
+  }
+  return s + "</svg>";
+}
+
+function guideOverlaySVG(width, height, guideMarkers, highlightIndex) {
+  var markers = (guideMarkers || []).map(function (m) {
+    return { x: m.x * width, y: m.y * height, kind: m.kind, angle: m.angle || 0 };
+  });
+  var s = '<svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + " " + height + '" style="position:absolute;inset:0" aria-hidden="true">';
+  s += '<defs><pattern id="guide-wz-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#ffedd5" /><line x1="0" y1="0" x2="0" y2="6" stroke="#ea580c" stroke-width="1.3" /></pattern></defs>';
+  markers.forEach(function (m) {
+    if (m.kind === "work") {
+      /* 作業帯マーカー：64×20px（縮小済みサイズ） */
+      s += '<g transform="translate(' + m.x + ", " + m.y + ") rotate(" + m.angle + ')">';
+      s += '<rect x="-32" y="-10" width="64" height="20" rx="2" fill="url(#guide-wz-hatch)" stroke="#b91c1c" stroke-width="1.8" />';
+      s += '<text x="0" y="4" text-anchor="middle" font-size="11" font-weight="800" fill="#b91c1c" style="paint-order:stroke" stroke="#ffffff" stroke-width="2.2">作業帯</text>';
+      s += "</g>";
+    } else {
+      s += '<g transform="translate(' + m.x + ", " + m.y + ')">';
+      s += '<circle cx="0" cy="-8" r="15" fill="#111111" stroke="#ffffff" stroke-width="2.2" />';
+      s += '<text x="0" y="-3" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">誘</text>';
+      s += '<g transform="translate(0, 20)"><rect x="-30" y="-11" width="60" height="21" rx="3" fill="#111111" stroke="#ffffff" stroke-width="1.6" /><text x="0" y="3.5" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">誘導員</text></g>';
+      s += "</g>";
+    }
+  });
+  if (highlightIndex >= 0 && markers[highlightIndex]) {
+    var hl = markers[highlightIndex];
+    s += '<circle cx="' + hl.x + '" cy="' + hl.y + '" r="' + (hl.kind === "work" ? 34 : 38) + '" fill="none" stroke="#111111" stroke-width="2.5" stroke-dasharray="6 4" opacity="0.85" />';
+  }
+  return s + "</svg>";
+}
+
+/* 地図タイル＋現場マーカー＋オーバーレイを1枚にまとめた表示（666×520固定） */
+function mapCanvasHTML(geo, opts) {
+  opts = opts || {};
+  var width = SHEET_MAP_W, height = SHEET_MAP_H;
+  var mPerPx = (156543.03392 * Math.cos((geo.lat * Math.PI) / 180)) / Math.pow(2, MAP_ZOOM);
+  var barW = Math.round(100 / mPerPx);
+  var s = '<div style="position:relative;width:' + width + "px;height:" + height + 'px;overflow:hidden;border:1.5px solid #111;background:#e8e4da;flex:none">';
+  s += mapTilesHTML(geo.lat, geo.lon, width, height);
+  s += '<svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + " " + height + '" style="position:absolute;inset:0" aria-hidden="true">';
+  s += sitePinSVG(width, height, opts.sitePinPos, opts.siteLabelPos, opts.highlightSite || null);
+  s += '<g transform="translate(' + (width - 30) + ', 30)"><circle r="17" fill="rgba(255,255,255,0.88)" stroke="#888" stroke-width="0.75" /><path d="M 0 -11 L 5 4 L 0 1 L -5 4 z" fill="#111" /><text x="0" y="13.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#111">北</text></g>';
+  s += '<g transform="translate(14, ' + (height - 34) + ')"><rect x="0" y="0" width="' + barW + '" height="5" fill="#111" stroke="#fff" stroke-width="0.75" /><text x="0" y="-4" font-size="11" fill="#111" font-weight="600">100m</text></g>';
+  s += "</svg>";
+  if (opts.showRoutes) s += routeOverlaySVG(width, height, opts.detourArrows || [], opts.closurePoints || [], opts.highlightArrowIndex != null ? opts.highlightArrowIndex : -1);
+  if (opts.showGuideMarkers) s += guideOverlaySVG(width, height, opts.guideMarkers || [], opts.highlightGuideIndex != null ? opts.highlightGuideIndex : -1);
+  s += '<span style="position:absolute;right:4px;bottom:3px;font-size:9.5px;color:#444;background:rgba(255,255,255,0.75);padding:0 3px">出典：国土地理院（地理院タイル）</span>';
+  return s + "</div>";
+}
+</script>
+<script>
+"use strict";
+/* =====================================================================
+   書類シート（A4・794×1123px固定レイアウト）
+   ===================================================================== */
+var MINCHO = "'Hiragino Mincho ProN', 'Hiragino Mincho Pro', 'YuMincho', 'Yu Mincho', 'MS Mincho', serif";
+var GOTHIC = "'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', YuGothic, 'MS Gothic', sans-serif";
+
+function sheetOpen() {
+  return '<div class="a4-sheet" style="width:794px;height:1123px;background:#ffffff;color:#111111;color-scheme:light;font-family:' + MINCHO + ';position:relative;overflow:hidden;flex:none"><div style="padding:56px 64px;height:100%;box-sizing:border-box">';
+}
+function sheetClose() { return "</div></div>"; }
+function blankText(s) { return (s || "").trim() ? s : "＿＿＿＿＿＿"; }
+function stationChiefName(station) {
+  var s = (station || "").trim();
+  return s.endsWith("警察署") ? s.slice(0, -"警察署".length) : s;
+}
+function spreadLabel(text) {
+  var chars = text.split("").map(function (ch) { return "<span>" + esc(ch) + "</span>"; }).join("");
+  return '<span style="display:flex;justify-content:space-between;width:100%">' + chars + "</span>";
+}
+var FEES = [
+  { label: "第1号", price: "¥2,700" }, { label: "第2号", price: "¥2,100" },
+  { label: "第3号", price: "¥2,100" }, { label: "第3号", price: "¥1,100" },
+  { label: "第4号", price: "¥2,100" }
+];
+function feeBarcodeSVG(seed) {
+  var widths = [3,1,1,2,1,1,3,2,1,1,1,3,1,2,2,1,1,1,3,1,2,1,1,2,3,1,1,1,2,2,1,3,1,1,2,1];
+  var x = 0, bars = "";
+  widths.forEach(function (w, i) {
+    var gap = ((seed + i * 7) % 3) + 1;
+    if (i % 2 === 0) bars += '<rect x="' + x + '" y="0" width="' + w + '" height="26" fill="#111" />';
+    x += w + gap;
+  });
+  return '<svg width="100%" height="26" viewBox="0 0 ' + x + ' 26" preserveAspectRatio="none" aria-hidden="true">' + bars + "</svg>";
+}
+
+/* ------------------------------ 頭紙 ------------------------------ */
+function applicationSheetHTML(data) {
+  var s = data.settings;
+  var seireki = function (d) { return d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日"; };
+  var appDate = data.applicationDate ? seireki(data.applicationDate) : "年　月　日";
+  var sd = data.startDate, ed = data.endDate;
+  var sameDay = !!sd && !!ed && sd.getTime() === ed.getTime();
+  var periodText;
+  if (!sd || !ed) periodText = "　年　月　日　時から　　年　月　日　時まで";
+  else if (sameDay) periodText = seireki(sd) + "　" + hourLabel(data.startTime) + "から" + hourLabel(data.endTime) + "まで";
+  else periodText = seireki(sd) + "　" + hourLabel(data.startTime) + "から　" + seireki(ed) + "　" + hourLabel(data.endTime) + "まで";
+  var area = data.workWidth > 0 && data.workLength > 0 ? data.workWidth * data.workLength : 0;
+  var pedestrianText = data.hasSidewalk
+    ? "歩道に歩行者の通路を確保する。"
+    : "歩道がないため、路肩側に歩行者通路を確保し、交通誘導員が歩行者を誘導する。";
+  var methodText = "作業帯（幅" + numLabel(data.workWidth) + "m×延長" + numLabel(data.workLength) + "m" + (area > 0 ? "・面積" + numLabel(area) + "㎡" : "") + "）を設置し、" + esc(data.regulation) + "とする。交通誘導員" + data.guards + "名を配置する。" + pedestrianText;
+  var placeText = data.siteName.trim() ? data.siteAddress + "　" + data.siteName : data.siteAddress;
+
+  var labelCell = "text-align:center;vertical-align:middle;padding:6px 16px;border:1px solid #111;font-size:14.5px";
+  var subLabelCell = "text-align:center;vertical-align:middle;padding:6px 12px;border:1px solid #111;font-size:14.5px";
+  var valueCell = "vertical-align:middle;padding:8px 14px;border:1px solid #111;font-size:15px;line-height:1.6";
+  var dbl = "border-bottom:4px double #111";
+
+  var h = sheetOpen();
+  h += '<div style="margin:-16px -8px">';
+  h += '<p style="font-size:13.5px;margin:0 0 4px">別記様式第六（第十条関係）</p>';
+  h += '<div style="border:1px solid #111;border-bottom:none;padding:14px 22px 12px;min-height:158px;box-sizing:border-box">';
+  h += '<h2 style="text-align:center;font-size:23px;font-weight:700;letter-spacing:9px;margin:2px 0 0;font-family:' + GOTHIC + '">道路使用許可申請書</h2>';
+  h += '<p style="text-align:right;font-size:15px;margin:18px 6px 0">' + esc(appDate) + "</p>";
+  h += '<div style="display:flex;align-items:flex-start">';
+  h += '<p style="font-size:16px;margin:18px 0 0;padding-left:7%;white-space:nowrap">' + esc(stationChiefName(data.station)) + "　警察署長　殿</p>";
+  h += '<div style="margin-left:auto;width:57%;font-size:15px;line-height:1.95">';
+  h += '<p style="margin:0;display:flex"><span style="width:3.4em;text-align:right;flex:none">住所</span><span style="margin-left:0.6em">' + esc(s.companyAddress) + "</span></p>";
+  h += '<p style="margin:0;display:flex"><span style="width:3.4em;text-align:right;flex:none">申請者</span><span style="margin-left:0.6em">' + esc(s.companyName) + "</span></p>";
+  h += '<p style="margin:0;display:flex"><span style="width:3.4em;text-align:right;flex:none">氏名</span><span style="margin-left:0.6em">' + esc(s.representative) + "</span></p>";
+  h += "</div></div></div>";
+
+  h += '<table style="width:100%;border-collapse:collapse"><colgroup><col style="width:10.8%" /><col style="width:10.4%" /><col style="width:42.9%" /><col style="width:11.5%" /><col style="width:24.4%" /></colgroup><tbody>';
+  h += '<tr style="height:45px"><td style="' + labelCell + '" colspan="2">道路使用の目的</td><td style="' + valueCell + '" colspan="3">' + esc(data.purpose) + "</td></tr>";
+  h += '<tr style="height:45px"><td style="' + labelCell + '" colspan="2">場所又は区間</td><td style="' + valueCell + '" colspan="3">' + esc(placeText) + "</td></tr>";
+  h += '<tr style="height:45px"><td style="' + labelCell + '" colspan="2">' + spreadLabel("期間") + '</td><td style="' + valueCell + ';text-align:center" colspan="3">' + esc(periodText) + "</td></tr>";
+  h += '<tr style="height:45px"><td style="' + labelCell + '" colspan="2">方法又は形態</td><td style="' + valueCell + '" colspan="3">' + methodText + "</td></tr>";
+  h += '<tr style="height:45px"><td style="' + labelCell + '" colspan="2">' + spreadLabel("添付書類") + '</td><td style="' + valueCell + '" colspan="3">案内図、配置図' + (data.hasDetourSheet ? "、迂回路図" : "") + "</td></tr>";
+  h += '<tr style="height:45px"><td style="' + labelCell + ";padding:0;" + dbl + '" rowspan="2">'
+    + '<div style="height:44px;display:flex;align-items:center;padding:0 10px">' + spreadLabel("現場") + "</div>"
+    + '<div style="height:44px;display:flex;align-items:center;padding:0 10px">' + spreadLabel("責任者") + "</div></td>"
+    + '<td style="' + subLabelCell + '">' + spreadLabel("住所") + '</td><td style="' + valueCell + '" colspan="3">' + esc(data.managerAddress) + "</td></tr>";
+  h += '<tr style="height:45px"><td style="' + subLabelCell + ";" + dbl + '">' + spreadLabel("氏名") + '</td><td style="' + valueCell + ";" + dbl + '">' + esc(data.managerName) + '</td><td style="' + subLabelCell + ";" + dbl + '">' + spreadLabel("電話") + '</td><td style="' + valueCell + ";" + dbl + '">' + esc(data.managerPhone) + "</td></tr>";
+  h += "</tbody></table>";
+
+  h += '<div style="border:1px solid #111;border-top:none;padding:12px 22px 16px;min-height:268px;box-sizing:border-box">';
+  h += '<p style="font-size:15px;margin:2px 0 0 12px">第　　　　　号</p>';
+  h += '<h3 style="text-align:center;font-size:22px;font-weight:400;letter-spacing:10px;margin:8px 0 12px">道路使用許可証</h3>';
+  h += '<p style="font-size:15px;margin:0 0 0 8px">上記のとおり許可する。ただし、次の条件に従うこと。</p>';
+  h += '<table style="width:86%;margin-left:9%;margin-top:14px;border-collapse:collapse"><tbody><tr style="height:48px"><td style="width:15%;border:1px solid #111;padding:6px 12px;font-size:14.5px;text-align:center;vertical-align:middle">' + spreadLabel("条件") + '</td><td style="border:1px solid #111"></td></tr></tbody></table>';
+  h += '<p style="text-align:right;font-size:15px;margin:18px 12% 0 0;letter-spacing:6px">年　　月　　日</p>';
+  h += '<p style="text-align:right;font-size:16px;margin:22px 12% 0 0">警　察　署　長<span style="display:inline-block;width:22px;height:22px;border:1px solid #888;color:#555;font-size:13px;line-height:20px;text-align:center;vertical-align:middle;margin-left:16px">印</span></p>';
+  h += "</div>";
+
+  var remarks = [
+    "１　申請者が法人であるときは、申請者の欄には、その名称、主たる事務所の所在地及び代表者の氏名を記載すること。",
+    "２　方法又は形態の欄には、工事又は作業の方法、使用面積、行事等の参加人員、通行の形態又は方法等使用について必要な事項を記載すること。",
+    "３　添付書類の欄には、道路使用の場所、方法等を明らかにした図面その他必要な書類を添付した場合に、その書類名を記載すること。",
+    "４　用紙の大きさは、日本産業規格Ａ列４番とする。"
+  ];
+  h += '<div style="margin-top:12px;font-size:11.5px;line-height:1.8">';
+  remarks.forEach(function (line, i) {
+    h += '<p style="margin:0;display:flex"><span style="flex:none;width:3.2em">' + (i === 0 ? "備考" : "") + "</span><span>" + esc(line) + "</span></p>";
+  });
+  h += "</div>";
+
+  h += '<table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:10.5px"><tbody>';
+  h += '<tr style="height:12px"><td style="width:36px;border:1px solid #111;text-align:center;font-size:9px;padding:1px 0">該当欄</td>' + FEES.map(function () { return '<td style="border:1px solid #111"></td>'; }).join("") + "</tr>";
+  h += '<tr><td style="border:1px solid #111;text-align:center;padding:2px 0;writing-mode:vertical-rl;font-size:10px">手数料種別</td>';
+  FEES.forEach(function (f, i) {
+    h += '<td style="border:1px solid #111;padding:3px 6px;text-align:center;width:19%"><div style="font-weight:700;margin-bottom:2px">' + f.label + "　" + f.price + "</div>" + feeBarcodeSVG(i * 3 + 1) + "</td>";
+  });
+  h += "</tr></tbody></table>";
+  h += "</div>";
+  return h + sheetClose();
+}
+
+/* ------------------------------ 保安図 ------------------------------ */
+function vehicleShapeSVG(x, cy, w, hgt, label, kind) {
+  var top = cy - hgt / 2;
+  var cabW = Math.max(16, w * 0.2);
+  var fontSize = hgt >= 22 ? 11.5 : 9.5;
+  var s = "<g>";
+  s += '<rect x="' + x + '" y="' + top + '" width="' + w + '" height="' + hgt + '" rx="3" fill="#ffffff" stroke="#111" stroke-width="1.6" />';
+  s += '<rect x="' + (x + w - cabW) + '" y="' + (top + 1.5) + '" width="' + (cabW - 1.5) + '" height="' + (hgt - 3) + '" fill="#dbeafe" stroke="#111" stroke-width="1.1" />';
+  [x + w * 0.16, x + w * 0.78].forEach(function (wx) {
+    s += '<g fill="#111"><rect x="' + (wx - 6) + '" y="' + (top - 2.6) + '" width="12" height="2.6" /><rect x="' + (wx - 6) + '" y="' + (top + hgt) + '" width="12" height="2.6" /></g>';
+  });
+  if (kind === "mixer") s += '<ellipse cx="' + (x + w * 0.34) + '" cy="' + cy + '" rx="' + (w * 0.19) + '" ry="' + (hgt * 0.34) + '" fill="#e5e7eb" stroke="#555" stroke-width="1.1" />';
+  if (kind === "pump") s += '<polyline points="' + (x + w * 0.14) + "," + (cy + hgt * 0.22) + " " + (x + w * 0.34) + "," + (cy - hgt * 0.24) + " " + (x + w * 0.58) + "," + (cy + hgt * 0.05) + '" fill="none" stroke="#555" stroke-width="1.6" />';
+  s += '<text x="' + (x + w / 2) + '" y="' + (cy + fontSize / 2 - 1) + '" text-anchor="middle" font-size="' + fontSize + '" font-weight="700" fill="#111" style="paint-order:stroke" stroke="#ffffff" stroke-width="3">' + esc(label) + "</text>";
+  return s + "</g>";
+}
+
+function diagramSheetHTML(data) {
+  var W = 666;
+  var roadX0 = 78, roadX1 = 586, roadTop = 128, roadH = 216;
+  var roadBottom = roadTop + roadH;
+  var ratio = data.roadWidth > 0 ? Math.min(0.85, Math.max(0.12, data.workWidth / data.roadWidth)) : 0.3;
+  var wzH = Math.round(roadH * ratio);
+  var wzBottom = roadTop + wzH;
+  var wzX0 = 168, wzX1 = 520;
+  var passageW = Math.max(0, data.roadWidth - data.workWidth);
+  var laneLines = [];
+  for (var i = 0; i < Math.max(0, data.lanes - 1); i++) laneLines.push(Math.round(roadTop + (roadH * (i + 1)) / data.lanes));
+  var cones = [186, 236, 286, 336, 386, 436, 486];
+  var bidirectional = data.regulation === "片側交互通行";
+  var midX = (roadX0 + roadX1) / 2;
+
+  var h = sheetOpen();
+  h += '<h2 style="text-align:center;font-size:25px;font-weight:700;letter-spacing:6px;margin:2px 0 10px">作業帯図・保安図</h2>';
+  h += '<p style="font-size:14.5px;margin:0 0 4px">場所：' + esc(blankText(data.siteAddress)) + (data.siteName.trim() ? "　" + esc(data.siteName) : "") + "</p>";
+  h += '<p style="font-size:14.5px;margin:0 0 6px">期間：' + esc(wareki(data.startDate)) + " 〜 " + esc(wareki(data.endDate)) + "　／　作業時間：" + esc(timeLabel(data.startTime)) + " 〜 " + esc(timeLabel(data.endTime)) + "</p>";
+
+  var s = '<svg width="' + W + '" height="520" viewBox="0 0 ' + W + ' 520" role="img" aria-label="作業帯図・保安図の図面">';
+  s += '<defs><pattern id="wz-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="10" height="10" fill="#fde8e8" /><line x1="0" y1="0" x2="0" y2="10" stroke="#d97706" stroke-width="2" /></pattern>'
+    + '<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#111" /></marker>'
+    + '<marker id="dim" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto-start-reverse"><path d="M0,5 L10,0 L10,10 z" fill="#555" /></marker></defs>';
+
+  if (data.hasSidewalk) {
+    s += '<rect x="' + roadX0 + '" y="' + (roadTop - 42) + '" width="' + (roadX1 - roadX0) + '" height="42" fill="#e5e5e5" stroke="#999" />';
+    s += '<rect x="' + roadX0 + '" y="' + roadBottom + '" width="' + (roadX1 - roadX0) + '" height="42" fill="#e5e5e5" stroke="#999" />';
+    s += '<text x="' + midX + '" y="' + (roadTop - 16) + '" text-anchor="middle" font-size="14" fill="#555">歩　道</text>';
+    s += '<text x="' + midX + '" y="' + (roadBottom + 27) + '" text-anchor="middle" font-size="14" fill="#555">歩　道</text>';
+  } else {
+    s += '<rect x="' + roadX0 + '" y="' + (roadTop - 42) + '" width="' + (roadX1 - roadX0) + '" height="42" fill="#faf7ed" stroke="#999" stroke-dasharray="6 4" />';
+    s += '<rect x="' + roadX0 + '" y="' + roadBottom + '" width="' + (roadX1 - roadX0) + '" height="42" fill="#faf7ed" stroke="#999" stroke-dasharray="6 4" />';
+    s += '<text x="' + midX + '" y="' + (roadTop - 16) + '" text-anchor="middle" font-size="13.5" fill="#666">路肩・敷地境界（歩道なし）</text>';
+    s += '<text x="' + midX + '" y="' + (roadBottom + 27) + '" text-anchor="middle" font-size="13.5" fill="#666">路肩・敷地境界（歩道なし）</text>';
+  }
+
+  s += '<rect x="' + roadX0 + '" y="' + roadTop + '" width="' + (roadX1 - roadX0) + '" height="' + roadH + '" fill="#fafafa" stroke="#111" stroke-width="2" />';
+  laneLines.forEach(function (y) {
+    s += '<line x1="' + roadX0 + '" y1="' + y + '" x2="' + roadX1 + '" y2="' + y + '" stroke="#888" stroke-width="1.5" stroke-dasharray="14 10" />';
+  });
+
+  s += '<rect x="' + wzX0 + '" y="' + roadTop + '" width="' + (wzX1 - wzX0) + '" height="' + wzH + '" fill="url(#wz-hatch)" stroke="#b91c1c" stroke-width="3" />';
+  if (data.purposePreset === "生コン打設" || data.purposePreset === "資材搬入出") {
+    s += '<text x="' + (wzX0 + 8) + '" y="' + (roadTop + 15) + '" font-size="12" font-weight="700" fill="#b91c1c">作業帯</text>';
+    var vehH = Math.max(14, Math.min(28, wzH * 0.5));
+    var vehCy = roadTop + wzH - vehH / 2 - 3;
+    if (data.purposePreset === "生コン打設") {
+      var gap = 14, margin = 10;
+      var vw = (wzX1 - wzX0 - margin * 2 - gap) / 2;
+      s += vehicleShapeSVG(wzX0 + margin, vehCy, vw, vehH, "ポンプ車", "pump");
+      s += vehicleShapeSVG(wzX0 + margin + vw + gap, vehCy, vw, vehH, "ミキサー車", "mixer");
+    } else {
+      var vw2 = Math.min(240, wzX1 - wzX0 - 40);
+      s += vehicleShapeSVG((wzX0 + wzX1) / 2 - vw2 / 2, vehCy, vw2, vehH, "トラック", "truck");
+    }
+  } else {
+    s += '<text x="' + ((wzX0 + wzX1) / 2) + '" y="' + (roadTop + wzH / 2 + 6) + '" text-anchor="middle" font-size="17" font-weight="700" fill="#b91c1c">作 業 帯</text>';
+  }
+
+  cones.forEach(function (cx) {
+    s += '<path d="M ' + cx + " " + (wzBottom + 14) + " L " + (cx + 7) + " " + (wzBottom - 2) + " L " + (cx + 14) + " " + (wzBottom + 14) + ' z" fill="#ea580c" stroke="#9a3412" stroke-width="1" />';
+  });
+
+  s += '<g><rect x="108" y="' + (wzBottom + 29) + '" width="36" height="28" fill="#fff7ed" stroke="#ea580c" stroke-width="2" />'
+    + '<path d="M 119 ' + (wzBottom + 43) + " L 131 " + (wzBottom + 43) + " M 125 " + (wzBottom + 37.5) + " L 131 " + (wzBottom + 43) + " L 125 " + (wzBottom + 48.5) + '" stroke="#ea580c" stroke-width="2.5" fill="none" />'
+    + '<text x="126" y="' + (wzBottom + 80) + '" text-anchor="middle" font-size="12.5" fill="#9a3412">矢印板</text></g>';
+
+  s += '<text x="' + midX + '" y="' + (wzBottom + 78) + '" text-anchor="middle" font-size="16" font-weight="600">通行帯　' + numLabel(passageW) + " m</text>";
+  s += '<line x1="' + (wzX0 + 30) + '" y1="' + (roadBottom - 26) + '" x2="' + (wzX1 - 30) + '" y2="' + (roadBottom - 26) + '" stroke="#111" stroke-width="2.5" marker-end="url(#arr)" />';
+  if (bidirectional) s += '<line x1="' + (wzX1 - 30) + '" y1="' + (wzBottom + 40) + '" x2="' + (wzX0 + 30) + '" y2="' + (wzBottom + 40) + '" stroke="#111" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr)" />';
+
+  [{ x: wzX0 - 16, y: wzBottom + 16 }, { x: wzX1 + 16, y: wzBottom + 16 }].forEach(function (g) {
+    s += '<g><circle cx="' + g.x + '" cy="' + g.y + '" r="13" fill="#111" /><text x="' + g.x + '" y="' + (g.y + 5) + '" text-anchor="middle" font-size="13" fill="#fff">誘</text></g>';
+  });
+  s += '<text x="' + (wzX1 + 16) + '" y="' + (wzBottom + 48) + '" text-anchor="middle" font-size="12" fill="#333">誘導員</text>';
+
+  s += '<line x1="46" y1="' + roadTop + '" x2="46" y2="' + roadBottom + '" stroke="#555" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)" />';
+  s += '<text x="30" y="' + ((roadTop + roadBottom) / 2) + '" text-anchor="middle" font-size="14" fill="#333" transform="rotate(-90 30 ' + ((roadTop + roadBottom) / 2) + ')">車道幅員 ' + numLabel(data.roadWidth) + " m</text>";
+  s += '<line x1="612" y1="' + roadTop + '" x2="612" y2="' + wzBottom + '" stroke="#555" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)" />';
+  s += '<text x="634" y="' + ((roadTop + wzBottom) / 2) + '" text-anchor="middle" font-size="13.5" fill="#b91c1c" transform="rotate(-90 634 ' + ((roadTop + wzBottom) / 2) + ')">作業帯幅 ' + numLabel(data.workWidth) + " m</text>";
+  s += '<line x1="' + wzX0 + '" y1="452" x2="' + wzX1 + '" y2="452" stroke="#555" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)" />';
+  s += '<line x1="' + wzX0 + '" y1="' + (roadBottom + 42) + '" x2="' + wzX0 + '" y2="460" stroke="#999" stroke-width="1" />';
+  s += '<line x1="' + wzX1 + '" y1="' + (roadBottom + 42) + '" x2="' + wzX1 + '" y2="460" stroke="#999" stroke-width="1" />';
+  s += '<text x="' + ((wzX0 + wzX1) / 2) + '" y="478" text-anchor="middle" font-size="14" fill="#333">作業帯延長 ' + numLabel(data.workLength) + " m</text>";
+  s += '<text x="' + roadX0 + '" y="104" font-size="13.5" fill="#555">車線数：' + data.lanes + "車線</text>";
+  s += "</svg>";
+  h += s;
+
+  var rows = [
+    ["歩道", data.hasSidewalk ? "あり（道路の両側に歩道帯）" : "なし（車道の外側は路肩・敷地境界）"],
+    ["歩行者対策", data.hasSidewalk ? "歩道に歩行者の通路を確保する" : "路肩側に歩行者通路を確保し、誘導員が歩行者を誘導する"],
+    ["規制方法", data.regulation]
+  ];
+  if (data.purposePreset === "生コン打設") rows.push(["配置車両", "ポンプ車・ミキサー車 各1台（作業帯内に配置）"]);
+  else if (data.purposePreset === "資材搬入出") rows.push(["配置車両", "トラック 1台（作業帯内に配置）"]);
+  rows.push(["交通誘導員", data.guards + " 名（作業帯の両端に配置）"]);
+  rows.push(["保安施設", "カラーコーン・矢印板を作業帯の周囲に設置"]);
+
+  h += '<table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:15px"><tbody>';
+  rows.forEach(function (r) {
+    h += '<tr><td style="width:132px;background:#f3f3f3;border:1px solid #111;padding:9px 10px;text-align:center;font-weight:600">' + esc(r[0]) + '</td><td style="border:1px solid #111;padding:9px 14px">' + esc(r[1]) + "</td></tr>";
+  });
+  h += "</tbody></table>";
+  h += '<p style="font-size:12.5px;color:#444;margin-top:16px;line-height:1.8">※ 本図は入力した幅員・作業帯寸法に基づく概略図です。現場の形状に合わせて提出前にご確認ください。</p>';
+  return h + sheetClose();
+}
+
+/* ------------------------------ 案内図・迂回路図 ------------------------------ */
+function mapPlaceholderHTML(address) {
+  return '<div style="width:' + SHEET_MAP_W + "px;height:" + SHEET_MAP_H + 'px;border:1.5px solid #111;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#555;box-sizing:border-box;padding:0 48px;text-align:center">'
+    + '<p style="font-size:17px;font-weight:700;margin:0;color:#111">地図を取得できていません</p>'
+    + '<p style="font-size:14px;margin:0;line-height:1.8">住所：' + esc(address || "（未入力）") + "<br />入力画面の「案内図・迂回路図」で地図が表示されることを確認してから印刷してください。</p></div>";
+}
+function mapSheetHeaderHTML(title, data) {
+  return '<h2 style="text-align:center;font-size:25px;font-weight:700;letter-spacing:8px;margin:2px 0 12px">' + title + "</h2>"
+    + '<p style="font-size:15px;margin:0 0 4px">現場名：' + esc(blankText(data.siteName)) + "</p>"
+    + '<p style="font-size:15px;margin:0 0 4px">場所：' + esc(blankText(data.siteAddress)) + "</p>"
+    + '<p style="font-size:14.5px;margin:0 0 12px">期間：' + esc(wareki(data.startDate)) + " 〜 " + esc(wareki(data.endDate)) + "　／　作業時間：" + esc(timeLabel(data.startTime)) + " 〜 " + esc(timeLabel(data.endTime)) + "</p>";
+}
+function guideMapSheetHTML(data, geo) {
+  var h = sheetOpen();
+  h += mapSheetHeaderHTML("案 内 図", data);
+  if (geo) {
+    h += mapCanvasHTML(geo, { guideMarkers: data.guideMarkers, showGuideMarkers: true, sitePinPos: data.sitePinPos, siteLabelPos: data.siteLabelPos });
+  } else {
+    h += mapPlaceholderHTML(data.siteAddress);
+  }
+  h += '<p style="font-size:13px;margin-top:14px;line-height:1.8">※ 地図上の赤い丸印と「現場」の表示が、現場（' + esc(blankText(data.siteAddress)) + "）の位置です。地図は住所から自動作成しています。"
+    + (data.guideMarkers.length > 0 ? " 橙色の帯が作業帯、黒い丸印とラベルが誘導員の配置位置です。" : "") + "</p>";
+  return h + sheetClose();
+}
+function detourMapSheetHTML(data, geo) {
+  var hasDetour = data.detourArrows.length >= 1;
+  var hasClosure = data.closurePoints.length >= 2;
+  var h = sheetOpen();
+  h += mapSheetHeaderHTML("迂 回 路 図", data);
+  if (geo) {
+    h += mapCanvasHTML(geo, { sitePinPos: data.sitePinPos, siteLabelPos: data.siteLabelPos, detourArrows: data.detourArrows, closurePoints: data.closurePoints, showRoutes: true });
+  } else {
+    h += mapPlaceholderHTML(data.siteAddress);
+  }
+  var cellK = "width:150px;border:1px solid #111;padding:8px 10px;text-align:center;font-weight:600";
+  var cellV = "border:1px solid #111;padding:8px 14px";
+  h += '<table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:14.5px"><tbody>';
+  h += '<tr><td style="' + cellK + ';background:#fef2f2;color:#b91c1c">現場</td><td style="' + cellV + '">地図上の赤い丸印と「現場」の表示の位置</td></tr>';
+  h += '<tr><td style="' + cellK + ';background:#eff6ff;color:#1d4ed8">迂回路</td><td style="' + cellV + '">青い矢印の向きに従って通行してください（両矢印は双方向通行可、片矢印は一方向のみ）</td></tr>';
+  h += '<tr><td style="' + cellK + ';background:#fef2f2;color:#b91c1c">通行止め区間</td><td style="' + cellV + '">' + esc(wareki(data.startDate)) + " 〜 " + esc(wareki(data.endDate)) + "　各日" + esc(timeLabel(data.startTime)) + " 〜 " + esc(timeLabel(data.endTime)) + "（車両通行止め）</td></tr>";
+  h += "</tbody></table>";
+  if (!hasDetour || !hasClosure) {
+    var msg = !hasDetour && !hasClosure ? "迂回路の矢印と通行止め区間の線が未入力です。" : !hasDetour ? "迂回路の矢印が未配置です。" : "通行止め区間の線が未入力です。";
+    h += '<p style="font-size:13px;color:#b45309;margin-top:12px;line-height:1.8">※ ' + msg + "入力画面の地図で矢印の配置と線の入力をしてから印刷してください。</p>";
+  }
+  return h + sheetClose();
+}
+</script>
+<script>
+"use strict";
+/* =====================================================================
+   PDF生成：window.print に頼らず、シートを画像化してA4 PDFを直接作る
+   ===================================================================== */
+var A4_PT = { width: 595.28, height: 841.89 };
+function concatBytes(chunks) {
+  var total = chunks.reduce(function (n, c) { return n + c.length; }, 0);
+  var out = new Uint8Array(total), offset = 0;
+  chunks.forEach(function (c) { out.set(c, offset); offset += c.length; });
+  return out;
+}
+function canvasToJpegBytes(canvas, quality) {
+  return new Promise(function (resolve, reject) {
+    if (canvas.toBlob) {
+      canvas.toBlob(function (blob) {
+        if (blob) { blob.arrayBuffer().then(function (buf) { resolve(new Uint8Array(buf)); }, reject); return; }
+        fallback();
+      }, "image/jpeg", quality);
+    } else fallback();
+    function fallback() {
+      try {
+        var dataUrl = canvas.toDataURL("image/jpeg", quality);
+        var base64 = dataUrl.slice(dataUrl.indexOf(",") + 1);
+        var bin = atob(base64);
+        var bytes = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        resolve(bytes);
+      } catch (e) { reject(e); }
+    }
+  });
+}
+function buildPdf(pages) {
+  if (!pages.length) throw new Error("PDFにするページがありません");
+  var encoder = new TextEncoder();
+  var chunks = [], offsets = [], length = 0;
+  function push(chunk) {
+    var bytes = typeof chunk === "string" ? encoder.encode(chunk) : chunk;
+    chunks.push(bytes); length += bytes.length;
+  }
+  function beginObject(n) { offsets[n] = length; push(n + " 0 obj\n"); }
+  push("%PDF-1.4\n%âãÏÓ\n");
+  var pagesObjectNum = 2, firstPageObjectNum = 3;
+  function pageObjectNum(i) { return firstPageObjectNum + i * 3; }
+  beginObject(1);
+  push("<< /Type /Catalog /Pages " + pagesObjectNum + " 0 R >>\nendobj\n");
+  beginObject(pagesObjectNum);
+  var kids = pages.map(function (_, i) { return pageObjectNum(i) + " 0 R"; }).join(" ");
+  push("<< /Type /Pages /Kids [" + kids + "] /Count " + pages.length + " >>\nendobj\n");
+  pages.forEach(function (page, i) {
+    var pageNum = pageObjectNum(i), contentNum = pageNum + 1, imageNum = pageNum + 2;
+    beginObject(pageNum);
+    push("<< /Type /Page /Parent " + pagesObjectNum + " 0 R /MediaBox [0 0 " + A4_PT.width + " " + A4_PT.height + "] /Resources << /XObject << /Im0 " + imageNum + " 0 R >> >> /Contents " + contentNum + " 0 R >>\nendobj\n");
+    var content = "q\n" + A4_PT.width + " 0 0 " + A4_PT.height + " 0 0 cm\n/Im0 Do\nQ\n";
+    var contentBytes = encoder.encode(content);
+    beginObject(contentNum);
+    push("<< /Length " + contentBytes.length + " >>\nstream\n");
+    push(contentBytes);
+    push("endstream\nendobj\n");
+    beginObject(imageNum);
+    push("<< /Type /XObject /Subtype /Image /Width " + page.widthPx + " /Height " + page.heightPx + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + page.jpeg.length + " >>\nstream\n");
+    push(page.jpeg);
+    push("\nendstream\nendobj\n");
+  });
+  var xrefStart = length;
+  var objectCount = firstPageObjectNum + pages.length * 3;
+  var xref = "xref\n0 " + objectCount + "\n0000000000 65535 f \n";
+  for (var n = 1; n < objectCount; n++) xref += String(offsets[n] || 0).padStart(10, "0") + " 00000 n \n";
+  push(xref + "trailer\n<< /Size " + objectCount + " /Root 1 0 R >>\nstartxref\n" + xrefStart + "\n%%EOF\n");
+  var bytes = concatBytes(chunks);
+  return new Blob([bytes.buffer], { type: "application/pdf" });
+}
+</script>
+<script>
+"use strict";
+/* =====================================================================
+   アプリ本体：localStorage保存・フォーム制御・編集地図・プレビュー
+   ===================================================================== */
+var LS_SETTINGS = "gk-road-permit-settings-v1";
+var LS_DRAFT = "gk-road-permit-draft-v1";
+
+function loadJSON(key) {
+  try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch (e) { return null; }
+}
+function saveJSON(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* 保存できない環境ではそのまま続行 */ }
+}
+
+var settings = defaultSettings();
+(function () {
+  var raw = loadJSON(LS_SETTINGS);
+  if (raw && typeof raw === "object") {
+    Object.keys(settings).forEach(function (k) { if (typeof raw[k] === "string") settings[k] = raw[k]; });
+  }
+})();
+var draft = normalizeDraft(loadJSON(LS_DRAFT));
+
+var $ = function (id) { return document.getElementById(id); };
+var els = {
+  summaryName: $("summary-name"), summarySub: $("summary-sub"),
+  stationSuggestWrap: $("station-suggest-wrap"), stationSuggestTitle: $("station-suggest-title"),
+  stationSuggestChips: $("station-suggest-chips"), stationSuggestEmpty: $("station-suggest-empty"),
+  stationSearch: $("station-search"), stationSelect: $("station-select"), stationCountNote: $("station-count-note"),
+  policeCustomField: $("police-custom-field"), purposeCustomField: $("purpose-custom-field"),
+  daysNote: $("days-note"), geoStatus: $("geo-status"), gmapLink: $("gmap-link"),
+  guideEditor: $("guide-editor"), guideUnavailable: $("guide-editor-unavailable"),
+  guideMap: $("guide-map"), guideMapInner: $("guide-map-inner"), guideHelp: $("guide-help"), guideCounts: $("guide-counts"),
+  detourToggleWrap: $("detour-toggle-wrap"), detourEditor: $("detour-editor"), detourMsg: $("detour-msg"),
+  detourMap: $("detour-map"), detourMapInner: $("detour-map-inner"), detourHelp: $("detour-help"), detourCounts: $("detour-counts"),
+  ddirGroup: $("ddir-group"),
+  previewTabs: $("preview-tabs"), scaledWrap: $("scaled-wrap"), scaledInner: $("scaled-inner"), previewNote: $("preview-note"),
+  sheetsAll: $("sheets-all"), screenRoot: $("screen-root"),
+  missingLine: $("missing-line"), pdfBtn: $("pdf-btn"), pdfDone: $("pdf-done"),
+  pdfOpen: $("pdf-open"), pdfSave: $("pdf-save"), pdfError: $("pdf-error"),
+  saveSettingsBtn: $("save-settings-btn")
+};
+
+var stationPrefOverride = null;
+var currentPage = 0;
+var savedAt = null;
+var geoState = { kind: "idle", geo: null };
+var geoTimer = null;
+var geoRetry = 0;
+var lastGeoQuery = null;
+var pdfState = { kind: "idle" };
+var pdfUrl = null;
+
+function currentData() { return toPermitData(settings, draft); }
+
+/* ------------------------------ 入力の読み書き ------------------------------ */
+var settingInputs = {
+  companyName: $("s-companyName"), companyAddress: $("s-companyAddress"),
+  representative: $("s-representative"), phone: $("s-phone"),
+  managerName: $("s-managerName"), managerAddress: $("s-managerAddress"), managerPhone: $("s-managerPhone")
+};
+var draftInputs = {
+  policeCustom: $("police-custom"), applicationDate: $("application-date"),
+  purposeCustom: $("purpose-custom"), siteAddress: $("site-address"), siteName: $("site-name"),
+  startDate: $("start-date"), endDate: $("end-date"), startTime: $("start-time"), endTime: $("end-time"),
+  guards: $("guards"), roadWidth: $("road-width"), lanes: $("lanes"),
+  workWidth: $("work-width"), workLength: $("work-length")
+};
+function fillInputs() {
+  Object.keys(settingInputs).forEach(function (k) { settingInputs[k].value = settings[k]; });
+  Object.keys(draftInputs).forEach(function (k) { draftInputs[k].value = draft[k] || ""; });
+  $("purpose-select").value = draft.purposePreset;
+  $("regulation-select").value = draft.regulation;
+  els.stationSelect.value = draft.policeStation;
+}
+
+/* ------------------------------ 下書き自動保存 ------------------------------ */
+var draftSaveTimer = null;
+function scheduleDraftSave() {
+  if (draftSaveTimer) clearTimeout(draftSaveTimer);
+  draftSaveTimer = setTimeout(function () {
+    saveJSON(LS_DRAFT, draft);
+    savedAt = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+    renderSummary();
+  }, 900);
+}
+function setDraft(patch) {
+  Object.assign(draft, patch);
+  scheduleDraftSave();
+  updateAll();
+}
+
+/* ------------------------------ 警察署セクション ------------------------------ */
+function currentStationPref() {
+  return stationPrefOverride || detectPrefecture(draft.siteAddress) || prefectureOfStation(draft.policeStation) || "東京都";
+}
+function renderStation() {
+  var suggestions = suggestStationsForAddress(draft.siteAddress);
+  if (suggestions.length) {
+    els.stationSuggestWrap.hidden = false;
+    els.stationSuggestEmpty.hidden = true;
+    els.stationSuggestTitle.textContent = "住所（" + draft.siteAddress.trim() + "）からの候補";
+    els.stationSuggestChips.innerHTML = "";
+    suggestions.forEach(function (st) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.textContent = st.name;
+      b.setAttribute("aria-label", "候補から選ぶ：" + st.name);
+      b.setAttribute("aria-pressed", draft.policeStation === st.name ? "true" : "false");
+      b.addEventListener("click", function () {
+        stationPrefOverride = st.pref;
+        setDraft({ policeStation: st.name });
+        els.stationSelect.value = st.name;
+      });
+      els.stationSuggestChips.appendChild(b);
+    });
+  } else {
+    els.stationSuggestWrap.hidden = true;
+    els.stationSuggestEmpty.hidden = false;
+  }
+  var pref = currentStationPref();
+  document.querySelectorAll("#station-pref-btns [data-pref]").forEach(function (b) {
+    b.setAttribute("aria-pressed", b.getAttribute("data-pref") === pref ? "true" : "false");
+  });
+  var base = stationsForPrefecture(pref).map(function (s) { return s.name; });
+  var q = els.stationSearch.value.trim();
+  var filtered = q ? base.filter(function (n) { return n.indexOf(q) >= 0; }) : base;
+  if (draft.policeStation !== OTHER && draft.policeStation && filtered.indexOf(draft.policeStation) < 0) {
+    filtered = [draft.policeStation].concat(filtered);
+  }
+  var html = '<option value="">選択してください</option>';
+  filtered.forEach(function (n) { html += '<option value="' + esc(n) + '">' + esc(n) + "</option>"; });
+  html += '<option value="' + OTHER + '">' + OTHER + "</option>";
+  els.stationSelect.innerHTML = html;
+  els.stationSelect.value = draft.policeStation;
+  els.stationCountNote.textContent = pref + "の" + stationsForPrefecture(pref).length + "署から表示中"
+    + (q ? "（「" + q + "」で絞り込み：" + filtered.length + "件）" : "")
+    + "。東京・埼玉・神奈川の全195署を収録しています。";
+  els.policeCustomField.hidden = draft.policeStation !== OTHER;
+  els.purposeCustomField.hidden = draft.purposePreset !== OTHER;
+}
+
+/* ------------------------------ サマリー・未入力 ------------------------------ */
+function renderSummary() {
+  var data = currentData();
+  var days = dayCount(data.startDate, data.endDate);
+  els.summaryName.textContent = draft.siteName.trim() || "現場名未入力";
+  els.summarySub.textContent = (draft.siteAddress.trim() || "住所未入力")
+    + (days > 0 ? "　／　" + days + "日間" : "")
+    + (savedAt ? "　／　下書き保存 " + savedAt : "");
+  els.daysNote.textContent = days > 0
+    ? "期間は " + days + " 日間です（頭紙と案内図に自動で入ります）"
+    : "開始日・終了日を入れると日数が自動計算されます";
+  var missing = [];
+  if (!settings.companyName.trim()) missing.push("会社名");
+  if (!settings.companyAddress.trim()) missing.push("会社の住所");
+  if (!settings.representative.trim()) missing.push("代表者名");
+  if (!settings.phone.trim()) missing.push("電話番号");
+  if (!data.station.trim()) missing.push("管轄警察署");
+  if (!data.purpose.trim()) missing.push("使用の目的");
+  if (!data.siteAddress.trim()) missing.push("使用する場所");
+  if (!data.startDate || !data.endDate || days === 0) missing.push("使用の期間");
+  if (missing.length) {
+    els.missingLine.hidden = false;
+    els.missingLine.textContent = "未入力：" + missing.join("・");
+  } else els.missingLine.hidden = true;
+}
+
+/* ------------------------------ 地図取得 ------------------------------ */
+function renderGeoStatus() {
+  if (geoState.kind === "loading") els.geoStatus.textContent = "住所から地図を取得中…";
+  else if (geoState.kind === "ok") els.geoStatus.textContent = "地図を取得しました。下の編集地図で作業帯・誘導員の配置と現場の位置を調整でき、そのままプレビュー「案内図」に入ります。別途PDFを用意する必要はありません。";
+  else if (geoState.kind === "error") els.geoStatus.textContent = "この住所では地図を取得できませんでした。住所の表記を確認してください（市区町村から番地まで入れると取得しやすくなります）。";
+  else els.geoStatus.textContent = "「使用する場所（住所）」を入れると、案内図の地図が自動で作成されます。";
+  els.gmapLink.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(draft.siteAddress || "");
+  var hasGeo = geoState.kind === "ok" && !!geoState.geo;
+  els.guideEditor.style.display = hasGeo ? "" : "none";
+  els.guideUnavailable.style.display = hasGeo ? "none" : "";
+}
+function triggerGeocode(immediate) {
+  var q = draft.siteAddress.trim();
+  if (!q) { geoState = { kind: "idle", geo: null }; lastGeoQuery = null; renderGeoStatus(); renderEditors(); renderSheets(); return; }
+  if (q === lastGeoQuery && geoState.kind === "ok") return;
+  if (geoTimer) clearTimeout(geoTimer);
+  var run = function () {
+    lastGeoQuery = q;
+    geoState = { kind: "loading", geo: geoState.geo };
+    renderGeoStatus();
+    geocodeAddress(q, function (geo) {
+      if (draft.siteAddress.trim() !== q) return;
+      geoState = geo ? { kind: "ok", geo: geo } : { kind: "error", geo: null };
+      renderGeoStatus(); renderEditors(); renderSheets();
+    });
+  };
+  if (immediate) run(); else geoTimer = setTimeout(run, 700);
+}
+
+/* ------------------------------ シート描画・プレビュー ------------------------------ */
+function allSheetsHTML(data) {
+  var sheets = [
+    { name: "頭紙", html: applicationSheetHTML(data) },
+    { name: "保安図", html: diagramSheetHTML(data) },
+    { name: "案内図", html: guideMapSheetHTML(data, geoState.geo) }
+  ];
+  if (data.hasDetourSheet) sheets.push({ name: "迂回路図", html: detourMapSheetHTML(data, geoState.geo) });
+  return sheets;
+}
+function renderSheets() {
+  var data = currentData();
+  var sheets = allSheetsHTML(data);
+  if (currentPage > sheets.length - 1) currentPage = sheets.length - 1;
+  els.previewTabs.innerHTML = "";
+  sheets.forEach(function (sh, i) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "toggle-btn"; b.textContent = sh.name;
+    b.setAttribute("role", "tab");
+    b.setAttribute("aria-label", "プレビュー：" + sh.name);
+    b.setAttribute("aria-selected", currentPage === i ? "true" : "false");
+    b.setAttribute("aria-pressed", currentPage === i ? "true" : "false");
+    b.addEventListener("click", function () { currentPage = i; renderSheets(); });
+    els.previewTabs.appendChild(b);
+  });
+  els.scaledInner.innerHTML = sheets[currentPage].html;
+  els.sheetsAll.innerHTML = sheets.map(function (sh) { return sh.html; }).join("");
+  els.previewNote.innerHTML = "入力した内容がそのまま書類に入ります。下の「PDFにする」で、このレイアウトのままA4で" + sheets.length + "ページのPDFになります。"
+    + (currentPage === 0 ? ' 頭紙は警視庁の<a href="https://www.keishicho.metro.tokyo.lg.jp/tetsuzuki/kotsu/application/shiyo_kyoka.html" target="_blank" rel="noreferrer" style="color:inherit;text-decoration:underline">道路使用許可申請書（別記様式第六）</a>の様式そのままです。' : "");
+  updateScaledPreview();
+}
+function updateScaledPreview() {
+  var w = els.scaledWrap.clientWidth;
+  if (!w) return;
+  var scale = w / 794;
+  els.scaledInner.style.transform = "scale(" + scale + ")";
+  els.scaledWrap.style.height = Math.round(1123 * scale) + "px";
+}
+
+/* ------------------------------ 編集地図の共通処理 ------------------------------ */
+function setupScaledEditor(wrap, inner, renderFn) {
+  var state = { scale: 0, displayW: 0 };
+  function resize() {
+    state.displayW = wrap.clientWidth;
+    state.scale = state.displayW > 0 ? state.displayW / SHEET_MAP_W : 0;
+    wrap.style.height = state.displayW > 0 ? Math.round(state.displayW * (SHEET_MAP_H / SHEET_MAP_W)) + "px" : "";
+    inner.style.width = SHEET_MAP_W + "px";
+    inner.style.height = SHEET_MAP_H + "px";
+    inner.style.transform = "scale(" + state.scale + ")";
+    renderFn();
+  }
+  new ResizeObserver(resize).observe(wrap);
+  return state;
+}
+function toSheetPx(wrap, scale, e) {
+  if (!scale) return null;
+  var rect = wrap.getBoundingClientRect();
+  if (!rect.width || !rect.height) return null;
+  return { x: (e.clientX - rect.left) / scale, y: (e.clientY - rect.top) / scale };
+}
+function clamp01(v) { return Math.min(1, Math.max(0, v)); }
+var ROTATE_STEP = 45, DRAG_THRESHOLD_PX = 7, ARROW_HIT_PX = 34;
+
+/* ------------------------------ 案内図エディタ ------------------------------ */
+var guideMode = "work";
+var guideDrag = null, guideDraggingIndex = -1, guideDraggingSite = null;
+var guideEditorScale = null;
+
+function renderGuideEditor() {
+  if (!guideEditorScale || geoState.kind !== "ok" || !geoState.geo) return;
+  els.guideMapInner.innerHTML = mapCanvasHTML(geoState.geo, {
+    guideMarkers: draft.guideMarkers, showGuideMarkers: true,
+    highlightGuideIndex: guideDraggingIndex,
+    sitePinPos: draft.sitePinPos, siteLabelPos: draft.siteLabelPos,
+    highlightSite: guideDraggingSite
+  });
+  var workCount = draft.guideMarkers.filter(function (m) { return m.kind === "work"; }).length;
+  var guardCount = draft.guideMarkers.length - workCount;
+  var siteMoved = Math.abs(draft.sitePinPos.x - 0.5) > 0.001 || Math.abs(draft.sitePinPos.y - 0.5) > 0.001
+    || Math.abs(draft.siteLabelPos.x - 0.5) > 0.001 || Math.abs(draft.siteLabelPos.y - 0.408) > 0.001;
+  els.guideCounts.textContent = "作業帯：" + workCount + "か所 ／ 誘導員：" + guardCount + "名" + (siteMoved ? " ／ 現場の位置は移動済み" : "");
+  $("guide-reset-site").disabled = !siteMoved;
+  $("guide-reset-site").style.opacity = siteMoved ? "" : "0.4";
+  els.guideHelp.textContent = guideMode === "deleteMarker"
+    ? "消したいマーカーをタップすると、そのマーカーだけが削除されます。現場の丸印とラベルは削除されません（ドラッグで移動はできます）。"
+    : "地図をタップすると、その場所にマーカーが1個置かれます。置いたマーカーは指でドラッグ（スライド）すると位置を動かせます。作業帯は動かさずタップすると45度ずつ回転します。赤い丸印（現場）と「現場」ラベルは、どのモードでもそれぞれドラッグで動かせます。ラベルだけをずらせば、作業帯の文字などとの重なりを避けられます。この編集地図は案内図のシートとまったく同じ縮尺のため、ここで合わせた位置が印刷でもずれません。";
+}
+function guideEmit(markers, pin, label) {
+  draft.guideMarkers = markers; draft.sitePinPos = pin; draft.siteLabelPos = label;
+  scheduleDraftSave(); renderGuideEditor(); renderSheets();
+}
+function guideHitMarker(px, py) {
+  for (var i = draft.guideMarkers.length - 1; i >= 0; i--) {
+    var m = draft.guideMarkers[i]; if (!m) continue;
+    var cx = m.x * SHEET_MAP_W, cy = m.y * SHEET_MAP_H;
+    if (m.kind === "work") {
+      var rad = ((m.angle || 0) * Math.PI) / 180;
+      var dx = px - cx, dy = py - cy;
+      var rx = dx * Math.cos(-rad) - dy * Math.sin(-rad);
+      var ry = dx * Math.sin(-rad) + dy * Math.cos(-rad);
+      if (Math.abs(rx) <= 44 && Math.abs(ry) <= 20) return i;
+    } else if (Math.hypot(px - cx, py - cy) <= 38) return i;
+  }
+  return -1;
+}
+function initGuideEditor() {
+  guideEditorScale = setupScaledEditor(els.guideMap, els.guideMapInner, renderGuideEditor);
+  document.querySelectorAll("[data-gmode]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      guideMode = b.getAttribute("data-gmode");
+      document.querySelectorAll("[data-gmode]").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      renderGuideEditor();
+    });
+  });
+  $("guide-undo").addEventListener("click", function () { guideEmit(draft.guideMarkers.slice(0, -1), draft.sitePinPos, draft.siteLabelPos); });
+  $("guide-clear").addEventListener("click", function () { guideEmit([], draft.sitePinPos, draft.siteLabelPos); });
+  $("guide-reset-site").addEventListener("click", function () {
+    guideEmit(draft.guideMarkers, { x: DEFAULT_SITE_PIN_POS.x, y: DEFAULT_SITE_PIN_POS.y }, { x: DEFAULT_SITE_LABEL_POS.x, y: DEFAULT_SITE_LABEL_POS.y });
+  });
+  els.guideMap.addEventListener("pointerdown", function (e) {
+    if (geoState.kind !== "ok") return;
+    var p = toSheetPx(els.guideMap, guideEditorScale.scale, e);
+    if (!p) return;
+    var pt = { x: clamp01(p.x / SHEET_MAP_W), y: clamp01(p.y / SHEET_MAP_H) };
+    var lx = draft.siteLabelPos.x * SHEET_MAP_W, ly = draft.siteLabelPos.y * SHEET_MAP_H;
+    if (Math.abs(p.x - lx) <= 42 && Math.abs(p.y - ly) <= 24) {
+      guideDrag = { kind: "siteLabel", index: -1, offsetX: lx - p.x, offsetY: ly - p.y, startX: p.x, startY: p.y, moved: false, isNew: false };
+      guideDraggingSite = "label";
+      els.guideMap.setPointerCapture(e.pointerId); renderGuideEditor(); return;
+    }
+    var cx = draft.sitePinPos.x * SHEET_MAP_W, cy = draft.sitePinPos.y * SHEET_MAP_H;
+    if (Math.hypot(p.x - cx, p.y - cy) <= 36) {
+      guideDrag = { kind: "sitePin", index: -1, offsetX: cx - p.x, offsetY: cy - p.y, startX: p.x, startY: p.y, moved: false, isNew: false };
+      guideDraggingSite = "pin";
+      els.guideMap.setPointerCapture(e.pointerId); renderGuideEditor(); return;
+    }
+    var hit = guideHitMarker(p.x, p.y);
+    if (hit >= 0) {
+      if (guideMode === "deleteMarker") {
+        guideEmit(draft.guideMarkers.filter(function (_, i) { return i !== hit; }), draft.sitePinPos, draft.siteLabelPos);
+        return;
+      }
+      var m = draft.guideMarkers[hit];
+      guideDrag = { kind: "marker", index: hit, offsetX: m.x * SHEET_MAP_W - p.x, offsetY: m.y * SHEET_MAP_H - p.y, startX: p.x, startY: p.y, moved: false, isNew: false };
+      guideDraggingIndex = hit;
+      els.guideMap.setPointerCapture(e.pointerId); renderGuideEditor(); return;
+    }
+    if (guideMode === "work" || guideMode === "guard") {
+      var next = draft.guideMarkers.concat([{ x: pt.x, y: pt.y, kind: guideMode, angle: 0 }]);
+      guideDrag = { kind: "marker", index: next.length - 1, offsetX: 0, offsetY: 0, startX: p.x, startY: p.y, moved: false, isNew: true };
+      guideDraggingIndex = next.length - 1;
+      els.guideMap.setPointerCapture(e.pointerId);
+      guideEmit(next, draft.sitePinPos, draft.siteLabelPos);
+    }
+  });
+  els.guideMap.addEventListener("pointermove", function (e) {
+    if (!guideDrag) return;
+    var p = toSheetPx(els.guideMap, guideEditorScale.scale, e);
+    if (!p) return;
+    if (!guideDrag.moved) {
+      if (Math.hypot(p.x - guideDrag.startX, p.y - guideDrag.startY) < DRAG_THRESHOLD_PX) return;
+      guideDrag.moved = true;
+    }
+    var nx = clamp01((p.x + guideDrag.offsetX) / SHEET_MAP_W);
+    var ny = clamp01((p.y + guideDrag.offsetY) / SHEET_MAP_H);
+    if (guideDrag.kind === "sitePin") guideEmit(draft.guideMarkers, { x: nx, y: ny }, draft.siteLabelPos);
+    else if (guideDrag.kind === "siteLabel") guideEmit(draft.guideMarkers, draft.sitePinPos, { x: nx, y: ny });
+    else guideEmit(draft.guideMarkers.map(function (m, i) { return i === guideDrag.index ? { x: nx, y: ny, kind: m.kind, angle: m.angle } : m; }), draft.sitePinPos, draft.siteLabelPos);
+  });
+  function guideUp() {
+    var drag = guideDrag;
+    guideDrag = null; guideDraggingIndex = -1; guideDraggingSite = null;
+    if (!drag || drag.moved || drag.isNew) { renderGuideEditor(); return; }
+    if (drag.kind === "marker") {
+      var m = draft.guideMarkers[drag.index];
+      if (m && m.kind === "work") {
+        guideEmit(draft.guideMarkers.map(function (cur, i) { return i === drag.index ? { x: cur.x, y: cur.y, kind: cur.kind, angle: ((cur.angle || 0) + ROTATE_STEP) % 360 } : cur; }), draft.sitePinPos, draft.siteLabelPos);
+        return;
+      }
+    }
+    renderGuideEditor();
+  }
+  els.guideMap.addEventListener("pointerup", guideUp);
+  els.guideMap.addEventListener("pointercancel", function () { guideDrag = null; guideDraggingIndex = -1; guideDraggingSite = null; renderGuideEditor(); });
+}
+
+/* ------------------------------ 迂回路図エディタ ------------------------------ */
+var detourMode = "detour";
+var detourNewDirection = "both";
+var detourDrag = null, detourDraggingIndex = -1;
+var detourEditorScale = null;
+
+function renderDetourSection() {
+  var data = currentData();
+  els.detourToggleWrap.hidden = !data.isClosure;
+  els.detourEditor.hidden = !data.hasDetourSheet;
+  $("detour-yes").setAttribute("aria-pressed", draft.includeDetour !== false ? "true" : "false");
+  $("detour-no").setAttribute("aria-pressed", draft.includeDetour === false ? "true" : "false");
+  if (!data.isClosure) els.detourMsg.textContent = "規制方法で「車両通行止め」を選ぶと、迂回路図を付けるかどうかを選べるようになります。";
+  else if (!data.hasDetourSheet) els.detourMsg.textContent = "迂回路図は付けない設定です。迂回路図のページは追加されず、頭紙の添付書類欄にも記載されません。";
+  else els.detourMsg.textContent = geoState.kind === "ok" ? "" : "迂回路図の編集地図は、住所から地図を取得できると表示されます。";
+  els.detourMsg.style.display = els.detourMsg.textContent ? "" : "none";
+  els.ddirGroup.style.display = detourMode === "detour" ? "" : "none";
+  renderDetourEditor();
+}
+function renderDetourEditor() {
+  if (!detourEditorScale || geoState.kind !== "ok" || !geoState.geo) return;
+  if (!currentData().hasDetourSheet) return;
+  els.detourMapInner.innerHTML = mapCanvasHTML(geoState.geo, {
+    detourArrows: draft.detourArrows, closurePoints: draft.closurePoints, showRoutes: true,
+    highlightArrowIndex: detourDraggingIndex,
+    sitePinPos: draft.sitePinPos, siteLabelPos: draft.siteLabelPos
+  });
+  var bothCount = draft.detourArrows.filter(function (a) { return a.direction !== "single"; }).length;
+  var singleCount = draft.detourArrows.length - bothCount;
+  els.detourCounts.textContent = "迂回路の矢印：" + draft.detourArrows.length + "個（両矢印" + bothCount + "個・片矢印" + singleCount + "個）／ 通行止め区間：" + draft.closurePoints.length + "点";
+  els.detourHelp.textContent = detourMode === "detour"
+    ? "地図をタップすると、その場所に迂回路の矢印が1個置かれます（線はつながりません）。置いた矢印は指でドラッグ（スライド）すると位置を動かせます。動かさずタップすると45度ずつ回転するので、道路の向きに合わせてください。地図の中心の赤い丸印と「現場」の表示が現場位置です。この編集地図は迂回路図のシートとまったく同じ縮尺で描かれているため、ここで合わせた位置が印刷でもずれません。"
+    : detourMode === "closure"
+      ? "地図をタップすると点が打たれ、点同士が赤い線でつながって通行止め区間になります。"
+      : detourMode === "toggleDirection"
+        ? "切り替えたい矢印をタップすると、両矢印（双方向）⇔片矢印（一方向）が切り替わります。ドラッグすると位置も動かせます。"
+        : "消したい矢印をタップすると、その矢印だけが削除されます。";
+}
+function detourEmit(arrows, closure) {
+  draft.detourArrows = arrows; draft.closurePoints = closure;
+  scheduleDraftSave(); renderDetourEditor(); renderSheets();
+}
+function nearestArrowIndex(px, py) {
+  var best = -1, bestDist = ARROW_HIT_PX;
+  draft.detourArrows.forEach(function (a, i) {
+    var d = Math.hypot(a.x * SHEET_MAP_W - px, a.y * SHEET_MAP_H - py);
+    if (d <= bestDist) { bestDist = d; best = i; }
+  });
+  return best;
+}
+function initDetourEditor() {
+  detourEditorScale = setupScaledEditor(els.detourMap, els.detourMapInner, renderDetourEditor);
+  document.querySelectorAll("[data-dmode]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      detourMode = b.getAttribute("data-dmode");
+      document.querySelectorAll("[data-dmode]").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      renderDetourSection();
+    });
+  });
+  document.querySelectorAll("[data-ddir]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      detourNewDirection = b.getAttribute("data-ddir");
+      document.querySelectorAll("[data-ddir]").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    });
+  });
+  $("detour-yes").addEventListener("click", function () { setDraft({ includeDetour: true }); });
+  $("detour-no").addEventListener("click", function () { setDraft({ includeDetour: false }); });
+  $("detour-undo").addEventListener("click", function () {
+    if (detourMode === "closure") detourEmit(draft.detourArrows, draft.closurePoints.slice(0, -1));
+    else detourEmit(draft.detourArrows.slice(0, -1), draft.closurePoints);
+  });
+  $("detour-clear").addEventListener("click", function () { detourEmit([], []); });
+  els.detourMap.addEventListener("pointerdown", function (e) {
+    if (geoState.kind !== "ok") return;
+    var p = toSheetPx(els.detourMap, detourEditorScale.scale, e);
+    if (!p) return;
+    var pt = { x: clamp01(p.x / SHEET_MAP_W), y: clamp01(p.y / SHEET_MAP_H) };
+    if (detourMode === "closure") { detourEmit(draft.detourArrows, draft.closurePoints.concat([pt])); return; }
+    var hit = nearestArrowIndex(p.x, p.y);
+    if (detourMode === "deleteArrow") {
+      if (hit >= 0) detourEmit(draft.detourArrows.filter(function (_, i) { return i !== hit; }), draft.closurePoints);
+      return;
+    }
+    if (hit >= 0) {
+      var a = draft.detourArrows[hit];
+      detourDrag = { index: hit, offsetX: a.x * SHEET_MAP_W - p.x, offsetY: a.y * SHEET_MAP_H - p.y, startX: p.x, startY: p.y, moved: false, isNew: false };
+      detourDraggingIndex = hit;
+      els.detourMap.setPointerCapture(e.pointerId); renderDetourEditor(); return;
+    }
+    if (detourMode === "detour") {
+      var next = draft.detourArrows.concat([{ x: pt.x, y: pt.y, angle: 0, direction: detourNewDirection }]);
+      detourDrag = { index: next.length - 1, offsetX: 0, offsetY: 0, startX: p.x, startY: p.y, moved: false, isNew: true };
+      detourDraggingIndex = next.length - 1;
+      els.detourMap.setPointerCapture(e.pointerId);
+      detourEmit(next, draft.closurePoints);
+    }
+  });
+  els.detourMap.addEventListener("pointermove", function (e) {
+    if (!detourDrag) return;
+    var p = toSheetPx(els.detourMap, detourEditorScale.scale, e);
+    if (!p) return;
+    if (!detourDrag.moved) {
+      if (Math.hypot(p.x - detourDrag.startX, p.y - detourDrag.startY) < DRAG_THRESHOLD_PX) return;
+      detourDrag.moved = true;
+    }
+    var nx = clamp01((p.x + detourDrag.offsetX) / SHEET_MAP_W);
+    var ny = clamp01((p.y + detourDrag.offsetY) / SHEET_MAP_H);
+    detourEmit(draft.detourArrows.map(function (a, i) { return i === detourDrag.index ? { x: nx, y: ny, angle: a.angle, direction: a.direction } : a; }), draft.closurePoints);
+  });
+  function detourUp() {
+    var drag = detourDrag;
+    detourDrag = null; detourDraggingIndex = -1;
+    if (!drag || drag.moved || drag.isNew) { renderDetourEditor(); return; }
+    if (detourMode === "detour") {
+      detourEmit(draft.detourArrows.map(function (cur, i) { return i === drag.index ? { x: cur.x, y: cur.y, angle: (cur.angle + ROTATE_STEP) % 360, direction: cur.direction } : cur; }), draft.closurePoints);
+      return;
+    }
+    if (detourMode === "toggleDirection") {
+      detourEmit(draft.detourArrows.map(function (cur, i) { return i === drag.index ? { x: cur.x, y: cur.y, angle: cur.angle, direction: cur.direction === "single" ? "both" : "single" } : cur; }), draft.closurePoints);
+      return;
+    }
+    renderDetourEditor();
+  }
+  els.detourMap.addEventListener("pointerup", detourUp);
+  els.detourMap.addEventListener("pointercancel", function () { detourDrag = null; detourDraggingIndex = -1; renderDetourEditor(); });
+}
+
+/* ------------------------------ 編集地図の再描画フック ------------------------------ */
+function renderEditors() { renderGuideEditor(); renderDetourSection(); }
+
+/* ------------------------------ PDF生成 ------------------------------ */
+function setPdfState(st) {
+  pdfState = st;
+  if (st.kind === "working") {
+    els.pdfBtn.disabled = true;
+    els.pdfBtn.textContent = "PDFを作成中…（" + st.page + "/" + st.total + "ページ）";
+    els.pdfDone.hidden = true; els.pdfError.hidden = true;
+    els.screenRoot.classList.remove("pdf-done");
+  } else if (st.kind === "done") {
+    els.pdfBtn.disabled = false;
+    els.pdfBtn.textContent = "PDFを作り直す";
+    els.pdfDone.hidden = false; els.pdfError.hidden = true;
+    els.pdfOpen.href = st.url;
+    els.pdfSave.href = st.url;
+    els.pdfSave.setAttribute("download", st.fileName);
+    els.screenRoot.classList.add("pdf-done");
+    setTimeout(function () { els.pdfDone.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80);
+  } else if (st.kind === "error") {
+    els.pdfBtn.disabled = false;
+    els.pdfBtn.textContent = "PDFにする";
+    els.pdfDone.hidden = true; els.pdfError.hidden = false;
+    els.pdfError.textContent = st.message;
+    els.screenRoot.classList.remove("pdf-done");
+  } else {
+    els.pdfBtn.disabled = false;
+    els.pdfBtn.textContent = "PDFにする";
+    els.pdfDone.hidden = true; els.pdfError.hidden = true;
+    els.screenRoot.classList.remove("pdf-done");
+  }
+}
+function generatePdf() {
+  if (pdfState.kind === "working") return;
+  var sheetEls = Array.prototype.slice.call(els.sheetsAll.querySelectorAll(".a4-sheet"));
+  if (!sheetEls.length) {
+    setPdfState({ kind: "error", message: "書類の準備ができていません。少し待ってからもう一度お試しください。" });
+    return;
+  }
+  if (typeof htmlToImage === "undefined" || !htmlToImage.toPng) {
+    setPdfState({ kind: "error", message: "PDF作成用の部品を読み込めませんでした。通信環境を確認して、ページを再読み込みしてください。" });
+    return;
+  }
+  var total = sheetEls.length;
+  setPdfState({ kind: "working", page: 0, total: total });
+  var canvases = [];
+  var chain = Promise.resolve();
+  sheetEls.forEach(function (el, i) {
+    chain = chain.then(function () {
+      setPdfState({ kind: "working", page: i + 1, total: total });
+      return htmlToImage.toPng(el, { pixelRatio: 2, backgroundColor: "#ffffff", skipFonts: true, cacheBust: false }).then(function (dataUrl) {
+        return new Promise(function (resolve, reject) {
+          var img = new Image();
+          img.onload = function () {
+            var canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+            var ctx = canvas.getContext("2d");
+            if (!ctx) { reject(new Error("canvas context unavailable")); return; }
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            canvases.push(canvas);
+            resolve();
+          };
+          img.onerror = reject;
+          img.src = dataUrl;
+        });
+      });
+    });
+  });
+  chain.then(function () {
+    var pagePromises = canvases.map(function (canvas) {
+      return canvasToJpegBytes(canvas, 0.92).then(function (jpeg) {
+        return { jpeg: jpeg, widthPx: canvas.width, heightPx: canvas.height };
+      });
+    });
+    return Promise.all(pagePromises);
+  }).then(function (pages) {
+    var pdfBlob = buildPdf(pages);
+    var siteLabel = draft.siteName.trim() || draft.siteAddress.trim() || "申請書";
+    var fileName = "道路使用許可申請書_" + siteLabel + ".pdf";
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    pdfUrl = URL.createObjectURL(pdfBlob);
+    setPdfState({ kind: "done", url: pdfUrl, fileName: fileName });
+    var a = document.createElement("a");
+    a.href = pdfUrl; a.download = fileName;
+    document.body.appendChild(a); a.click(); a.remove();
+  }).catch(function () {
+    setPdfState({ kind: "error", message: "PDFを作成できませんでした。地図の読み込みが終わってから、もう一度お試しください。" });
+  });
+}
+
+/* ------------------------------ 全体更新 ------------------------------ */
+function updateAll() {
+  renderSummary();
+  renderStation();
+  /* トグルの見た目 */
+  $("sw-yes").setAttribute("aria-pressed", draft.hasSidewalk !== false ? "true" : "false");
+  $("sw-no").setAttribute("aria-pressed", draft.hasSidewalk === false ? "true" : "false");
+  $("purpose-select").value = draft.purposePreset;
+  $("regulation-select").value = draft.regulation;
+  renderSheets();
+  renderEditors();
+}
+
+/* ------------------------------ イベント配線 ------------------------------ */
+function bindEvents() {
+  Object.keys(settingInputs).forEach(function (k) {
+    settingInputs[k].addEventListener("input", function () { settings[k] = settingInputs[k].value; renderSummary(); renderSheets(); });
+  });
+  els.saveSettingsBtn.addEventListener("click", function () {
+    Object.keys(settingInputs).forEach(function (k) { settings[k] = settingInputs[k].value; });
+    saveJSON(LS_SETTINGS, settings);
+    els.saveSettingsBtn.textContent = "保存しました";
+    setTimeout(function () { els.saveSettingsBtn.textContent = "固定設定を保存"; }, 2500);
+    updateAll();
+  });
+  var draftTextKeys = ["policeCustom", "purposeCustom", "siteName", "guards", "roadWidth", "lanes", "workWidth", "workLength"];
+  draftTextKeys.forEach(function (k) {
+    draftInputs[k].addEventListener("input", function () {
+      var patch = {}; patch[k] = draftInputs[k].value; setDraft(patch);
+    });
+  });
+  draftInputs.siteAddress.addEventListener("input", function () {
+    setDraft({ siteAddress: draftInputs.siteAddress.value });
+    triggerGeocode(false);
+  });
+  ["applicationDate", "startDate", "endDate", "startTime", "endTime"].forEach(function (k) {
+    draftInputs[k].addEventListener("change", function () {
+      var patch = {}; patch[k] = draftInputs[k].value; setDraft(patch);
+    });
+    draftInputs[k].addEventListener("input", function () {
+      var patch = {}; patch[k] = draftInputs[k].value; setDraft(patch);
+    });
+  });
+  els.stationSelect.addEventListener("change", function () { setDraft({ policeStation: els.stationSelect.value }); });
+  els.stationSearch.addEventListener("input", function () { renderStation(); });
+  document.querySelectorAll("#station-pref-btns [data-pref]").forEach(function (b) {
+    b.addEventListener("click", function () { stationPrefOverride = b.getAttribute("data-pref"); renderStation(); });
+  });
+  $("purpose-select").addEventListener("change", function () { setDraft({ purposePreset: $("purpose-select").value }); });
+  $("regulation-select").addEventListener("change", function () { setDraft({ regulation: $("regulation-select").value }); });
+  $("sw-yes").addEventListener("click", function () { setDraft({ hasSidewalk: true }); });
+  $("sw-no").addEventListener("click", function () { setDraft({ hasSidewalk: false }); });
+  $("geo-retry-btn").addEventListener("click", function () {
+    geoRetry++;
+    var q = draft.siteAddress.trim();
+    if (q) { delete geoCache[q]; lastGeoQuery = null; triggerGeocode(true); }
+  });
+  els.pdfBtn.addEventListener("click", generatePdf);
+  new ResizeObserver(function () { updateScaledPreview(); }).observe(els.scaledWrap);
+}
+
+/* ------------------------------ 初期化 ------------------------------ */
+fillInputs();
+bindEvents();
+initGuideEditor();
+initDetourEditor();
+updateAll();
+renderGeoStatus();
+if (draft.siteAddress.trim()) triggerGeocode(true);
+</script>
+</body>
+</html>
