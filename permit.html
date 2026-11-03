@@ -169,13 +169,13 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ERMFG5G32F"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ERMFG5G32F');</script>
 <style>
-/* press feedback */
-button, .nav-item { -webkit-tap-highlight-color: transparent; }
-button { transition: transform .07s ease, filter .07s ease; }
-button:active { transform: scale(.96); filter: brightness(1.3); }
-.calc-btn:active { transform: scale(.93); }
-.nav-item { transition: transform .07s ease, filter .07s ease; }
-.nav-item:active { transform: scale(.9); filter: brightness(1.5); }
+/* press feedback v2 */
+button, .nav-item { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+button { transition: transform .12s ease, filter .12s ease, box-shadow .12s ease; }
+button:active, button.is-pressed { transform: scale(.93); filter: brightness(1.45); box-shadow: inset 0 3px 12px rgba(0,0,0,.5); }
+.calc-btn:active, .calc-btn.is-pressed { transform: scale(.90); filter: brightness(1.5); }
+.nav-item { transition: transform .12s ease, filter .12s ease; }
+.nav-item:active, .nav-item.is-pressed { transform: scale(.88); filter: brightness(1.6); }
 </style>
 </head>
   <body>
@@ -1855,6 +1855,15 @@ initDetourEditor();
 updateAll();
 renderGeoStatus();
 if (draft.siteAddress.trim()) triggerGeocode(true);
+</script>
+<script>
+(function(){function on(e){var b=e.target.closest('button,.nav-item');if(b)b.classList.add('is-pressed');}
+function off(e){var b=e.target.closest('button,.nav-item');if(b)setTimeout(function(){b.classList.remove('is-pressed');},130);}
+document.addEventListener('touchstart',on,{passive:true});
+document.addEventListener('mousedown',on);
+document.addEventListener('touchend',off,{passive:true});
+document.addEventListener('mouseup',off);
+document.addEventListener('touchcancel',function(){document.querySelectorAll('.is-pressed').forEach(function(b){b.classList.remove('is-pressed');});},{passive:true});})();
 </script>
 </body>
 </html>
