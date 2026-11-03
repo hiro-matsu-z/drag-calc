@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>電圧降下計算 | 現場計算 PRO</title>
+    <meta name="description" content="電圧降下計算の無料ツール。配線方式（単相2線式・単相3線式・三相3線式）と電線サイズ・こう長・電流から電圧降下（V）と降下率（%）を即時計算。電線サイズ選定の目安判定付き。">
+    <meta name="keywords" content="電圧降下,電圧降下計算,電線サイズ,単相3線,三相3線,こう長,内線規程,電気工事">
+
+    <meta name="google-adsense-account" content="ca-pub-5476919369993440">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5476919369993440" crossorigin="anonymous"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ERMFG5G32F"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ERMFG5G32F');</script>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+
+    <style>
+        :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --volt: #ffd60a; }
+        * { box-sizing: border-box; touch-action: manipulation; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
+        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; }
+        header { display: flex; justify-content: space-between; align-items: flex-start; border-left: 5px solid var(--blue); padding-left: 15px; margin-bottom: 20px; }
+        header h1 { font-size: 1.3rem; margin: 0; color: white; }
+        header p { font-size: 0.7rem; color: var(--blue); margin: 0; font-weight: bold; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .input-group { display: flex; gap: 10px; margin-bottom: 12px; }
+        .input-box { flex: 1; background: #2a2a2a; border: 2px solid var(--border); border-radius: 10px; padding: 8px 12px; }
+        .input-box label { display: block; font-size: 0.65rem; color: var(--blue); font-weight: bold; }
+        .input-box input, .input-box select { width: 100%; background: transparent; border: none; color: white; font-size: 1.2rem; outline: none; font-weight: bold; }
+        .input-box select option { background: #333; }
+        .result-area { background: #2a2a2a; padding: 15px; border-top: 2px solid var(--border); border-radius: 0 0 12px 12px; }
+        .result-main { display: flex; justify-content: space-between; align-items: baseline; }
+        .result-main .val { font-size: 2rem; font-weight: bold; color: var(--volt); }
+        .rate-row { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.9rem; }
+        .rate-row .val { font-weight: bold; color: white; }
+        .judge { margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; line-height: 1.6; background: #1a2a3a; border: 1px solid #005a73; color: #cfeef7; }
+        .judge.warn { background: #3a2a1a; border-color: #8a5a00; color: #ffe1b0; }
+
+        .article-section { margin-top: 40px; padding: 30px 20px; background: #1a1a1a; border-radius: 12px; border-top: 4px solid var(--blue); }
+        .article-section h2 { color: var(--blue); font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
+        .article-section h3 { color: #fff; font-size: 1rem; margin-top: 25px; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
+        .article-section h3 .material-symbols-outlined { color: var(--orange); }
+        .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; line-height: 1.8; }
+        .article-section ul { padding-left: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; }
+        .article-section li { font-size: 0.9rem; color: #ddd; margin-bottom: 8px; }
+        .article-section table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 0.85rem; }
+        .article-section th, .article-section td { border: 1px solid #444; padding: 8px; text-align: left; }
+        .article-section th { background-color: #333; color: white; }
+
+        .profile-card { background: #252525; border: 1px solid #444; border-radius: 10px; padding: 20px; margin-top: 30px; display: flex; gap: 15px; align-items: flex-start; }
+        .profile-icon { font-size: 40px; color: var(--blue); }
+        .profile-content h4 { margin: 0 0 5px 0; color: white; font-size: 1rem; }
+        .profile-content p { font-size: 0.8rem; color: #aaa; margin: 0; line-height: 1.5; }
+
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #333; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom)); z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; text-decoration: none; padding-top: 8px; }
+        .nav-item .material-symbols-outlined { font-size: 24px; font-weight: 300; margin-bottom: 2px; }
+        .nav-item span:last-child { font-size: 0.65rem; font-weight: 500; }
+        .nav-item.active { color: var(--blue); }
+        .nav-item.active .material-symbols-outlined { text-shadow: 0 0 12px rgba(0, 212, 255, 0.4); }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <header><div><h1>電圧降下計算</h1><p>配線方式と電線サイズから電圧降下を算出</p></div></header>
+
+    <div class="card" style="padding:0; overflow:hidden;">
+        <div style="padding:15px 15px 5px 15px;">
+            <div class="input-group">
+                <div class="input-box">
+                    <label>配線方式</label>
+                    <select id="v_system" onchange="calcVoltage()">
+                        <option value="35.6">単相2線式</option>
+                        <option value="17.8" selected>単相3線式</option>
+                        <option value="30.8">三相3線式</option>
+                    </select>
+                </div>
+                <div class="input-box">
+                    <label>電線サイズ (mm²)</label>
+                    <select id="v_size" onchange="calcVoltage()">
+                        <option value="2">2 mm²</option>
+                        <option value="3.5">3.5 mm²</option>
+                        <option value="5.5" selected>5.5 mm²</option>
+                        <option value="8">8 mm²</option>
+                        <option value="14">14 mm²</option>
+                        <option value="22">22 mm²</option>
+                        <option value="38">38 mm²</option>
+                        <option value="60">60 mm²</option>
+                        <option value="100">100 mm²</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group">
+                <div class="input-box"><label>こう長 (m)</label><input type="number" id="v_length" inputmode="decimal" placeholder="50" oninput="calcVoltage()"></div>
+                <div class="input-box"><label>電流 (A)</label><input type="number" id="v_current" inputmode="decimal" placeholder="20" oninput="calcVoltage()"></div>
+            </div>
+        </div>
+        <div class="result-area">
+            <div class="result-main">
+                <span style="color:#aaa; font-size:0.85rem;">電圧降下</span>
+                <span class="val" id="v_result">-- V</span>
+            </div>
+            <div class="rate-row"><span style="color:#aaa;">降下率（100V基準）</span><span class="val" id="v_rate100">-- %</span></div>
+            <div class="rate-row"><span style="color:#aaa;">降下率（200V基準）</span><span class="val" id="v_rate200">-- %</span></div>
+            <div class="judge" id="v_judge">こう長と電流を入力すると、内線規程の目安（幹線と分岐回路の合計で7%以内など）と比べた判定を表示します。</div>
+        </div>
+    </div>
+
+    <article class="article-section">
+        <h2>電圧降下計算の基本と電線サイズ選定の考え方</h2>
+        <p>電線には電気抵抗があるため、電流が流れる距離（こう長）が長くなるほど、負荷側の電圧は電源側より低くなります。この低下分が「電圧降下」です。電圧降下が大きすぎると、照明のちらつきやモーターの始動不良、エアコンや給湯器の能力低下など、実害が出ます。分電盤から遠い回路や、仮設電源・倉庫・駐車場など屋外の長い配線では、許容電流だけでなく電圧降下の検討がサイズ選定の決め手になります。本ツールは、日本の電気工事実務で広く使われている簡易式で電圧降下を即時計算します。</p>
+
+        <h3><span class="material-symbols-outlined">functions</span> 計算式（実務で使う簡易式）</h3>
+        <p>電圧降下 e（V）は、配線方式ごとの係数 K を使って「e = K × L × I ÷（1000 × A）」で求めます。L はこう長（m）、I は電流（A）、A は電線の断面積（mm²）です。係数は配線方式によって次のように変わります。</p>
+        <table>
+            <tr><th>配線方式</th><th>係数 K</th><th>計算式</th></tr>
+            <tr><td>単相2線式</td><td>35.6</td><td>e = 35.6 × L × I ÷ (1000 × A)</td></tr>
+            <tr><td>単相3線式</td><td>17.8</td><td>e = 17.8 × L × I ÷ (1000 × A)</td></tr>
+            <tr><td>三相3線式</td><td>30.8</td><td>e = 30.8 × L × I ÷ (1000 × A)</td></tr>
+        </table>
+        <p>単相3線式の係数が単相2線式の半分になるのは、中性線に電流が流れず往復の抵抗が片道分になるためです。三相3線式の係数には三相の位相差（√3）が織り込まれています。いずれの式も、導体抵抗をベースにした近似式であり、力率や電線のリアクタンスの影響が大きい大サイズ・長距離の幹線では、厳密計算と差が出る場合があります。</p>
+
+        <h3><span class="material-symbols-outlined">touch_app</span> 本ツールの使い方</h3>
+        <ul>
+            <li><strong>配線方式の選択：</strong> 単相2線式・単相3線式・三相3線式から、対象回路の方式を選びます。住宅の引込幹線は単相3線式が一般的です。</li>
+            <li><strong>電線サイズの選択：</strong> 2〜100mm²の中から、使用予定の電線サイズを選びます。</li>
+            <li><strong>こう長と電流の入力：</strong> こう長は「電源から負荷までの片道の長さ（m）」、電流はその回路に流れる最大電流（A）を入力します。入力と同時に結果が更新されます。</li>
+            <li><strong>結果の確認：</strong> 電圧降下（V）と、100V基準・200V基準それぞれの降下率（%）、目安判定が表示されます。</li>
+        </ul>
+
+        <h3><span class="material-symbols-outlined">rule</span> 内線規程の目安について</h3>
+        <p>内線規程では、電圧降下は幹線と分岐回路の合計で、使用電圧の7%以内を目安とする考え方が示されています（供給条件によっては10%が認められる場合もあります）。内訳の目安として、幹線側をおおむね2%程度、分岐回路側を残りの範囲に収める設計が一般的です。つまり本ツールで計算した1区間の降下率が、たとえば200V回路で5%を超えるようであれば、その区間だけで目安の大半を使ってしまうため、サイズアップを検討すべきサインです。なお、これは設計上の目安であり、最終判断は電気工事士・主任技術者の確認に基づいてください。</p>
+
+        <h3><span class="material-symbols-outlined">warning</span> 電線サイズ選定の注意点</h3>
+        <p>電線サイズは「許容電流」と「電圧降下」の両方を満たす必要があります。短い配線では許容電流が決め手になりますが、こう長が30m、50mと伸びる現場では、許容電流的には足りていても電圧降下が目安を超えるケースが頻発します。また、電流値は接続する機器の定格だけでなく、将来の増設や同時使用率も見込んで余裕を持たせることが大切です。迷った場合は、一段太いサイズを選ぶことで、発熱・損失の面でも安全側になります。逆に、太くしすぎると端末処理や配管サイズ、コストに跳ね返るため、本ツールのような事前計算で「必要十分なサイズ」を見極めることが実務では重要です。</p>
+
+        <h3><span class="material-symbols-outlined">quiz</span> よくある質問（FAQ）</h3>
+        <p><strong>Q. 同じ電圧降下（V）でも、100V回路と200V回路で評価が違うのはなぜですか？</strong><br>
+        A. 降下率は「使用電圧に対する割合」で評価するためです。たとえば降下が6Vの場合、100V回路では6%ですが、200V回路では3%です。同じ6Vでも、機器への影響は割合で決まります。</p>
+        <p><strong>Q. こう長は往復の長さを入れるのですか？</strong><br>
+        A. いいえ、片道の長さで入力してください。本ツールの係数には、往復分の抵抗がすでに織り込まれています。往復で入力すると、実際の2倍の降下になってしまいます。</p>
+        <p><strong>Q. 計算結果より実測の電圧降下が大きいことがあります。なぜですか？</strong><br>
+        A. 計算式が想定していない要因として、端子接続部の接触抵抗、電線の温度上昇による抵抗増加、力率の悪い負荷などが挙げられます。実測と大きく乖離する場合は、接続部の増し締めや緩みの点検も行ってください。</p>
+
+        <div class="profile-card">
+            <div class="profile-icon material-symbols-outlined">verified_user</div>
+            <div class="profile-content">
+                <h4>開発者：二級建築士 / 現役現場監督</h4>
+                <p>大規模な施工エリアで多数の現場を統括・管理する現役の施工管理者。実務経験に基づき、現場で「本当に使える」計算精度とUI/UXを追求し、本ツールを公開しています。</p>
+            </div>
+        </div>
+    </article>
+
+    <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
+        <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー・免責事項</a><span style="color: #444; margin: 0 10px;">|</span><a href="mailto:Hiroki199809@gmail.com" style="color: #888; text-decoration: none;">お問い合わせ</a><br><br>
+        <span style="color: #666;">© 2026 現場計算 PRO</span>
+    </div>
+
+    <nav>
+        <a href="index.html" class="nav-item"><span class="material-symbols-outlined">square_foot</span><span>対角</span></a>
+        <a href="stair.html" class="nav-item"><span class="material-symbols-outlined">stairs</span><span>ポーチ</span></a>
+        <a href="concrete.html" class="nav-item"><span class="material-symbols-outlined">water_drop</span><span>生コン</span></a>
+        <a href="soil.html" class="nav-item"><span class="material-symbols-outlined">landscape</span><span>残土</span></a>
+        <a href="road.html" class="nav-item"><span class="material-symbols-outlined">edit_road</span><span>道路</span></a>
+    </nav>
+</div>
+
+<script>
+    function calcVoltage() {
+        const k = parseFloat(document.getElementById('v_system').value);
+        const a = parseFloat(document.getElementById('v_size').value);
+        const l = parseFloat(document.getElementById('v_length').value);
+        const i = parseFloat(document.getElementById('v_current').value);
+        const judge = document.getElementById('v_judge');
+        if (!l || !i || l <= 0 || i <= 0) {
+            document.getElementById('v_result').innerText = '-- V';
+            document.getElementById('v_rate100').innerText = '-- %';
+            document.getElementById('v_rate200').innerText = '-- %';
+            judge.className = 'judge';
+            judge.innerText = 'こう長と電流を入力すると、内線規程の目安（幹線と分岐回路の合計で7%以内など）と比べた判定を表示します。';
+            return;
+        }
+        const e = k * l * i / (1000 * a);
+        const r100 = e / 100 * 100;
+        const r200 = e / 200 * 100;
+        document.getElementById('v_result').innerText = e.toFixed(2) + ' V';
+        document.getElementById('v_rate100').innerText = r100.toFixed(2) + ' %';
+        document.getElementById('v_rate200').innerText = r200.toFixed(2) + ' %';
+        let msg, warn = false;
+        if (r200 <= 2) { msg = '目安判定：200V回路として見ると2%以内で、幹線1区間としても余裕のある範囲です。100V回路では ' + r100.toFixed(1) + '% になるため、幹線＋分岐の合計7%以内に収まるか合わせて確認してください。'; }
+        else if (r200 <= 7) { msg = '目安判定：200V回路では合計7%の目安の範囲内ですが、この区間だけで ' + r200.toFixed(1) + '% を使います。残りの区間の降下と合算して7%以内に収まるか確認してください。'; }
+        else { warn = true; msg = '目安判定：200V回路でも7%を超えています。電線サイズを太くするか、こう長・負荷の見直しを検討してください。'; }
+        judge.className = 'judge' + (warn ? ' warn' : '');
+        judge.innerText = msg;
+    }
+    calcVoltage();
+</script>
+
+<!-- ▼ 新機能お知らせポップアップ（一度だけ表示） -->
+<div id="permit-notice" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:3000; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#1e1e1e; border:2px solid #00d4ff; border-radius:14px; padding:24px 20px; max-width:420px; width:100%; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,0.6);">
+    <div style="font-size:2rem; margin-bottom:8px;">📄</div>
+    <h2 style="color:#fff; font-size:1.1rem; margin:0 0 10px 0;">新機能のお知らせ</h2>
+    <p style="color:#ccc; font-size:0.9rem; line-height:1.7; margin:0 0 18px 0;">「道路使用許可 書類作成ツール」ができました！<br>申請書・配置図・案内図・迂回路図をスマホだけで作成し、PDFでそのまま提出できます。</p>
+    <a href="./permit.html" onclick="closePermitNotice()" style="display:block; background:linear-gradient(135deg,#00d4ff,#008fb3); color:#fff; font-weight:bold; padding:14px; border-radius:10px; text-decoration:none; margin-bottom:10px;">使ってみる</a>
+    <button onclick="closePermitNotice()" style="width:100%; background:#2a2a2a; color:#aaa; border:1px solid #444; padding:12px; border-radius:10px; font-size:0.9rem; cursor:pointer;">閉じる</button>
+  </div>
+</div>
+<script>
+function closePermitNotice(){ try{ localStorage.setItem('permitNoticeV1','1'); }catch(e){} document.getElementById('permit-notice').style.display='none'; }
+(function(){ var shown=false; try{ shown=!!localStorage.getItem('permitNoticeV1'); }catch(e){} if(!shown){ var el=document.getElementById('permit-notice'); if(el) el.style.display='flex'; } })();
+</script>
+</body>
+</html>
