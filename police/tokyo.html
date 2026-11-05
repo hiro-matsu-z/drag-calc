@@ -39,6 +39,7 @@
         .station-list li { border-bottom: 1px solid #2a2a2a; padding: 9px 2px; }
         .station-list a { color: var(--blue); text-decoration: none; font-weight: bold; font-size: 0.92rem; }
         .station-list .areas { color: #999; font-size: 0.75rem; display: block; margin-top: 2px; }
+        .station-list .days { color: #f0b35e; font-size: 0.78rem; display: block; margin-top: 1px; }
         nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #333; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom)); z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; text-decoration: none; padding-top: 8px; }
         .nav-item .material-symbols-outlined { font-size: 24px; font-weight: 300; margin-bottom: 2px; }
@@ -54,109 +55,110 @@
     <p style="font-size:0.92rem; color:#ddd; line-height:1.8;">東京都内の警察署ごとに、道路使用許可の管轄エリア、申請の基本、交付までの日数の目安（中1〜2日程度が多い）をまとめています。現場住所のエリアを管轄する警察署のページをご覧ください。</p>
     <div class="card">
         <ul class="station-list">
-            <li><a href="./akasaka.html">赤坂警察署</a><span class="areas">管轄：港区</span></li>
-            <li><a href="./akabane.html">赤羽警察署</a><span class="areas">管轄：北区</span></li>
-            <li><a href="./akishima.html">昭島警察署</a><span class="areas">管轄：昭島市</span></li>
-            <li><a href="./azabu.html">麻布警察署</a><span class="areas">管轄：港区</span></li>
-            <li><a href="./asakusa.html">浅草警察署</a><span class="areas">管轄：台東区</span></li>
-            <li><a href="./atago.html">愛宕警察署</a><span class="areas">管轄：港区</span></li>
-            <li><a href="./ayase.html">綾瀬警察署</a><span class="areas">管轄：足立区</span></li>
-            <li><a href="./arakawa.html">荒川警察署</a><span class="areas">管轄：荒川区</span></li>
-            <li><a href="./ikegami.html">池上警察署</a><span class="areas">管轄：大田区</span></li>
-            <li><a href="./ikebukuro.html">池袋警察署</a><span class="areas">管轄：豊島区</span></li>
-            <li><a href="./itabashi.html">板橋警察署</a><span class="areas">管轄：板橋区</span></li>
-            <li><a href="./itsukaichi.html">五日市警察署</a><span class="areas">管轄：あきる野市・檜原村・日の出町</span></li>
-            <li><a href="./ueno.html">上野警察署</a><span class="areas">管轄：台東区</span></li>
-            <li><a href="./ushigome.html">牛込警察署</a><span class="areas">管轄：新宿区</span></li>
-            <li><a href="./ebara.html">荏原警察署</a><span class="areas">管轄：品川区</span></li>
-            <li><a href="./ome.html">青梅警察署</a><span class="areas">管轄：青梅市・奥多摩町</span></li>
-            <li><a href="./oi.html">大井警察署</a><span class="areas">管轄：品川区</span></li>
-            <li><a href="./osaki.html">大崎警察署</a><span class="areas">管轄：品川区</span></li>
-            <li><a href="./oji.html">王子警察署</a><span class="areas">管轄：北区</span></li>
+            <li><a href="./akasaka.html">赤坂警察署</a><span class="areas">管轄：港区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./akabane.html">赤羽警察署</a><span class="areas">管轄：北区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./akishima.html">昭島警察署</a><span class="areas">管轄：昭島市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./azabu.html">麻布警察署</a><span class="areas">管轄：港区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./asakusa.html">浅草警察署</a><span class="areas">管轄：台東区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./atago.html">愛宕警察署</a><span class="areas">管轄：港区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./ayase.html">綾瀬警察署</a><span class="areas">管轄：足立区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./arakawa.html">荒川警察署</a><span class="areas">管轄：荒川区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./ikegami.html">池上警察署</a><span class="areas">管轄：大田区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./ikebukuro.html">池袋警察署</a><span class="areas">管轄：豊島区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./itabashi.html">板橋警察署</a><span class="areas">管轄：板橋区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./itsukaichi.html">五日市警察署</a><span class="areas">管轄：あきる野市・檜原村・日の出町</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./ueno.html">上野警察署</a><span class="areas">管轄：台東区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./ushigome.html">牛込警察署</a><span class="areas">管轄：新宿区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./ebara.html">荏原警察署</a><span class="areas">管轄：品川区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./ome.html">青梅警察署</a><span class="areas">管轄：青梅市・奥多摩町</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./oi.html">大井警察署</a><span class="areas">管轄：品川区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./osaki.html">大崎警察署</a><span class="areas">管轄：品川区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./oji.html">王子警察署</a><span class="areas">管轄：北区</span><span class="days">交付目安：中2日</span></li>
             <li><a href="./oshima.html">大島警察署</a><span class="areas">管轄：大島町</span></li>
-            <li><a href="./otsuka.html">大塚警察署</a><span class="areas">管轄：文京区</span></li>
-            <li><a href="./omori.html">大森警察署</a><span class="areas">管轄：大田区</span></li>
+            <li><a href="./otsuka.html">大塚警察署</a><span class="areas">管轄：文京区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./omori.html">大森警察署</a><span class="areas">管轄：大田区</span><span class="days">交付目安：中1日</span></li>
             <li><a href="./ogasawara.html">小笠原警察署</a><span class="areas">管轄：小笠原村</span></li>
-            <li><a href="./ogikubo.html">荻窪警察署</a><span class="areas">管轄：杉並区</span></li>
-            <li><a href="./ogu.html">尾久警察署</a><span class="areas">管轄：荒川区</span></li>
-            <li><a href="./kasai.html">葛西警察署</a><span class="areas">管轄：江戸川区</span></li>
-            <li><a href="./katsushika.html">葛飾警察署</a><span class="areas">管轄：葛飾区</span></li>
-            <li><a href="./kamata.html">蒲田警察署</a><span class="areas">管轄：大田区</span></li>
-            <li><a href="./kameari.html">亀有警察署</a><span class="areas">管轄：葛飾区</span></li>
-            <li><a href="./kanda.html">神田警察署</a><span class="areas">管轄：千代田区</span></li>
-            <li><a href="./kitazawa.html">北沢警察署</a><span class="areas">管轄：世田谷区</span></li>
-            <li><a href="./kuramae.html">蔵前警察署</a><span class="areas">管轄：台東区</span></li>
-            <li><a href="./koiwa.html">小岩警察署</a><span class="areas">管轄：江戸川区</span></li>
-            <li><a href="./kojimachi.html">麹町警察署</a><span class="areas">管轄：千代田区</span></li>
-            <li><a href="./koganei.html">小金井警察署</a><span class="areas">管轄：小金井市・国分寺市</span></li>
-            <li><a href="./kodaira.html">小平警察署</a><span class="areas">管轄：小平市</span></li>
-            <li><a href="./komagome.html">駒込警察署</a><span class="areas">管轄：文京区</span></li>
-            <li><a href="./komatsugawa.html">小松川警察署</a><span class="areas">管轄：江戸川区</span></li>
-            <li><a href="./shitaya.html">下谷警察署</a><span class="areas">管轄：台東区</span></li>
-            <li><a href="./shibuya.html">渋谷警察署</a><span class="areas">管轄：渋谷区</span></li>
-            <li><a href="./shinagawa.html">品川警察署</a><span class="areas">管轄：品川区</span></li>
-            <li><a href="./shimura.html">志村警察署</a><span class="areas">管轄：板橋区</span></li>
-            <li><a href="./shakujii.html">石神井警察署</a><span class="areas">管轄：練馬区</span></li>
-            <li><a href="./joto.html">城東警察署</a><span class="areas">管轄：江東区</span></li>
-            <li><a href="./shinjuku.html">新宿警察署</a><span class="areas">管轄：新宿区</span></li>
-            <li><a href="./sugamo.html">巣鴨警察署</a><span class="areas">管轄：豊島区</span></li>
-            <li><a href="./suginami.html">杉並警察署</a><span class="areas">管轄：杉並区</span></li>
-            <li><a href="./seijo.html">成城警察署</a><span class="areas">管轄：世田谷区・狛江市</span></li>
-            <li><a href="./setagaya.html">世田谷警察署</a><span class="areas">管轄：世田谷区</span></li>
-            <li><a href="./senju.html">千住警察署</a><span class="areas">管轄：足立区</span></li>
-            <li><a href="./takaido.html">高井戸警察署</a><span class="areas">管轄：杉並区</span></li>
-            <li><a href="./takao.html">高尾警察署</a><span class="areas">管轄：八王子市</span></li>
-            <li><a href="./takashimadaira.html">高島平警察署</a><span class="areas">管轄：板橋区</span></li>
-            <li><a href="./takanawa.html">高輪警察署</a><span class="areas">管轄：港区</span></li>
-            <li><a href="./takinogawa.html">滝野川警察署</a><span class="areas">管轄：北区</span></li>
-            <li><a href="./takenotsuka.html">竹の塚警察署</a><span class="areas">管轄：足立区</span></li>
-            <li><a href="./tachikawa.html">立川警察署</a><span class="areas">管轄：立川市・国立市</span></li>
-            <li><a href="./tamagawa.html">玉川警察署</a><span class="areas">管轄：世田谷区</span></li>
-            <li><a href="./tanashi.html">田無警察署</a><span class="areas">管轄：西東京市・東久留米市</span></li>
-            <li><a href="./tama-chuo.html">多摩中央警察署</a><span class="areas">管轄：多摩市・稲城市</span></li>
-            <li><a href="./chuo.html">中央警察署</a><span class="areas">管轄：中央区</span></li>
-            <li><a href="./chofu.html">調布警察署</a><span class="areas">管轄：調布市・狛江市</span></li>
-            <li><a href="./tsukishima.html">月島警察署</a><span class="areas">管轄：中央区</span></li>
-            <li><a href="./tsukiji.html">築地警察署</a><span class="areas">管轄：中央区</span></li>
-            <li><a href="./denenchofu.html">田園調布警察署</a><span class="areas">管轄：大田区・世田谷区</span></li>
-            <li><a href="./tokyo-kuko.html">東京空港警察署</a><span class="areas">管轄：大田区</span></li>
-            <li><a href="./tokyo-wangan.html">東京湾岸警察署</a><span class="areas">管轄：江東区・港区・江戸川区</span></li>
-            <li><a href="./totsuka-tokyo.html">戸塚警察署</a><span class="areas">管轄：新宿区</span></li>
-            <li><a href="./tomisaka.html">富坂警察署</a><span class="areas">管轄：文京区</span></li>
-            <li><a href="./nakano.html">中野警察署</a><span class="areas">管轄：中野区</span></li>
+            <li><a href="./ogikubo.html">荻窪警察署</a><span class="areas">管轄：杉並区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./ogu.html">尾久警察署</a><span class="areas">管轄：荒川区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./kasai.html">葛西警察署</a><span class="areas">管轄：江戸川区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./katsushika.html">葛飾警察署</a><span class="areas">管轄：葛飾区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./kamata.html">蒲田警察署</a><span class="areas">管轄：大田区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./kameari.html">亀有警察署</a><span class="areas">管轄：葛飾区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./kanda.html">神田警察署</a><span class="areas">管轄：千代田区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./kitazawa.html">北沢警察署</a><span class="areas">管轄：世田谷区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./kuramae.html">蔵前警察署</a><span class="areas">管轄：台東区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./koiwa.html">小岩警察署</a><span class="areas">管轄：江戸川区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./kojimachi.html">麹町警察署</a><span class="areas">管轄：千代田区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./koganei.html">小金井警察署</a><span class="areas">管轄：小金井市・国分寺市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./kodaira.html">小平警察署</a><span class="areas">管轄：小平市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./komagome.html">駒込警察署</a><span class="areas">管轄：文京区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./komatsugawa.html">小松川警察署</a><span class="areas">管轄：江戸川区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./shitaya.html">下谷警察署</a><span class="areas">管轄：台東区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./shibuya.html">渋谷警察署</a><span class="areas">管轄：渋谷区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./shinagawa.html">品川警察署</a><span class="areas">管轄：品川区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./shimura.html">志村警察署</a><span class="areas">管轄：板橋区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./shakujii.html">石神井警察署</a><span class="areas">管轄：練馬区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./joto.html">城東警察署</a><span class="areas">管轄：江東区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./shinjuku.html">新宿警察署</a><span class="areas">管轄：新宿区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./sugamo.html">巣鴨警察署</a><span class="areas">管轄：豊島区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./suginami.html">杉並警察署</a><span class="areas">管轄：杉並区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./seijo.html">成城警察署</a><span class="areas">管轄：世田谷区・狛江市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./setagaya.html">世田谷警察署</a><span class="areas">管轄：世田谷区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./senju.html">千住警察署</a><span class="areas">管轄：足立区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./takaido.html">高井戸警察署</a><span class="areas">管轄：杉並区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./takao.html">高尾警察署</a><span class="areas">管轄：八王子市</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./takashimadaira.html">高島平警察署</a><span class="areas">管轄：板橋区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./takanawa.html">高輪警察署</a><span class="areas">管轄：港区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./takinogawa.html">滝野川警察署</a><span class="areas">管轄：北区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./takenotsuka.html">竹の塚警察署</a><span class="areas">管轄：足立区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./tachikawa.html">立川警察署</a><span class="areas">管轄：立川市・国立市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./tamagawa.html">玉川警察署</a><span class="areas">管轄：世田谷区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./tanashi.html">田無警察署</a><span class="areas">管轄：西東京市・東久留米市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./tama-chuo.html">多摩中央警察署</a><span class="areas">管轄：多摩市・稲城市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./chuo.html">中央警察署</a><span class="areas">管轄：中央区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./chofu.html">調布警察署</a><span class="areas">管轄：調布市・狛江市</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./tsukishima.html">月島警察署</a><span class="areas">管轄：中央区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./tsukiji.html">築地警察署</a><span class="areas">管轄：中央区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./denenchofu.html">田園調布警察署</a><span class="areas">管轄：大田区・世田谷区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./tokyo-kuko.html">東京空港警察署</a><span class="areas">管轄：大田区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./tokyo-wangan.html">東京湾岸警察署</a><span class="areas">管轄：江東区・港区・江戸川区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./totsuka-tokyo.html">戸塚警察署</a><span class="areas">管轄：新宿区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./tomisaka.html">富坂警察署</a><span class="areas">管轄：文京区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./nakano.html">中野警察署</a><span class="areas">管轄：中野区</span><span class="days">交付目安：中2日</span></li>
             <li><a href="./niijima.html">新島警察署</a><span class="areas">管轄：新島村・神津島村・利島村</span></li>
-            <li><a href="./nishi-arai.html">西新井警察署</a><span class="areas">管轄：足立区</span></li>
-            <li><a href="./nerima.html">練馬警察署</a><span class="areas">管轄：練馬区</span></li>
-            <li><a href="./nogata.html">野方警察署</a><span class="areas">管轄：中野区</span></li>
-            <li><a href="./hachioji.html">八王子警察署</a><span class="areas">管轄：八王子市</span></li>
+            <li><a href="./nishi-arai.html">西新井警察署</a><span class="areas">管轄：足立区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./nerima.html">練馬警察署</a><span class="areas">管轄：練馬区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./nogata.html">野方警察署</a><span class="areas">管轄：中野区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./hachioji.html">八王子警察署</a><span class="areas">管轄：八王子市</span><span class="days">交付目安：中1日</span></li>
             <li><a href="./hachijojima.html">八丈島警察署</a><span class="areas">管轄：八丈町・青ヶ島村</span></li>
-            <li><a href="./harajuku.html">原宿警察署</a><span class="areas">管轄：渋谷区</span></li>
-            <li><a href="./higashi-murayama.html">東村山警察署</a><span class="areas">管轄：東村山市・清瀬市</span></li>
-            <li><a href="./higashi-yamato.html">東大和警察署</a><span class="areas">管轄：東大和市・武蔵村山市</span></li>
-            <li><a href="./hikarigaoka.html">光が丘警察署</a><span class="areas">管轄：練馬区</span></li>
-            <li><a href="./hisamatsu.html">久松警察署</a><span class="areas">管轄：中央区</span></li>
-            <li><a href="./hino.html">日野警察署</a><span class="areas">管轄：日野市</span></li>
-            <li><a href="./himonya.html">碑文谷警察署</a><span class="areas">管轄：目黒区</span></li>
-            <li><a href="./fukagawa.html">深川警察署</a><span class="areas">管轄：江東区</span></li>
-            <li><a href="./fuchu.html">府中警察署</a><span class="areas">管轄：府中市</span></li>
-            <li><a href="./fussa.html">福生警察署</a><span class="areas">管轄：福生市・羽村市・瑞穂町</span></li>
-            <li><a href="./honjo-tokyo.html">本所警察署</a><span class="areas">管轄：墨田区</span></li>
-            <li><a href="./machida.html">町田警察署</a><span class="areas">管轄：町田市</span></li>
-            <li><a href="./marunouchi.html">丸の内警察署</a><span class="areas">管轄：千代田区</span></li>
-            <li><a href="./manseibashi.html">万世橋警察署</a><span class="areas">管轄：千代田区</span></li>
-            <li><a href="./mita.html">三田警察署</a><span class="areas">管轄：港区</span></li>
-            <li><a href="./mitaka.html">三鷹警察署</a><span class="areas">管轄：三鷹市</span></li>
-            <li><a href="./minami-osawa.html">南大沢警察署</a><span class="areas">管轄：八王子市</span></li>
-            <li><a href="./minami-senju.html">南千住警察署</a><span class="areas">管轄：荒川区</span></li>
+            <li><a href="./harajuku.html">原宿警察署</a><span class="areas">管轄：渋谷区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./higashi-murayama.html">東村山警察署</a><span class="areas">管轄：東村山市・清瀬市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./higashi-yamato.html">東大和警察署</a><span class="areas">管轄：東大和市・武蔵村山市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./hikarigaoka.html">光が丘警察署</a><span class="areas">管轄：練馬区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./hisamatsu.html">久松警察署</a><span class="areas">管轄：中央区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./hino.html">日野警察署</a><span class="areas">管轄：日野市</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./himonya.html">碑文谷警察署</a><span class="areas">管轄：目黒区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./fukagawa.html">深川警察署</a><span class="areas">管轄：江東区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./fuchu.html">府中警察署</a><span class="areas">管轄：府中市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./fussa.html">福生警察署</a><span class="areas">管轄：福生市・羽村市・瑞穂町</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./honjo-tokyo.html">本所警察署</a><span class="areas">管轄：墨田区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./machida.html">町田警察署</a><span class="areas">管轄：町田市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./marunouchi.html">丸の内警察署</a><span class="areas">管轄：千代田区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./manseibashi.html">万世橋警察署</a><span class="areas">管轄：千代田区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./mita.html">三田警察署</a><span class="areas">管轄：港区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./mitaka.html">三鷹警察署</a><span class="areas">管轄：三鷹市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./minami-osawa.html">南大沢警察署</a><span class="areas">管轄：八王子市</span><span class="days">交付目安：中1日〜中2日</span></li>
+            <li><a href="./minami-senju.html">南千住警察署</a><span class="areas">管轄：荒川区</span><span class="days">交付目安：中1日</span></li>
             <li><a href="./miyakejima.html">三宅島警察署</a><span class="areas">管轄：三宅村・御蔵島村</span></li>
-            <li><a href="./mukojima.html">向島警察署</a><span class="areas">管轄：墨田区</span></li>
-            <li><a href="./musashino.html">武蔵野警察署</a><span class="areas">管轄：武蔵野市</span></li>
-            <li><a href="./meguro.html">目黒警察署</a><span class="areas">管轄：目黒区</span></li>
-            <li><a href="./mejiro.html">目白警察署</a><span class="areas">管轄：豊島区</span></li>
-            <li><a href="./honfuji.html">本富士警察署</a><span class="areas">管轄：文京区</span></li>
-            <li><a href="./yotsuya.html">四谷警察署</a><span class="areas">管轄：新宿区</span></li>
-            <li><a href="./yoyogi.html">代々木警察署</a><span class="areas">管轄：渋谷区</span></li>
+            <li><a href="./mukojima.html">向島警察署</a><span class="areas">管轄：墨田区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./musashino.html">武蔵野警察署</a><span class="areas">管轄：武蔵野市</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./meguro.html">目黒警察署</a><span class="areas">管轄：目黒区</span><span class="days">交付目安：中1日</span></li>
+            <li><a href="./mejiro.html">目白警察署</a><span class="areas">管轄：豊島区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./honfuji.html">本富士警察署</a><span class="areas">管轄：文京区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./yotsuya.html">四谷警察署</a><span class="areas">管轄：新宿区</span><span class="days">交付目安：中2日</span></li>
+            <li><a href="./yoyogi.html">代々木警察署</a><span class="areas">管轄：渋谷区</span><span class="days">交付目安：中2日</span></li>
         </ul>
+        <p style="font-size:0.75rem; color:#999; margin:10px 0 0;">※交付目安は、申請代行事業者が公表している実績データに基づく目安です。</p>
     </div>
     <a href="https://zawa.click/permit.html" class="main-btn">📄 申請書類を作成する（無料ツール）</a>
 
