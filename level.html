@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>レベル換算計算 | 現場計算 PRO</title>
+    <meta name="description" content="レーザーレベルを複数台・複数位置で使う場合に対応。各レーザー基準で読みを入力し、共通点で自動的につないで全体の高低差と関係図を表示する無料ツール。最も高い点・低い点・全体の高低差（不陸）も一目で確認。入力したポイント名は端末に保存されます。">
+    <meta name="keywords" content="レーザーレベル,レベル出し,高低差,不陸,墨出し,受光器,レベル計算,床レベル,共通点">
+
+    <meta name="google-adsense-account" content="ca-pub-5476919369993440">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5476919369993440" crossorigin="anonymous"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ERMFG5G32F"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ERMFG5G32F');</script>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+
+    <style>
+        :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; --green: #30d158; }
+        * { box-sizing: border-box; touch-action: manipulation; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
+        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; }
+        header { display: flex; justify-content: space-between; align-items: flex-start; border-left: 5px solid var(--blue); padding-left: 15px; margin-bottom: 20px; }
+        header h1 { font-size: 1.3rem; margin: 0; color: white; }
+        header p { font-size: 0.7rem; color: var(--blue); margin: 0; font-weight: bold; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .card h2 { font-size: 0.95rem; color: white; margin: 0 0 12px 0; }
+        .input-box { background: #2a2a2a; border: 2px solid var(--border); border-radius: 10px; padding: 8px 12px; }
+        .input-box label { display: block; font-size: 0.65rem; color: var(--blue); font-weight: bold; }
+        .input-box input { width: 100%; background: transparent; border: none; color: white; font-size: 1.2rem; outline: none; font-weight: bold; }
+        .input-box input[type="text"] { font-size: 1rem; }
+        .laser-head { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+        .laser-name { flex: 1; background: #2a2a2a; border: 2px solid var(--green); border-radius: 10px; padding: 8px 12px; }
+        .laser-name input { width: 100%; background: transparent; border: none; color: white; font-size: 1.05rem; font-weight: bold; outline: none; }
+        .laser-del { background: #2a2a2a; border: 1px solid #444; color: #999; border-radius: 8px; height: 42px; padding: 0 12px; font-size: 0.8rem; cursor: pointer; flex: none; }
+        .lstat { font-size: 0.75rem; margin: 0 0 12px 0; line-height: 1.5; }
+        .lstat.ok { color: var(--green); }
+        .lstat.base { color: var(--green); }
+        .lstat.ng { color: var(--orange); }
+        .lstat .warn { color: #ffd60a; }
+        .pt-row { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 10px; }
+        .pt-row .nm { flex: 1.1; }
+        .pt-row .rd { flex: 1; }
+        .pt-row .rs { flex: 1.4; font-size: 0.82rem; line-height: 1.5; padding-bottom: 4px; }
+        .pt-row .rs .main { color: var(--green); font-weight: bold; font-size: 1rem; }
+        .pt-row .rs .uni { color: var(--blue); }
+        .pt-row .rs .cmp { color: var(--orange); }
+        .pt-row.is-cmp .input-box { border-color: var(--orange); }
+        .cmp-btn { background: #2a2a2a; border: 1px solid #444; color: #999; border-radius: 8px; height: 42px; padding: 0 10px; font-size: 0.75rem; cursor: pointer; flex: none; }
+        .cmp-btn.on { border-color: var(--orange); color: var(--orange); }
+        .del-btn { background: #2a2a2a; border: 1px solid #444; color: #999; border-radius: 8px; width: 38px; height: 42px; font-size: 1rem; cursor: pointer; flex: none; }
+        .add-btn { width: 100%; padding: 12px; background: var(--blue); color: #000; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: bold; cursor: pointer; margin-top: 4px; }
+        .add-laser-btn { width: 100%; padding: 13px; background: var(--green); color: #000; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; }
+        .clear-btn { width: 100%; padding: 10px; background: transparent; color: #888; border: 1px solid #444; border-radius: 8px; font-size: 0.8rem; cursor: pointer; margin-top: 10px; }
+        .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .chip { background: #252525; border: 1px solid #444; color: #ddd; border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; }
+        .chip:active { background: #1a3a4a; border-color: var(--blue); }
+        .name-del { background: none; border: none; color: #777; font-size: 0.72rem; text-decoration: underline; cursor: pointer; padding: 4px; box-shadow: none; }
+        .result-area { background: #2a2a2a; padding: 15px; border-top: 2px solid var(--border); border-radius: 0 0 12px 12px; }
+        .rate-row { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.9rem; }
+        .rate-row .val { font-weight: bold; color: white; }
+        .rate-row .val.big { color: var(--green); font-size: 1.15rem; }
+        #diagram { background: #181818; border: 1px solid #2c2c2c; border-radius: 10px; padding: 6px; }
+        #diagram svg { width: 100%; height: auto; display: block; }
+
+        .article-section { margin-top: 40px; padding: 30px 20px; background: #1a1a1a; border-radius: 12px; border-top: 4px solid var(--blue); }
+        .article-section h2 { color: var(--blue); font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
+        .article-section h3 { color: #fff; font-size: 1rem; margin-top: 25px; margin-bottom: 10px; display: flex; align-items: center; gap:8px; }
+        .article-section h3 .material-symbols-outlined { color: var(--orange); }
+        .article-section p { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; line-height: 1.8; }
+        .article-section ul { padding-left: 20px; background: #222; padding: 15px 15px 15px 35px; border-radius: 8px; }
+        .article-section li { font-size: 0.9rem; color: #ddd; margin-bottom: 8px; }
+
+        .profile-card { background: #252525; border: 1px solid #444; border-radius: 10px; padding: 20px; margin-top: 30px; display: flex; gap: 15px; align-items: flex-start; }
+        .profile-icon { font-size: 40px; color: var(--blue); }
+        .profile-content h4 { margin: 0 0 5px 0; color: white; font-size: 1rem; }
+        .profile-content p { font-size: 0.8rem; color: #aaa; margin: 0; line-height: 1.5; }
+
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #333; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom)); z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; text-decoration: none; padding-top: 8px; }
+        .nav-item .material-symbols-outlined { font-size: 24px; font-weight: 300; margin-bottom: 2px; }
+        .nav-item span:last-child { font-size: 0.65rem; font-weight: 500; }
+        .nav-item.active { color: var(--blue); }
+        .nav-item.active .material-symbols-outlined { text-shadow: 0 0 12px rgba(0, 212, 255, 0.4); }
+    </style>
+<style>
+/* press feedback v3 */
+button, .nav-item { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+button { box-shadow: 0 3px 0 rgba(0,0,0,.35); transition: transform .22s cubic-bezier(.34,1.8,.64,1), box-shadow .22s cubic-bezier(.34,1.8,.64,1), filter .15s ease; }
+button:active, button.is-pressed { transform: translateY(3px) scale(.98); box-shadow: 0 0 0 rgba(0,0,0,.35), inset 0 2px 8px rgba(0,0,0,.35); filter: brightness(1.12); transition-duration: .05s, .05s, .05s; }
+.calc-btn { box-shadow: 0 4px 0 rgba(0,0,0,.42); }
+.calc-btn:active, .calc-btn.is-pressed { transform: translateY(4px) scale(.97); box-shadow: 0 0 0 rgba(0,0,0,.42), inset 0 2px 10px rgba(0,0,0,.4); filter: brightness(1.15); }
+.nav-item { transition: transform .22s cubic-bezier(.34,1.8,.64,1), filter .15s ease; }
+.nav-item:active, .nav-item.is-pressed { transform: translateY(2px) scale(.9); filter: brightness(1.5); transition-duration: .05s, .05s; }
+</style>
+</head>
+
+<body>
+<div class="container">
+    <header><div><h1>レベル換算計算</h1><p>複数のレーザーをつないで、全体の高低差を自動表示</p></div></header>
+
+    <div class="card">
+        <h2>関係図（断面イメージ）</h2>
+        <div id="diagram"></div>
+        <p style="font-size:0.72rem; color:#888; margin:8px 0 0 0;">各レーザーの面と全ポイントの位置関係です（色はレーザーごと）。左の寸法線（黄色の数字）は、面とポイントの各段差を表します。未接続のレーザーは含まれません。</p>
+    </div>
+
+    <div id="nameLib" style="margin-bottom:16px;"></div>
+    <datalist id="nameList"></datalist>
+
+    <div id="lasers"></div>
+
+    <div class="card" style="padding:0; overflow:hidden;">
+        <div style="padding:15px 15px 5px 15px;">
+            <button class="add-laser-btn" onclick="addLaser()">＋ レーザーを追加</button>
+            <button class="clear-btn" onclick="clearAll()">入力を全てクリア（名前リストは残ります）</button>
+            <p style="font-size:0.72rem; color:#888; margin:10px 0 0 0;">レーザーを移動・増設したら、新しいレーザーとして追加し、前のレーザーで測った点と同じ名前の点を1つ以上測ってください（共通点）。共通点の読みの差から、レーザー同士を自動でつなぎます。入力内容はこの端末に自動保存されます。</p>
+        </div>
+        <div class="result-area">
+            <div class="rate-row" style="margin-top:0;"><span style="color:#aaa;">最も高い点（全体）</span><span class="val" id="sum_high">--</span></div>
+            <div class="rate-row"><span style="color:#aaa;">最も低い点（全体）</span><span class="val" id="sum_low">--</span></div>
+            <div class="rate-row"><span style="color:#aaa;">全体の高低差</span><span class="val big" id="sum_diff">--</span></div>
+        </div>
+    </div>
+
+    <article class="article-section">
+        <h2>複数のレーザーレベルをつなぐ考え方</h2>
+        <p>広い現場やレーザーを移動した現場では、1つのレーザー面だけでは全ポイントを測れません。その場合、レーザーごとに測った読みは「そのレーザー面からの下がり」でしかなく、そのままでは比較できません。ポイント同士を比べるには、レーザー同士の位置関係（面のズレ）を知る必要があります。本ツールは、同じ点を2つのレーザーで測った「共通点」を手がかりに、レーザー同士のズレを自動計算し、全ポイントを最初のレーザー基準に統一して表示します。</p>
+
+        <h3><span class="material-symbols-outlined">functions</span> 共通点による接続の仕組み</h3>
+        <p>たとえば、ある点の読みがレーザー1で92mm、レーザー2で140mmだった場合、レーザー2の面はレーザー1より48mm高い位置にあります。したがって、レーザー2で測った読みは一律48mm引けば、レーザー1基準の値に換算できます。共通点は1つあれば計算できますが、2つ以上あると「ズレの食い違い」として測定のブレも分かります。食い違いが大きい場合は、どちらかのレーザーが動いたか、読み違いの疑いがあります。本ツールでは共通点が複数の場合、平均で接続し、食い違いの最大値をステータスに表示します。</p>
+
+        <h3><span class="material-symbols-outlined">straighten</span> 設計基準（FL・GL）への読み替え</h3>
+        <p>レーザー基準の値は、設計基準と1点だけ関係が分かれば読み替えられます。たとえば「1FLの読みが92」で「1FL±0 = GL+295」なら、レーザー面は1FLの92mm上（GL+387）にあり、各ポイントは「1FLからの差＝92 − 読み」「GL換算＝295 ＋その差」で換算できます。比較基準（「差」ボタン）に1FLのポイントを指定すれば、他点の「1FLから±」がそのまま表示されます。</p>
+
+        <h3><span class="material-symbols-outlined">warning</span> レベル出しの注意点</h3>
+        <ul>
+            <li><strong>共通点は動いていない点を選ぶ：</strong> 現床・基礎天端・既設の墨など、絶対に動かない点を使ってください。足場や仮設材の上は、荷重や振動で動くため共通点には向きません。</li>
+            <li><strong>レーザー設置後は動かさない：</strong> 三脚に触れたり床の振動でレーザー面がずれると、そのレーザーで測った読みが全て無効になります。ずれた疑いがある場合は、共通点を測り直してズレが変わっていないか確認します。</li>
+            <li><strong>読みの向きを統一する：</strong> 読みは「レーザー面からの下がり」で統一します。ポイントごとに上がり・下がりを混ぜると符号が逆転して事故になります。</li>
+            <li><strong>距離による精度：</strong> レーザーレベルの水平精度は距離が伸びるほど誤差が大きくなります（例：±1mm/10m級）。共通点は、できるだけ両方のレーザーから近すぎず遠すぎない位置で取ると誤差が揃います。</li>
+        </ul>
+
+        <h3><span class="material-symbols-outlined">quiz</span> よくある質問（FAQ）</h3>
+        <p><strong>Q. 読みの数字が大きい点のほうが高いのですか？</strong><br>
+        A. いいえ、逆です。読みは「レーザー面からの下がり」なので、数字が小さい点ほど高い位置にあります。</p>
+        <p><strong>Q. 「未接続」と表示されます。</strong><br>
+        A. そのレーザーと前のレーザー群との間に、同じ名前のポイント（共通点）がまだ無い状態です。どちらでも測れる点を同じ名前で入力してください。名前が1文字でも違うと同じ点と判定されません。</p>
+        <p><strong>Q. 入力した内容は保存されますか？</strong><br>
+        A. レーザー・ポイント名・読みは、この端末のブラウザ内に自動保存されます。アプリやブラウザを閉じても残ります。一度入力したポイント名は「名前リスト」に残り、入力欄をクリアしても消えません。</p>
+
+        <div class="profile-card">
+            <div class="profile-icon material-symbols-outlined">verified_user</div>
+            <div class="profile-content">
+                <h4>開発者：二級建築士 / 現役現場監督</h4>
+                <p>大規模な施工エリアで多数の現場を統括・管理する現役の施工管理者。実務経験に基づき、現場で「本当に使える」計算精度とUI/UXを追求し、本ツールを公開しています。</p>
+            </div>
+        </div>
+    </article>
+
+    <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
+        <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー・免責事項</a><span style="color: #444; margin: 0 10px;">|</span><a href="mailto:Hiroki199809@gmail.com" style="color: #888; text-decoration: none;">お問い合わせ</a><br><br>
+        <span style="color: #666;">© 2026 現場計算 PRO</span>
+    </div>
+
+    <nav>
+        <a href="index.html" class="nav-item"><span class="material-symbols-outlined">square_foot</span><span>対角</span></a>
+        <a href="stair.html" class="nav-item"><span class="material-symbols-outlined">stairs</span><span>ポーチ</span></a>
+        <a href="concrete.html" class="nav-item"><span class="material-symbols-outlined">water_drop</span><span>生コン</span></a>
+        <a href="soil.html" class="nav-item"><span class="material-symbols-outlined">landscape</span><span>残土</span></a>
+        <a href="road.html" class="nav-item"><span class="material-symbols-outlined">edit_road</span><span>道路</span></a>
+        <a href="voltage.html" class="nav-item"><span class="material-symbols-outlined">bolt</span><span>電圧</span></a>
+        <a href="slope.html" class="nav-item"><span class="material-symbols-outlined">trending_down</span><span>勾配</span></a>
+        <a href="level.html" class="nav-item active"><span class="material-symbols-outlined">straighten</span><span>レベル</span></a>
+    </nav>
+</div>
+
+<script>
+    var KEY = 'levelToolV4';
+    var NKEY = 'levelNamesV1';
+    var lasers = [];
+    var cmp = { l: -1, p: -1 };
+    var names = [];
+    var lastLinks = { off: [0], info: [null] };
+
+    function blank3() { return [{ name: '', reading: '' }, { name: '', reading: '' }, { name: '', reading: '' }]; }
+    function newLaser(n) { return { name: 'レーザー' + n, points: blank3() }; }
+    function save() {
+        try { localStorage.setItem(KEY, JSON.stringify({ lasers: lasers, cmp: cmp })); } catch (e) {}
+        saveNames();
+    }
+    function saveNames() { try { localStorage.setItem(NKEY, JSON.stringify(names)); } catch (e) {} }
+    function load() {
+        try {
+            var s = JSON.parse(localStorage.getItem(KEY) || 'null');
+            if (s && Array.isArray(s.lasers) && s.lasers.length) { lasers = s.lasers; cmp = s.cmp || { l: -1, p: -1 }; }
+        } catch (e) {}
+        if (!lasers.length) {
+            // 旧バージョン（V3/V2）からの引き継ぎ
+            try {
+                var old = JSON.parse(localStorage.getItem('levelToolV3') || 'null') || JSON.parse(localStorage.getItem('levelToolV2') || 'null');
+                if (old && Array.isArray(old.points) && old.points.length) {
+                    lasers = [{ name: 'レーザー1', points: old.points }];
+                    if (typeof old.cmp === 'number' && old.cmp >= 0) cmp = { l: 0, p: old.cmp };
+                }
+            } catch (e) {}
+        }
+        if (!lasers.length) lasers = [newLaser(1)];
+        try {
+            var nm = JSON.parse(localStorage.getItem(NKEY) || '[]');
+            if (Array.isArray(nm)) names = nm;
+        } catch (e) {}
+        // 入力途中の1文字断片（より長い名前の先頭と一致するもの）を掃除
+        names = names.filter(function (n, i) {
+            return !(n.length === 1 && names.some(function (m, j) { return j !== i && m.length > 1 && m.indexOf(n) === 0; }));
+        });
+        saveNames();
+        lasers.forEach(function (L) { L.points.forEach(function (p) { collectName(p.name, true); }); });
+    }
+    function collectName(n, silent) {
+        n = (n || '').trim();
+        if (n && names.indexOf(n) === -1) { names.push(n); if (!silent) { saveNames(); renderNameLib(); } }
+    }
+    function fmtSigned(v) {
+        if (v === 0) return '±0';
+        return (v > 0 ? '+' : '-') + Math.abs(v).toLocaleString();
+    }
+    function esc(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+    function escXml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    function laserName(li) { return lasers[li].name || ('レーザー' + (li + 1)); }
+
+    function renderNameLib() {
+        var el = document.getElementById('nameLib');
+        var dl = document.getElementById('nameList');
+        dl.innerHTML = names.map(function (n) { return '<option value="' + esc(n) + '">'; }).join('');
+        if (!names.length) { el.innerHTML = ''; return; }
+        var html = '<div style="font-size:0.72rem; color:#888; margin-bottom:6px;">保存済みの名前（タップで空き枠に入力）</div><div class="chip-row" style="margin-bottom:6px;">';
+        names.forEach(function (n, ni) { html += '<span style="display:inline-flex; align-items:center;"><button class="chip" onclick="fillName(\'' + n.replace(/'/g, "\\'") + '\')">' + esc(n) + '</button><button onclick="delName(' + ni + ')" title="この名前を消す" style="background:none; border:none; color:#888; font-size:0.85rem; padding:2px 4px; cursor:pointer; box-shadow:none;">×</button></span>'; });
+        html += '</div><div style="text-align:right;"><button class="name-del" onclick="clearNames()">名前リストを全て消す</button></div>';
+        el.innerHTML = html;
+    }
+    function fillName(n) {
+        for (var li = 0; li < lasers.length; li++) {
+            for (var pi = 0; pi < lasers[li].points.length; pi++) {
+                if (!lasers[li].points[pi].name) { lasers[li].points[pi].name = n; save(); renderLasers(); return; }
+            }
+        }
+        lasers[lasers.length - 1].points.push({ name: n, reading: '' });
+        save(); renderLasers();
+    }
+    function clearNames() { names = []; saveNames(); renderNameLib(); renderLasers(); }
+    function delName(ni) { names.splice(ni, 1); saveNames(); renderNameLib(); }
+
+    function renderLasers() {
+        var el = document.getElementById('lasers');
+        el.innerHTML = '';
+        lasers.forEach(function (L, li) {
+            var card = document.createElement('div');
+            card.className = 'card';
+            var html = '<div class="laser-head">' +
+                '<div class="laser-name"><input type="text" id="ln_' + li + '" value="' + esc(L.name) + '" oninput="onLaserName(' + li + ')"></div>' +
+                (lasers.length > 1 ? '<button class="laser-del" onclick="delLaser(' + li + ')">削除</button>' : '') +
+                '</div>' +
+                '<p class="lstat" id="lstat_' + li + '"></p>';
+            L.points.forEach(function (p, pi) {
+                var isCmp = (cmp.l === li && cmp.p === pi);
+                html += '<div class="pt-row' + (isCmp ? ' is-cmp' : '') + '">' +
+                    '<div class="input-box nm"><label>測定場所</label><input type="text" id="pn_' + li + '_' + pi + '" list="nameList" value="' + esc(p.name) + '" placeholder="場所名" oninput="onPoint(' + li + ',' + pi + ')" onchange="commitName(' + li + ',' + pi + ')"></div>' +
+                    '<div class="input-box rd"><label>読み (mm)</label><input type="number" id="pr_' + li + '_' + pi + '" inputmode="decimal" value="' + (p.reading || '') + '" placeholder="105" oninput="onPoint(' + li + ',' + pi + ')"></div>' +
+                    '<div class="rs" id="rs_' + li + '_' + pi + '">--</div>' +
+                    '<button class="cmp-btn' + (isCmp ? ' on' : '') + '" onclick="setCmp(' + li + ',' + pi + ')">差</button>' +
+                    '<button class="del-btn" onclick="delPoint(' + li + ',' + pi + ')">×</button>' +
+                    '</div>';
+            });
+            html += '<button class="add-btn" onclick="addPoint(' + li + ')">＋ ポイントを追加</button>';
+            card.innerHTML = html;
+            el.appendChild(card);
+        });
+        calcAll();
+    }
+    function onLaserName(li) { lasers[li].name = document.getElementById('ln_' + li).value; save(); calcAll(); }
+    function onPoint(li, pi) {
+        lasers[li].points[pi].name = document.getElementById('pn_' + li + '_' + pi).value;
+        lasers[li].points[pi].reading = document.getElementById('pr_' + li + '_' + pi).value;
+        save(); calcAll();
+    }
+    function commitName(li, pi) {
+        var v = document.getElementById('pn_' + li + '_' + pi).value;
+        lasers[li].points[pi].name = v;
+        collectName(v);
+        save();
+    }
+    function addPoint(li) { lasers[li].points.push({ name: '', reading: '' }); save(); renderLasers(); }
+    function delPoint(li, pi) {
+        lasers[li].points.splice(pi, 1);
+        if (cmp.l === li) { if (cmp.p === pi) cmp = { l: -1, p: -1 }; else if (cmp.p > pi) cmp.p--; }
+        if (!lasers[li].points.length) lasers[li].points = blank3();
+        save(); renderLasers();
+    }
+    function addLaser() { lasers.push(newLaser(lasers.length + 1)); save(); renderLasers(); }
+    function delLaser(li) {
+        lasers.splice(li, 1);
+        if (cmp.l === li) cmp = { l: -1, p: -1 }; else if (cmp.l > li) cmp.l--;
+        save(); renderLasers();
+    }
+    function setCmp(li, pi) {
+        if (cmp.l === li && cmp.p === pi) cmp = { l: -1, p: -1 }; else cmp = { l: li, p: pi };
+        save(); renderLasers();
+    }
+    function clearAll() { lasers = [newLaser(1)]; cmp = { l: -1, p: -1 }; save(); renderLasers(); }
+
+    function pointMap(li) {
+        var m = {};
+        lasers[li].points.forEach(function (p) {
+            var k = (p.name || '').trim();
+            var v = parseFloat(p.reading);
+            if (k && p.reading !== '' && !isNaN(v) && !(k in m)) m[k] = v;
+        });
+        return m;
+    }
+    function computeLinks() {
+        var n = lasers.length;
+        var off = new Array(n).fill(null), info = new Array(n).fill(null);
+        off[0] = 0;
+        var queue = [0];
+        while (queue.length) {
+            var i = queue.shift();
+            var mi = pointMap(i);
+            for (var j = 0; j < n; j++) {
+                if (j === i || off[j] !== null) continue;
+                var mj = pointMap(j);
+                var ds = [], usedNames = [];
+                Object.keys(mi).forEach(function (k) {
+                    if (k in mj) { ds.push((mi[k] + off[i]) - mj[k]); usedNames.push(k); }
+                });
+                if (ds.length) {
+                    var avg = ds.reduce(function (a, b) { return a + b; }, 0) / ds.length;
+                    off[j] = avg;
+                    info[j] = { from: i, names: usedNames, spread: Math.max.apply(null, ds) - Math.min.apply(null, ds), count: ds.length };
+                    queue.push(j);
+                }
+            }
+        }
+        return { off: off, info: info };
+    }
+    function mergedPoints(off) {
+        var map = {}, order = [];
+        lasers.forEach(function (L, li) {
+            if (off[li] === null) return;
+            L.points.forEach(function (p, pi) {
+                var v = parseFloat(p.reading);
+                if (p.reading === '' || isNaN(v)) return;
+                var nm = (p.name || '').trim();
+                var key = nm ? 'n:' + nm : 'x:' + li + '-' + pi;
+                if (!map[key]) {
+                    map[key] = { name: nm || (laserName(li) + 'のポイント' + (pi + 1)), v: v + off[li], li: li };
+                    order.push(key);
+                }
+            });
+        });
+        return order.map(function (k) { return map[k]; });
+    }
+
+    var LASER_COLORS = ['#30d158', '#ff9500', '#bf5af2', '#ffd60a', '#64d2ff', '#ff6482', '#7ee787', '#ffa657'];
+    function renderDiagram(merged, cmpU, cmpName, off) {
+        var el = document.getElementById('diagram');
+        var W = 360, H = 252, topY = 30, bottomY = 204;
+        var dimX = 46, plotL = 84, plotR = 306, bracketX = 324;
+        var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+        if (!merged.length) {
+            s += '<line x1="' + (dimX - 16) + '" y1="42" x2="' + plotR + '" y2="42" stroke="#30d158" stroke-width="2.5"/>';
+            s += '<text x="' + (dimX - 16) + '" y="34" fill="#30d158" font-size="11" font-weight="bold">' + escXml(laserName(0)) + ' ±0</text>';
+            s += '<text x="' + (W / 2) + '" y="140" fill="#888" font-size="12" text-anchor="middle">読みを入力すると、ここに関係図が出ます</text>';
+            s += '</svg>';
+            el.innerHTML = s;
+            return;
+        }
+        // 縦スケール：全レーザー面と全ポイントを含む
+        var vals = [0];
+        off.forEach(function (o) { if (o !== null) vals.push(o); });
+        merged.forEach(function (o) { vals.push(o.v); });
+        var dMin = Math.min.apply(null, vals), dMax = Math.max.apply(null, vals);
+        var pad = (dMax - dMin) * 0.08 + 2;
+        function Y(v) { return topY + ((v - dMin + pad) / ((dMax - dMin) + 2 * pad)) * (bottomY - topY); }
+        // 寸法チェーン：レーザー面とポイントの全レベル
+        var levels = [];
+        vals.forEach(function (v) { if (levels.indexOf(v) === -1) levels.push(v); });
+        levels.sort(function (a, b) { return a - b; });
+        levels.forEach(function (lv) {
+            var y = Y(lv);
+            s += '<line x1="' + dimX + '" y1="' + y + '" x2="' + plotR + '" y2="' + y + '" stroke="#2c2c2c" stroke-width="1"/>';
+            s += '<line x1="' + (dimX - 5) + '" y1="' + y + '" x2="' + (dimX + 5) + '" y2="' + y + '" stroke="#e0e0e0" stroke-width="1.5"/>';
+        });
+        s += '<line x1="' + dimX + '" y1="' + Y(levels[0]) + '" x2="' + dimX + '" y2="' + Y(levels[levels.length - 1]) + '" stroke="#e0e0e0" stroke-width="1.2"/>';
+        for (var li = 1; li < levels.length; li++) {
+            var d = Math.round(levels[li] - levels[li - 1]);
+            if (d === 0) continue;
+            var midY = (Y(levels[li - 1]) + Y(levels[li])) / 2;
+            s += '<text x="' + (dimX - 9) + '" y="' + (midY + 3.5) + '" fill="#ffd60a" font-size="10.5" font-weight="bold" text-anchor="end">' + d.toLocaleString() + '</text>';
+        }
+        // 各レーザーの面
+        off.forEach(function (o, lk) {
+            if (o === null) return;
+            var col = LASER_COLORS[lk % LASER_COLORS.length];
+            var y = Y(o);
+            s += '<line x1="' + (dimX - 16) + '" y1="' + y + '" x2="' + plotR + '" y2="' + y + '" stroke="' + col + '" stroke-width="' + (lk === 0 ? 2.5 : 2) + '"/>';
+            var lbl = laserName(lk) + (lk === 0 ? ' ±0' : ' 面');
+            s += '<text x="' + (lk === 0 ? dimX - 16 : plotL + 2) + '" y="' + (y - 6) + '" fill="' + col + '" font-size="11" font-weight="bold">' + escXml(lbl) + '</text>';
+        });
+        // ポイント（自分のレーザー面から垂線）
+        var n = merged.length;
+        merged.forEach(function (o, k) {
+            var x = n === 1 ? (plotL + plotR) / 2 : plotL + 16 + k * ((plotR - plotL - 32) / (n - 1));
+            var y = Y(o.v);
+            var yFrom = Y(off[o.li] === null ? 0 : off[o.li]);
+            var isCmpPt = (cmpU !== null && Math.abs(o.v - cmpU) < 0.001 && o.name === cmpName);
+            var col = isCmpPt ? '#ff9500' : LASER_COLORS[o.li % LASER_COLORS.length];
+            s += '<line x1="' + x + '" y1="' + yFrom + '" x2="' + x + '" y2="' + y + '" stroke="#666" stroke-width="1" stroke-dasharray="3 3"/>';
+            s += '<line x1="' + (x - 22) + '" y1="' + y + '" x2="' + (x + 22) + '" y2="' + y + '" stroke="' + col + '" stroke-width="2.5"/>';
+            s += '<circle cx="' + x + '" cy="' + y + '" r="3.5" fill="' + col + '"/>';
+            s += '<text x="' + x + '" y="' + (y + 16) + '" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">' + escXml(o.name) + '</text>';
+            s += '<text x="' + x + '" y="' + (y + 30) + '" fill="' + col + '" font-size="10.5" text-anchor="middle">−' + Math.round(o.v).toLocaleString() + '</text>';
+            if (cmpU !== null && !isCmpPt) {
+                s += '<text x="' + x + '" y="' + (y + 44) + '" fill="#ff9500" font-size="10" text-anchor="middle">' + escXml(cmpName) + 'から ' + fmtSigned(Math.round(cmpU - o.v)) + '</text>';
+            }
+            if (isCmpPt) {
+                s += '<text x="' + x + '" y="' + (y + 44) + '" fill="#ff9500" font-size="10" text-anchor="middle">比較基準</text>';
+            }
+        });
+        // 全体の高低差ブラケット（ポイント間）
+        var pMin = Infinity, pMax = -Infinity;
+        merged.forEach(function (o) { if (o.v < pMin) pMin = o.v; if (o.v > pMax) pMax = o.v; });
+        if (n >= 2 && pMax > pMin) {
+            var y1 = Y(pMin), y2 = Y(pMax);
+            s += '<line x1="' + bracketX + '" y1="' + y1 + '" x2="' + bracketX + '" y2="' + y2 + '" stroke="#e0e0e0" stroke-width="1.5"/>';
+            s += '<line x1="' + (bracketX - 4) + '" y1="' + y1 + '" x2="' + (bracketX + 4) + '" y2="' + y1 + '" stroke="#e0e0e0" stroke-width="1.5"/>';
+            s += '<line x1="' + (bracketX - 4) + '" y1="' + y2 + '" x2="' + (bracketX + 4) + '" y2="' + y2 + '" stroke="#e0e0e0" stroke-width="1.5"/>';
+            s += '<text x="' + (bracketX + 9) + '" y="' + ((y1 + y2) / 2) + '" fill="#e0e0e0" font-size="10.5" text-anchor="middle" transform="rotate(-90 ' + (bracketX + 9) + ' ' + ((y1 + y2) / 2) + ')">高低差 ' + Math.round(pMax - pMin).toLocaleString() + '</text>';
+        }
+        s += '</svg>';
+        el.innerHTML = s;
+    }
+
+    function calcAll() {
+        lastLinks = computeLinks();
+        var off = lastLinks.off, info = lastLinks.info;
+        // ステータス表示
+        lasers.forEach(function (L, li) {
+            var st = document.getElementById('lstat_' + li);
+            if (!st) return;
+            if (li === 0) {
+                st.className = 'lstat base';
+                st.textContent = '全体の基準です。各ポイントはこのレーザーからの下がり（mm）で入力してください。';
+            } else if (off[li] !== null) {
+                st.className = 'lstat ok';
+                var t = '接続済み：共通点「' + info[li].names.join('・') + '」で ' + laserName(info[li].from) + ' と接続（補正 ' + fmtSigned(Math.round(off[li])) + '）';
+                if (info[li].count >= 2 && info[li].spread > 0) t += '／共通点の食い違い 最大 ' + Math.round(info[li].spread) + 'mm';
+                st.textContent = t;
+                if (info[li].spread >= 5) {
+                    var w = document.createElement('span');
+                    w.className = 'warn';
+                    w.textContent = ' ※食い違いが大きめです。レーザーの移動や読み違いを確認してください。';
+                    st.appendChild(w);
+                }
+            } else {
+                st.className = 'lstat ng';
+                st.textContent = '未接続：このレーザーと他のレーザーの両方で測った、同じ名前のポイント（共通点）が必要です。';
+            }
+        });
+        // 比較基準の統一値
+        var cmpU = null, cmpName = '', cmpRaw = null;
+        if (cmp.l >= 0 && lasers[cmp.l] && lasers[cmp.l].points[cmp.p]) {
+            var cp = lasers[cmp.l].points[cmp.p];
+            var cv = parseFloat(cp.reading);
+            if (cp.reading !== '' && !isNaN(cv)) {
+                cmpRaw = cv;
+                cmpName = (cp.name || '').trim() || (laserName(cmp.l) + 'のポイント' + (cmp.p + 1));
+                if (off[cmp.l] !== null) cmpU = cv + off[cmp.l];
+            }
+        }
+        // 各行の結果
+        lasers.forEach(function (L, li) {
+            L.points.forEach(function (p, pi) {
+                var rs = document.getElementById('rs_' + li + '_' + pi);
+                if (!rs) return;
+                var v = parseFloat(p.reading);
+                if (p.reading === '' || isNaN(v)) { rs.innerHTML = '<span style="color:#888;">--</span>'; return; }
+                var html = '<span class="main">' + esc(laserName(li)) + ' −' + Math.round(v).toLocaleString() + '</span>';
+                if (li !== 0 && off[li] !== null) {
+                    html += '<br><span class="uni">統一：' + esc(laserName(0)) + ' −' + Math.round(v + off[li]).toLocaleString() + '</span>';
+                }
+                if (off[li] === null && li !== 0) {
+                    html += '<br><span style="color:#ff9500;">未接続のため統一不可</span>';
+                }
+                var isCmp = (cmp.l === li && cmp.p === pi);
+                if (isCmp) {
+                    html += '<br><span class="cmp">比較基準</span>';
+                } else if (cmpU !== null && off[li] !== null) {
+                    html += '<br><span class="cmp">' + esc(cmpName) + 'から ' + fmtSigned(Math.round(cmpU - (v + off[li]))) + '</span>';
+                } else if (cmpRaw !== null && cmp.l === li) {
+                    html += '<br><span class="cmp">' + esc(cmpName) + 'から ' + fmtSigned(Math.round(cmpRaw - v)) + '</span>';
+                }
+                rs.innerHTML = html;
+            });
+        });
+        // サマリーと図（統一済みのみ）
+        var merged = mergedPoints(off);
+        var sh = document.getElementById('sum_high'), sl = document.getElementById('sum_low'), sd = document.getElementById('sum_diff');
+        if (!merged.length) {
+            sh.innerText = '--'; sl.innerText = '--'; sd.innerText = '--';
+        } else {
+            var hi = merged[0], lo = merged[0];
+            merged.forEach(function (o) { if (o.v < hi.v) hi = o; if (o.v > lo.v) lo = o; });
+            sh.innerText = hi.name + '（統一 −' + Math.round(hi.v).toLocaleString() + '）';
+            sl.innerText = lo.name + '（統一 −' + Math.round(lo.v).toLocaleString() + '）';
+            sd.innerText = Math.round(lo.v - hi.v).toLocaleString() + ' mm';
+        }
+        renderDiagram(merged, cmpU, cmpName, off);
+    }
+
+    load();
+    renderNameLib();
+    renderLasers();
+</script>
+
+<script>
+(function(){var ctx=null,last=0,lastK=0;
+var sw=document.createElement('input');sw.type='checkbox';sw.setAttribute('switch','');sw.style.cssText='position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
+var lb=document.createElement('label');lb.style.cssText='position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;overflow:hidden;';
+lb.appendChild(sw);document.body.appendChild(lb);
+function knock(){var n=Date.now();if(n-lastK<40)return;lastK=n;if(navigator.vibrate){try{navigator.vibrate(6);return;}catch(e){}}try{lb.click();}catch(e){}}
+function click(){try{var n=Date.now();if(n-last<35)return;last=n;if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();var t=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.setValueAtTime(190,t);o.frequency.exponentialRampToValueAtTime(70,t+0.06);g.gain.setValueAtTime(0.10,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.07);o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+0.08);}catch(e){}}
+function on(e){var b=e.target.closest('button,.nav-item');if(b){b.classList.add('is-pressed');click();knock();}}
+function off(e){var b=e.target.closest('button,.nav-item');if(b)setTimeout(function(){b.classList.remove('is-pressed');},130);}
+document.addEventListener('touchstart',on,{passive:true});
+document.addEventListener('mousedown',on);
+document.addEventListener('touchend',off,{passive:true});
+document.addEventListener('mouseup',off);
+document.addEventListener('touchcancel',function(){document.querySelectorAll('.is-pressed').forEach(function(b){b.classList.remove('is-pressed');});},{passive:true});})();
+</script>
+</body>
+</html>
