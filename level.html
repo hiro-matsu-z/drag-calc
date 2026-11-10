@@ -54,6 +54,7 @@
         .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
         .chip { background: #252525; border: 1px solid #444; color: #ddd; border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; }
         .chip:active { background: #1a3a4a; border-color: var(--blue); }
+        .chip.on { background: #1a3a4a; border-color: var(--blue); color: #fff; }
         .name-del { background: none; border: none; color: #777; font-size: 0.72rem; text-decoration: underline; cursor: pointer; padding: 4px; box-shadow: none; }
         .result-area { background: #2a2a2a; padding: 15px; border-top: 2px solid var(--border); border-radius: 0 0 12px 12px; }
         .rate-row { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.9rem; }
@@ -145,6 +146,24 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
 
     <div id="lasers"></div>
 
+    <div class="card">
+        <h2>目標（設計値）</h2>
+        <p style="font-size:0.75rem; color:#888; margin:0 0 12px 0;">まだ存在しない点（FL-295など）は、測った点を基準に「基準から何mm上／下」で指定すると、そのレーザーで狙うべき読みを表示します。</p>
+        <div style="display:flex; gap:10px; margin-bottom:12px;">
+            <div class="input-box" style="flex:1.1;"><label>目標の名前</label><input type="text" id="t_name" list="nameList" placeholder="FL-295"></div>
+            <div class="input-box" style="flex:1;"><label>基準にするポイント</label><select id="t_base" style="width:100%; background:transparent; border:none; color:white; font-size:1rem; outline:none; padding:4px 0;"></select></div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:12px;">
+            <div class="input-box" style="flex:1;"><label>基準からの差 (mm)</label><input type="number" id="t_diff" inputmode="decimal" placeholder="282"></div>
+        </div>
+        <div class="chip-row">
+            <button class="chip on" id="tDirDown" onclick="setTDir(-1)">基準より下</button>
+            <button class="chip" id="tDirUp" onclick="setTDir(1)">基準より上</button>
+        </div>
+        <button class="add-btn" onclick="addTarget()">＋ 目標を追加</button>
+        <div id="targetList" style="margin-top:12px;"></div>
+    </div>
+
     <div class="card" style="padding:0; overflow:hidden;">
         <div style="padding:15px 15px 5px 15px;">
             <button class="add-laser-btn" onclick="addLaser()">＋ レーザーを追加</button>
@@ -215,20 +234,23 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
     var NKEY = 'levelNamesV1';
     var lasers = [];
     var cmp = { l: -1, p: -1 };
+    var targets = [];
+    var tDir = -1;
+    var baseSig = '';
     var names = [];
     var lastLinks = { off: [0], info: [null] };
 
     function blank3() { return [{ name: '', reading: '' }, { name: '', reading: '' }, { name: '', reading: '' }]; }
     function newLaser(n) { return { name: 'レーザー' + n, points: blank3() }; }
     function save() {
-        try { localStorage.setItem(KEY, JSON.stringify({ lasers: lasers, cmp: cmp })); } catch (e) {}
+        try { localStorage.setItem(KEY, JSON.stringify({ lasers: lasers, cmp: cmp, targets: targets })); } catch (e) {}
         saveNames();
     }
     function saveNames() { try { localStorage.setItem(NKEY, JSON.stringify(names)); } catch (e) {} }
     function load() {
         try {
             var s = JSON.parse(localStorage.getItem(KEY) || 'null');
-            if (s && Array.isArray(s.lasers) && s.lasers.length) { lasers = s.lasers; cmp = s.cmp || { l: -1, p: -1 }; }
+            if (s && Array.isArray(s.lasers) && s.lasers.length) { lasers = s.lasers; cmp = s.cmp || { l: -1, p: -1 }; targets = Array.isArray(s.targets) ? s.targets : []; }
         } catch (e) {}
         if (!lasers.length) {
             // 旧バージョン（V3/V2）からの引き継ぎ
@@ -342,7 +364,74 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
         if (cmp.l === li && cmp.p === pi) cmp = { l: -1, p: -1 }; else cmp = { l: li, p: pi };
         save(); renderLasers();
     }
-    function clearAll() { lasers = [newLaser(1)]; cmp = { l: -1, p: -1 }; save(); renderLasers(); }
+    function clearAll() { lasers = [newLaser(1)]; cmp = { l: -1, p: -1 }; targets = []; save(); renderLasers(); }
+
+    function setTDir(d) {
+        tDir = d;
+        document.getElementById('tDirUp').classList.toggle('on', d === 1);
+        document.getElementById('tDirDown').classList.toggle('on', d === -1);
+    }
+    function addTarget() {
+        var name = document.getElementById('t_name').value.trim();
+        var base = document.getElementById('t_base').value;
+        var diff = parseFloat(document.getElementById('t_diff').value);
+        if (!name || !base || isNaN(diff)) return;
+        targets.push({ name: name, base: base, diff: diff, dir: tDir });
+        collectName(name);
+        document.getElementById('t_name').value = '';
+        document.getElementById('t_diff').value = '';
+        save(); calcAll();
+    }
+    function delTarget(ti) { targets.splice(ti, 1); save(); calcAll(); }
+    function computeTargets(merged, off) {
+        var byName = {};
+        merged.forEach(function (o) { if (!(o.name in byName)) byName[o.name] = o.v; });
+        return targets.map(function (t) {
+            if (!(t.base in byName)) return { name: t.name, u: null, per: [] };
+            var u = byName[t.base] - t.dir * t.diff;
+            var per = [];
+            lasers.forEach(function (L, li) {
+                if (off[li] !== null) per.push({ laser: laserName(li), r: u - off[li] });
+            });
+            return { name: t.name, u: u, per: per };
+        });
+    }
+    function refreshBaseSelect() {
+        var sel = document.getElementById('t_base');
+        if (!sel) return;
+        var namesSet = {};
+        lasers.forEach(function (L, li) { Object.keys(pointMap(li)).forEach(function (k) { namesSet[k] = 1; }); });
+        var keys = Object.keys(namesSet);
+        var sig = keys.join('|');
+        if (sig === baseSig) return;
+        baseSig = sig;
+        var cur = sel.value;
+        sel.innerHTML = '';
+        keys.forEach(function (k) {
+            var o = document.createElement('option');
+            o.value = k; o.textContent = k;
+            sel.appendChild(o);
+        });
+        if (cur && namesSet[cur]) sel.value = cur;
+    }
+    function renderTargets(tgts) {
+        var el = document.getElementById('targetList');
+        if (!el) return;
+        if (!targets.length) { el.innerHTML = ''; return; }
+        var html = '';
+        tgts.forEach(function (t, ti) {
+            html += '<div style="display:flex; gap:8px; align-items:center; background:#222; border:1px solid #333; border-radius:10px; padding:10px 12px; margin-bottom:8px;">' +
+                '<div style="flex:1; font-size:0.88rem; line-height:1.55;"><strong style="color:#ffd60a;">' + esc(t.name) + '</strong>（目標）<br>';
+            if (t.u === null) {
+                html += '<span style="color:#ff9500;">基準ポイント「' + esc(targets[ti].base) + '」が未入力です</span>';
+            } else {
+                html += '統一：' + esc(laserName(0)) + ' −' + Math.round(t.u).toLocaleString();
+                t.per.forEach(function (p) { html += '<br>狙う読み（' + esc(p.laser) + '）：<strong style="color:#fff;">−' + Math.round(p.r).toLocaleString() + '</strong>'; });
+            }
+            html += '</div><button class="del-btn" onclick="delTarget(' + ti + ')">×</button></div>';
+        });
+        el.innerHTML = html;
+    }
 
     function pointMap(li) {
         var m = {};
@@ -397,7 +486,7 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
     }
 
     var LASER_COLORS = ['#30d158', '#ff9500', '#bf5af2', '#ffd60a', '#64d2ff', '#ff6482', '#7ee787', '#ffa657'];
-    function renderDiagram(merged, cmpU, cmpName, off) {
+    function renderDiagram(merged, cmpU, cmpName, off, tgts) {
         var el = document.getElementById('diagram');
         var W = 360, H = 252, topY = 30, bottomY = 204;
         var dimX = 46, plotL = 84, plotR = 306, bracketX = 324;
@@ -423,6 +512,7 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
         var vals = [0];
         off.forEach(function (o) { if (o !== null) vals.push(o); });
         merged.forEach(function (o) { vals.push(o.v); });
+        (tgts || []).forEach(function (t) { if (t.u !== null) vals.push(t.u); });
         var dMin = Math.min.apply(null, vals), dMax = Math.max.apply(null, vals);
         var pad = (dMax - dMin) * 0.08 + 2;
         function Y(v) { return topY + ((v - dMin + pad) / ((dMax - dMin) + 2 * pad)) * (bottomY - topY); }
@@ -470,6 +560,13 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
             if (isCmpPt) {
                 s += '<text x="' + x + '" y="' + (y + 44) + '" fill="' + C_CMP + '" font-size="10" text-anchor="middle">比較基準</text>';
             }
+        });
+        // 目標（設計値）：破線で表示
+        (tgts || []).forEach(function (t) {
+            if (t.u === null) return;
+            var y = Y(t.u);
+            s += '<line x1="' + dimX + '" y1="' + y + '" x2="' + plotR + '" y2="' + y + '" stroke="' + C_DIM + '" stroke-width="1.6" stroke-dasharray="7 4"/>';
+            s += '<text x="' + (plotL + 2) + '" y="' + (y - 6) + '" fill="' + C_DIM + '" font-size="11" font-weight="bold">' + escXml(t.name) + '（目標）</text>';
         });
         // 全体の高低差ブラケット（ポイント間）
         var pMin = Infinity, pMax = -Infinity;
@@ -559,7 +656,10 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
             sl.innerText = lo.name + '（統一 −' + Math.round(lo.v).toLocaleString() + '）';
             sd.innerText = Math.round(lo.v - hi.v).toLocaleString() + ' mm';
         }
-        renderDiagram(merged, cmpU, cmpName, off);
+        refreshBaseSelect();
+        var tgts = computeTargets(merged, off);
+        renderTargets(tgts);
+        renderDiagram(merged, cmpU, cmpName, off, tgts);
     }
 
     load();
