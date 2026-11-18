@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" href="./favicon.ico" />
+    <title>近隣挨拶文 作成 | 現場計算 Genba Keisan PRO</title>
+    <meta name="description" content="住所・工事内容・着工日・担当者など最低限の入力だけで、近隣挨拶文（新築工事のご挨拶）をA4で作成。位置図（地理院地図）付き、そのまま印刷して配れます。" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f4f2ed;
+        --surface: #ffffff;
+        --text: #1c1a17;
+        --dim: #6f6a61;
+        --border: #ddd8cf;
+        --accent: #ea580c;
+        --accent-dark: #c2410c;
+        --accent-soft: #fff7ed;
+        --warn: #b45309;
+        --error: #b91c1c;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #14120f;
+          --surface: #201d19;
+          --text: #f2efe9;
+          --dim: #a39c90;
+          --border: #3a362f;
+          --accent: #f97316;
+          --accent-dark: #fb923c;
+          --accent-soft: #2a1c10;
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", YuGothic, "Noto Sans JP", sans-serif;
+        -webkit-text-size-adjust: 100%;
+      }
+      html { scroll-padding-bottom: 180px; }
+      .screen-only { max-width: 560px; margin: 0 auto; padding: 0 16px 40px; }
+      .summary { padding-top: 12px; }
+      .summary .site-name { font-size: 20px; font-weight: 700; line-height: 1.4; margin: 0; }
+      .summary .site-sub { margin: 2px 0 0; font-size: 13.5px; color: var(--dim); }
+      .summary a { color: var(--accent-dark); }
+      section.block { margin-top: 24px; }
+      section.block > h2 {
+        display: flex; align-items: center; gap: 8px;
+        font-size: 15px; font-weight: 700; margin: 0 0 12px;
+      }
+      section.block > h2::before {
+        content: ""; display: inline-block; width: 4px; height: 16px;
+        border-radius: 2px; background: var(--accent); flex: none;
+      }
+      .fields { display: flex; flex-direction: column; gap: 16px; }
+      .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      label.field { display: block; }
+      .field-label { display: block; font-size: 13px; font-weight: 600; color: var(--dim); margin-bottom: 6px; }
+      .field-hint { display: block; font-size: 12px; color: var(--dim); margin-top: 4px; }
+      input, select, textarea {
+        width: 100%; padding: 0 14px;
+        border: 1px solid var(--border); border-radius: 8px;
+        background: var(--surface); color: var(--text);
+        font-size: 17px; outline: none; font-family: inherit;
+      }
+      input, select { height: 52px; }
+      textarea { padding: 12px 14px; min-height: 96px; font-size: 15.5px; line-height: 1.6; resize: vertical; }
+      input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(234,88,12,.3); }
+      .btn {
+        height: 46px; border-radius: 8px; border: 1px solid var(--border);
+        background: var(--surface); color: var(--text);
+        font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer;
+      }
+      .btn:active { background: var(--bg); }
+      .btn-row { display: flex; gap: 8px; }
+      .btn-row .btn { flex: 1; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+      .chip {
+        height: 40px; padding: 0 14px; border-radius: 999px; cursor: pointer;
+        font-size: 14px; font-weight: 600; font-family: inherit;
+        border: 1px solid var(--accent); background: var(--surface); color: var(--accent-dark);
+      }
+      .note { font-size: 12.5px; line-height: 1.7; color: var(--dim); margin: 0; }
+      .note.warn { color: var(--warn); font-size: 13.5px; }
+      #scaled-wrap { width: 100%; max-width: 794px; margin: 0 auto; overflow: hidden; border-radius: 6px; }
+      #scaled-inner { transform-origin: top left; box-shadow: 0 2px 14px rgba(0,0,0,.25); width: 794px; height: 1123px; }
+      .action-bar {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+        border-top: 1px solid var(--border); background: var(--surface);
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .action-bar-inner { max-width: 560px; margin: 0 auto; padding: 12px 16px; }
+      #print-btn {
+        width: 100%; height: 54px; border: none; border-radius: 12px; cursor: pointer;
+        background: var(--accent); color: #fff; font-size: 17px; font-weight: 700; font-family: inherit;
+      }
+      #print-btn:active { background: var(--accent-dark); }
+      #print-hint { margin: 6px 0 0; text-align: center; font-size: 11.5px; color: var(--dim); }
+      .bottom-space { height: 110px; }
+      @media print {
+        .screen-only, .action-bar, .bottom-space, .no-print { display: none !important; }
+        body { background: #ffffff; }
+        #scaled-wrap { overflow: visible; max-width: none; border-radius: 0; }
+        #scaled-inner { transform: none !important; box-shadow: none; }
+        @page { size: A4; margin: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="screen-only">
+      <div class="summary">
+        <p class="site-name">近隣挨拶文 作成</p>
+        <p class="site-sub">最低限の入力だけで、位置図つきの挨拶文をA4で作成します。<a href="./index.html">トップへ戻る</a></p>
+      </div>
+
+      <section class="block">
+        <h2>工事の情報</h2>
+        <div class="fields">
+          <label class="field">
+            <span class="field-label">工事場所（住所）</span>
+            <input id="f-address" placeholder="例：東京都世田谷区尾山台3丁目376番1" autocomplete="off" />
+            <span class="field-hint">入力すると位置図が自動で表示されます</span>
+          </label>
+          <label class="field">
+            <span class="field-label">工事内容</span>
+            <select id="f-work-type">
+              <option value="木造戸建住宅　新築工事">木造戸建住宅　新築工事</option>
+              <option value="木造2階建て住宅　新築工事">木造2階建て住宅　新築工事</option>
+              <option value="木造3階建て住宅　新築工事">木造3階建て住宅　新築工事</option>
+              <option value="__other__">その他（自由入力）</option>
+            </select>
+          </label>
+          <label class="field" id="work-custom-wrap" hidden>
+            <span class="field-label">工事内容（自由入力）</span>
+            <input id="f-work-custom" placeholder="例：木造戸建住宅　解体・新築工事" autocomplete="off" />
+          </label>
+          <div class="grid2">
+            <label class="field">
+              <span class="field-label">着工日</span>
+              <input id="f-start" type="date" />
+            </label>
+            <label class="field">
+              <span class="field-label">完成予定日</span>
+              <input id="f-end" type="date" />
+            </label>
+          </div>
+          <div>
+            <span class="field-label">完成は着工から（タップで完成予定日に反映）</span>
+            <div class="chips">
+              <button type="button" class="chip" data-months="3">約3ヶ月後</button>
+              <button type="button" class="chip" data-months="4">約4ヶ月後</button>
+              <button type="button" class="chip" data-months="5">約5ヶ月後</button>
+              <button type="button" class="chip" data-months="6">約6ヶ月後</button>
+            </div>
+          </div>
+          <div class="grid2">
+            <label class="field">
+              <span class="field-label">作業開始</span>
+              <input id="f-time-start" type="time" value="08:00" />
+            </label>
+            <label class="field">
+              <span class="field-label">作業終了</span>
+              <input id="f-time-end" type="time" value="18:30" />
+            </label>
+          </div>
+          <label class="field">
+            <span class="field-label">特記事項（任意）</span>
+            <textarea id="f-notes" placeholder="例：11月23日（月・祝）と11月25日（水）は上棟作業のため、前面道路を通行止めにさせていただきます。"></textarea>
+            <span class="field-hint">書いた内容がそのまま文面に入ります。通行止めの日程などに</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>問い合わせ先</h2>
+        <div class="fields">
+          <label class="field">
+            <span class="field-label">会社名</span>
+            <input id="f-company" placeholder="例：株式会社オープンハウス・アーキテクト" autocomplete="off" />
+          </label>
+          <div class="grid2">
+            <label class="field">
+              <span class="field-label">工事担当者名</span>
+              <input id="f-manager" placeholder="例：齊藤" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span class="field-label">電話番号</span>
+              <input id="f-phone" inputmode="tel" placeholder="例：0120-49-3410" autocomplete="off" />
+            </label>
+          </div>
+          <label class="field">
+            <span class="field-label">電話の見出し（任意）</span>
+            <input id="f-phone-label" placeholder="例：お客様相談室（空欄なら見出しなし）" autocomplete="off" />
+          </label>
+          <p class="note">入力内容はこの端末にだけ保存されます（サーバーには送信されません）。地図は国土地理院のAPI・地理院タイルを利用しています。</p>
+        </div>
+      </section>
+
+      <section class="block no-print">
+        <h2>プレビュー</h2>
+        <p class="note warn" id="missing-line"></p>
+      </section>
+    </div>
+
+    <div id="scaled-wrap"><div id="scaled-inner"></div></div>
+    <div class="bottom-space"></div>
+
+    <div class="action-bar">
+      <div class="action-bar-inner">
+        <button type="button" id="print-btn">印刷する（A4）</button>
+        <p id="print-hint">印刷画面で「PDFに保存」を選ぶとPDFにもなります</p>
+      </div>
+    </div>
+
+<script>
+"use strict";
+/* =====================================================================
+   近隣挨拶文 作成ツール
+   入力は端末内（localStorage）に保存。地図は国土地理院API＋地理院タイル。
+   シートはA4固定（794×1123px）で描画し、プレビューは縮小表示する。
+   ===================================================================== */
+var MINCHO = "'Hiragino Mincho ProN', 'Hiragino Mincho Pro', 'YuMincho', 'Yu Mincho', 'MS Mincho', serif";
+var LS_KEY = "genba-greeting-draft-v1";
+var MAP_W = 500, MAP_H = 300, MAP_ZOOM = 17, TILE = 256;
+
+function $(id) { return document.getElementById(id); }
+function esc(s) {
+  return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function blank(s, n) { return (s || "").trim() ? esc(s.trim()) : "＿".repeat(n || 6); }
+
+/* ---------- 日付・時刻の表記 ---------- */
+function parseDateInput(v) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || "");
+  if (!m) return null;
+  return { y: +m[1], mo: +m[2], d: +m[3] };
+}
+function wareki(dt) { return "令和" + (dt.y - 2018) + "年" + dt.mo + "月" + dt.d + "日"; }
+function warekiJun(dt) {
+  var jun = dt.d <= 10 ? "上旬" : dt.d <= 20 ? "中旬" : "下旬";
+  return "令和" + (dt.y - 2018) + "年" + dt.mo + "月" + jun + "頃";
+}
+function fmtTime(v) {
+  var m = /^(\d{1,2}):(\d{2})$/.exec(v || "");
+  if (!m) return "";
+  var h = +m[1], mi = +m[2];
+  var s = h < 12 ? "午前" + h + "時" : "午後" + (h === 12 ? 12 : h - 12) + "時";
+  if (mi) s += mi + "分";
+  return s;
+}
+function addMonthsEnd(dt, months) {
+  var y = dt.y, mo = dt.mo + months;
+  while (mo > 12) { mo -= 12; y += 1; }
+  var last = new Date(y, mo, 0).getDate();
+  return { y: y, mo: mo, d: last };
+}
+function dateInputValue(dt) {
+  function p2(n) { return (n < 10 ? "0" : "") + n; }
+  return dt.y + "-" + p2(dt.mo) + "-" + p2(dt.d);
+}
+
+/* ---------- 地図（地理院タイル） ---------- */
+function lonToTileX(lon, zoom) { return ((lon + 180) / 360) * Math.pow(2, zoom); }
+function latToTileY(lat, zoom) {
+  var rad = (lat * Math.PI) / 180;
+  return ((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2) * Math.pow(2, zoom);
+}
+var geoCache = {};
+function geocodeAddress(q, cb) {
+  if (Object.prototype.hasOwnProperty.call(geoCache, q)) { cb(geoCache[q]); return; }
+  var done = function (geo) { geoCache[q] = geo; cb(geo); };
+  fetch("https://msearch.gsi.go.jp/address-search/AddressSearch?q=" + encodeURIComponent(q), { headers: { Accept: "application/json" } })
+    .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+    .then(function (json) {
+      var arr = Array.isArray(json) ? json : [];
+      var first = arr[0];
+      var coords = first && first.geometry && first.geometry.coordinates;
+      var lon = coords && coords[0], lat = coords && coords[1];
+      if (typeof lat === "number" && typeof lon === "number" && isFinite(lat) && isFinite(lon)) { done({ lat: lat, lon: lon }); return; }
+      return fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=" + encodeURIComponent(q), { headers: { Accept: "application/json" } })
+        .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+        .then(function (json2) {
+          var f2 = (Array.isArray(json2) ? json2 : [])[0];
+          var lat2 = f2 && f2.lat ? parseFloat(f2.lat) : NaN;
+          var lon2 = f2 && f2.lon ? parseFloat(f2.lon) : NaN;
+          done(isFinite(lat2) && isFinite(lon2) ? { lat: lat2, lon: lon2 } : null);
+        });
+    })
+    .catch(function () { done(null); });
+}
+function mapHTML(geo) {
+  var cx = lonToTileX(geo.lon, MAP_ZOOM) * TILE;
+  var cy = latToTileY(geo.lat, MAP_ZOOM) * TILE;
+  var left = cx - MAP_W / 2, top = cy - MAP_H / 2;
+  var x0 = Math.floor(left / TILE), x1 = Math.floor((left + MAP_W) / TILE);
+  var y0 = Math.floor(top / TILE), y1 = Math.floor((top + MAP_H) / TILE);
+  var maxTile = Math.pow(2, MAP_ZOOM) - 1;
+  var s = '<div style="position:relative;width:' + MAP_W + "px;height:" + MAP_H + 'px;overflow:hidden;border:1.5px solid #111;background:#e8e4da">';
+  s += '<div style="position:absolute;inset:0;overflow:hidden" aria-hidden="true">';
+  for (var x = x0; x <= x1; x++) {
+    for (var y = y0; y <= y1; y++) {
+      if (x < 0 || y < 0 || x > maxTile || y > maxTile) continue;
+      s += '<img src="https://cyberjapandata.gsi.go.jp/xyz/std/' + MAP_ZOOM + "/" + x + "/" + y + '.png" alt="" draggable="false" style="position:absolute;left:' + (x * TILE - left) + "px;top:" + (y * TILE - top) + "px;width:" + TILE + "px;height:" + TILE + 'px" />';
+    }
+  }
+  s += "</div>";
+  s += '<svg width="' + MAP_W + '" height="' + MAP_H + '" viewBox="0 0 ' + MAP_W + " " + MAP_H + '" style="position:absolute;inset:0" aria-hidden="true">';
+  var px = MAP_W / 2, py = MAP_H / 2;
+  s += '<circle cx="' + px + '" cy="' + py + '" r="20" fill="rgba(255,255,255,0.25)" stroke="#dc2626" stroke-width="4" />';
+  s += '<circle cx="' + px + '" cy="' + py + '" r="4.5" fill="#dc2626" stroke="#ffffff" stroke-width="1.5" />';
+  s += '<g transform="translate(' + (px + 58) + ", " + py + ')"><rect x="-32" y="-15" width="64" height="30" rx="5" fill="#dc2626" stroke="#ffffff" stroke-width="2" /><text x="0" y="5.5" text-anchor="middle" font-size="15" font-weight="800" fill="#ffffff" letter-spacing="2">現場</text></g>';
+  s += '<line x1="' + (px + 26) + '" y1="' + py + '" x2="' + (px + 26 + 6) + '" y2="' + py + '" stroke="#dc2626" stroke-width="2.5" opacity="0.85" />';
+  s += '<g transform="translate(' + (MAP_W - 30) + ', 30)"><circle r="17" fill="rgba(255,255,255,0.88)" stroke="#888" stroke-width="0.75" /><path d="M 0 -11 L 5 4 L 0 1 L -5 4 z" fill="#111" /><text x="0" y="13.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#111">北</text></g>';
+  s += "</svg>";
+  s += '<span style="position:absolute;right:4px;bottom:3px;font-size:9.5px;color:#444;background:rgba(255,255,255,0.75);padding:0 3px">出典：国土地理院（地理院タイル）</span>';
+  return s + "</div>";
+}
+
+/* ---------- 状態 ---------- */
+var els = {
+  address: $("f-address"), workType: $("f-work-type"), workCustom: $("f-work-custom"),
+  workCustomWrap: $("work-custom-wrap"),
+  start: $("f-start"), end: $("f-end"),
+  timeStart: $("f-time-start"), timeEnd: $("f-time-end"),
+  notes: $("f-notes"), company: $("f-company"), manager: $("f-manager"),
+  phone: $("f-phone"), phoneLabel: $("f-phone-label"),
+  missing: $("missing-line"), scaledWrap: $("scaled-wrap"), scaledInner: $("scaled-inner")
+};
+var geoState = { address: "", geo: null, pending: false };
+
+function readDraft() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {}; } catch (e) { return {}; }
+}
+function saveDraft() {
+  var d = {
+    address: els.address.value, workType: els.workType.value, workCustom: els.workCustom.value,
+    start: els.start.value, end: els.end.value,
+    timeStart: els.timeStart.value, timeEnd: els.timeEnd.value,
+    notes: els.notes.value, company: els.company.value, manager: els.manager.value,
+    phone: els.phone.value, phoneLabel: els.phoneLabel.value
+  };
+  try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch (e) {}
+}
+function restoreDraft() {
+  var d = readDraft();
+  if (d.address) els.address.value = d.address;
+  if (d.workType) els.workType.value = d.workType;
+  if (d.workCustom) els.workCustom.value = d.workCustom;
+  if (d.start) els.start.value = d.start;
+  if (d.end) els.end.value = d.end;
+  if (d.timeStart) els.timeStart.value = d.timeStart;
+  if (d.timeEnd) els.timeEnd.value = d.timeEnd;
+  if (d.notes) els.notes.value = d.notes;
+  if (d.company) els.company.value = d.company;
+  if (d.manager) els.manager.value = d.manager;
+  if (d.phone) els.phone.value = d.phone;
+  if (d.phoneLabel) els.phoneLabel.value = d.phoneLabel;
+}
+
+/* ---------- シート描画 ---------- */
+function workContentText() {
+  return els.workType.value === "__other__" ? els.workCustom.value.trim() : els.workType.value;
+}
+function renderSheet() {
+  var address = els.address.value.trim();
+  var work = workContentText();
+  var title = work.indexOf("新築") >= 0 ? "新築工事のご挨拶" : "工事のご挨拶";
+  var startDt = parseDateInput(els.start.value);
+  var endDt = parseDateInput(els.end.value);
+  var period = startDt ? wareki(startDt) : "令和＿＿年＿＿月＿＿日";
+  period += "～" + (endDt ? warekiJun(endDt) + "（予定）" : "令和＿＿年＿＿月＿＿頃（予定）");
+  var timeRange = (fmtTime(els.timeStart.value) || "午前＿時") + "～" + (fmtTime(els.timeEnd.value) || "午後＿時");
+  var notesLines = els.notes.value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean);
+
+  var h = '<div style="width:794px;height:1123px;background:#ffffff;color:#111111;color-scheme:light;font-family:' + MINCHO + ';position:relative;overflow:hidden">';
+  h += '<div class="sheet-pad" style="padding:48px 64px;height:100%;box-sizing:border-box">';
+  h += '<p style="font-size:15.5px;margin:0 0 10px">近隣の皆様へ</p>';
+  h += '<p style="font-size:23px;font-weight:700;text-align:center;margin:0 0 22px;letter-spacing:2px">' + esc(title) + "</p>";
+  h += '<p style="font-size:15.5px;line-height:1.95;margin:0 0 4px;text-align:justify">拝啓　時下ますますご清祥のこととお慶び申し上げます。</p>';
+  h += '<p style="font-size:15.5px;line-height:1.95;margin:0 0 4px;text-align:justify">このたび、下記の場所におきまして' + blank(work, 10) + 'を行うこととなりました。工事期間中は、騒音・振動・工事車両の出入り等でご迷惑をおかけいたしますが、安全の確保と近隣の皆様への配慮に十分努めて進めてまいりますので、何卒ご理解とご協力を賜りますようお願い申し上げます。</p>';
+  h += '<p style="font-size:15.5px;line-height:1.95;margin:0;text-align:justify">ご不明な点やお気づきの点がございましたら、下記までご連絡くださいますようお願い申し上げます。</p>';
+  h += '<p style="font-size:15.5px;line-height:1.95;margin:6px 0 0;text-align:right">敬具</p>';
+  h += '<p style="font-size:15.5px;margin:14px 0 10px;text-align:center">記</p>';
+  h += '<table style="border-collapse:collapse;font-size:15.5px;line-height:1.9"><tbody>';
+  h += "<tr><td style='padding:0 10px 0 0;white-space:nowrap;vertical-align:top'>工事場所</td><td>：" + blank(address, 16) + "</td></tr>";
+  h += "<tr><td style='padding:0 10px 0 0;white-space:nowrap;vertical-align:top'>工事内容</td><td>：" + blank(work, 10) + "</td></tr>";
+  h += "<tr><td style='padding:0 10px 0 0;white-space:nowrap;vertical-align:top'>工事期間</td><td>：" + esc(period) + "</td></tr>";
+  h += "<tr><td style='padding:0 10px 0 0;white-space:nowrap;vertical-align:top'>作業時間</td><td>：" + esc(timeRange) + "</td></tr>";
+  h += "</tbody></table>";
+  h += '<p style="font-size:13.5px;line-height:1.8;margin:10px 0 0">※天候等により、工期を変更する場合がございます。</p>';
+  h += '<p style="font-size:13.5px;line-height:1.8;margin:0">※工事車両の出入りや資材の搬入等で一時的にご不便をおかけする場合がございますが、誘導員を配置するなど、安全には十分配慮いたします。</p>';
+  notesLines.forEach(function (line) {
+    h += '<p style="font-size:14.5px;line-height:1.85;margin:10px 0 0;text-align:justify">' + esc(line) + "</p>";
+  });
+  h += '<p style="font-size:15px;font-weight:700;margin:16px 0 8px">工事場所のご案内</p>';
+  if (geoState.geo && geoState.address === address) {
+    h += mapHTML(geoState.geo);
+  } else if (address && geoState.pending && geoState.address === address) {
+    h += '<div style="width:' + MAP_W + "px;height:" + MAP_H + 'px;border:1.5px solid #111;background:#f3f0e9;display:flex;align-items:center;justify-content:center;font-size:14px;color:#666">地図を取得しています…</div>';
+  } else if (address) {
+    h += '<div style="width:' + MAP_W + "px;height:" + MAP_H + 'px;border:1.5px solid #111;background:#f3f0e9;display:flex;align-items:center;justify-content:center;font-size:14px;color:#666">地図を取得できませんでした（住所をご確認ください）</div>';
+  } else {
+    h += '<div style="width:' + MAP_W + "px;height:" + MAP_H + 'px;border:1.5px dashed #999;background:#faf8f3;display:flex;align-items:center;justify-content:center;font-size:14px;color:#888">住所を入力すると位置図が表示されます</div>';
+  }
+  h += '<div style="margin-top:18px;font-size:15.5px;line-height:1.9">';
+  h += '<p style="margin:0">お問い合わせ先</p>';
+  h += '<p style="margin:0">' + blank(els.company.value, 12) + "</p>";
+  h += '<p style="margin:0">工事担当：' + blank(els.manager.value, 4) + "</p>";
+  var phoneText = els.phone.value.trim();
+  if (phoneText) {
+    var label = els.phoneLabel.value.trim();
+    h += '<p style="margin:0">' + (label ? esc(label) + "：" : "") + esc(phoneText) + "</p>";
+  }
+  h += "</div>";
+  h += '<p style="font-size:15.5px;margin:10px 0 0;text-align:right">以上</p>';
+  h += "</div></div>";
+  els.scaledInner.innerHTML = h;
+
+  /* 内容がA4の高さを超える場合は、シート全体が1ページに収まるよう内容側を縮小する */
+  var pad = els.scaledInner.querySelector(".sheet-pad");
+  if (pad && pad.scrollHeight > 1123) {
+    var k = 1115 / pad.scrollHeight;
+    pad.style.width = (794 / k) + "px";
+    pad.style.transform = "scale(" + k + ")";
+    pad.style.transformOrigin = "top left";
+  }
+
+  var missing = [];
+  if (!address) missing.push("工事場所");
+  if (!work) missing.push("工事内容");
+  if (!startDt) missing.push("着工日");
+  if (!els.company.value.trim()) missing.push("会社名");
+  if (!els.manager.value.trim()) missing.push("担当者名");
+  if (!phoneText) missing.push("電話番号");
+  els.missing.textContent = missing.length ? "未入力： " + missing.join("・") + "（プレビューでは空欄になります）" : "";
+}
+
+/* ---------- 地図の取得（住所変更に追随） ---------- */
+var geoTimer = null;
+function refreshGeo() {
+  var address = els.address.value.trim();
+  if (!address) { geoState = { address: "", geo: null, pending: false }; renderSheet(); return; }
+  if (geoState.address === address && (geoState.geo || geoState.pending)) { renderSheet(); return; }
+  geoState = { address: address, geo: null, pending: true };
+  renderSheet();
+  geocodeAddress(address, function (geo) {
+    if (geoState.address !== address) return;
+    geoState = { address: address, geo: geo, pending: false };
+    renderSheet();
+  });
+}
+function scheduleGeo() {
+  if (geoTimer) clearTimeout(geoTimer);
+  geoTimer = setTimeout(refreshGeo, 600);
+}
+
+/* ---------- プレビューの縮小 ---------- */
+function resizePreview() {
+  var w = els.scaledWrap.clientWidth;
+  if (!w) return;
+  var scale = Math.min(1, w / 794);
+  els.scaledInner.style.transform = "scale(" + scale + ")";
+  els.scaledWrap.style.height = Math.round(1123 * scale) + "px";
+}
+new ResizeObserver(resizePreview).observe(els.scaledWrap);
+
+/* ---------- イベント ---------- */
+[els.address, els.workCustom, els.start, els.end, els.timeStart, els.timeEnd, els.notes, els.company, els.manager, els.phone, els.phoneLabel].forEach(function (el) {
+  el.addEventListener("input", function () { saveDraft(); renderSheet(); });
+  el.addEventListener("change", function () { saveDraft(); renderSheet(); });
+});
+els.address.addEventListener("input", scheduleGeo);
+els.address.addEventListener("change", refreshGeo);
+els.workType.addEventListener("change", function () {
+  els.workCustomWrap.hidden = els.workType.value !== "__other__";
+  saveDraft(); renderSheet();
+});
+document.querySelectorAll("[data-months]").forEach(function (chip) {
+  chip.addEventListener("click", function () {
+    var startDt = parseDateInput(els.start.value);
+    if (!startDt) { els.start.focus(); return; }
+    var endDt = addMonthsEnd(startDt, +chip.getAttribute("data-months"));
+    els.end.value = dateInputValue(endDt);
+    saveDraft(); renderSheet();
+  });
+});
+$("print-btn").addEventListener("click", function () { window.print(); });
+
+/* ---------- 初期化 ---------- */
+restoreDraft();
+els.workCustomWrap.hidden = els.workType.value !== "__other__";
+renderSheet();
+resizePreview();
+refreshGeo();
+</script>
+  </body>
+</html>
