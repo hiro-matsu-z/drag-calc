@@ -415,9 +415,16 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
                 <button type="button" class="toggle-btn small mode-work" data-gmode="work" aria-pressed="true">作業帯を置く</button>
                 <button type="button" class="toggle-btn small mode-guard" data-gmode="guard" aria-pressed="false">誘導員を置く</button>
                 <button type="button" class="toggle-btn small mode-delete" data-gmode="deleteMarker" aria-pressed="false">マーカーを消す</button>
+                <button type="button" class="toggle-btn small" data-gmode="moveMap" aria-pressed="false">地図を動かす</button>
               </div>
               <div class="editor-map" id="guide-map" role="application" aria-label="案内図の編集地図。作業帯と誘導員のマーカーをタップで置き、ドラッグで移動できます。現場の赤い丸印と現場ラベルもドラッグで移動できます">
                 <div class="scaler" id="guide-map-inner"></div>
+              </div>
+              <div class="btn-row" style="margin-top:8px">
+                <button type="button" class="btn" id="guide-zoom-out">− 縮小</button>
+                <button type="button" class="btn" id="guide-zoom-in">＋ 拡大</button>
+                <button type="button" class="btn" id="guide-view-reset">表示をリセット</button>
+                <span class="note" id="guide-view-label" style="align-self:center"></span>
               </div>
               <p class="note" id="guide-help" style="margin-top:8px"></p>
               <div class="btn-row" style="margin-top:8px">
@@ -450,6 +457,7 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
             <div class="btn-row" style="margin-bottom:8px">
               <button type="button" class="toggle-btn small mode-toggle" data-dmode="toggleDirection" aria-pressed="false">両・片切替</button>
               <button type="button" class="toggle-btn small mode-delete" data-dmode="deleteArrow" aria-pressed="false">矢印を消す</button>
+              <button type="button" class="toggle-btn small" data-dmode="moveMap" aria-pressed="false">地図を動かす</button>
             </div>
             <div id="ddir-group" style="margin-bottom:8px">
               <span class="field-label" style="font-size:12.5px">新しく置く矢印の種類</span>
@@ -460,6 +468,12 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
             </div>
             <div class="editor-map" id="detour-map" role="application" aria-label="迂回路図の編集地図。矢印を置くモードではタップした場所に矢印が置かれ、置いてある矢印はドラッグで移動、タップで45度回転します">
               <div class="scaler" id="detour-map-inner"></div>
+            </div>
+            <div class="btn-row" style="margin-top:8px">
+              <button type="button" class="btn" id="detour-zoom-out">− 縮小</button>
+              <button type="button" class="btn" id="detour-zoom-in">＋ 拡大</button>
+              <button type="button" class="btn" id="detour-view-reset">表示をリセット</button>
+              <span class="note" id="detour-view-label" style="align-self:center"></span>
             </div>
             <p class="note" id="detour-help" style="margin-top:8px"></p>
             <div class="btn-row" style="margin-top:8px">
@@ -607,7 +621,9 @@ function defaultDraft() {
     guards: "", roadWidth: "4", lanes: "", workWidth: "", workLength: "",
     detourArrows: [], closurePoints: [], guideMarkers: [],
     sitePinPos: { x: DEFAULT_SITE_PIN_POS.x, y: DEFAULT_SITE_PIN_POS.y },
-    siteLabelPos: { x: DEFAULT_SITE_LABEL_POS.x, y: DEFAULT_SITE_LABEL_POS.y }
+    siteLabelPos: { x: DEFAULT_SITE_LABEL_POS.x, y: DEFAULT_SITE_LABEL_POS.y },
+    guideView: { zoom: 18, dx: 0, dy: 0 },
+    detourView: { zoom: 18, dx: 0, dy: 0 }
   };
 }
 /* 旧方式（点を線でつないだ迂回路）の点列を、区間ごとの個別矢印へ変換する */
@@ -641,6 +657,8 @@ function normalizeDraft(raw) {
   });
   if (!d.sitePinPos || typeof d.sitePinPos.x !== "number") d.sitePinPos = { x: 0.5, y: 0.5 };
   if (!d.siteLabelPos || typeof d.siteLabelPos.x !== "number") d.siteLabelPos = { x: 0.5, y: 0.408 };
+  d.guideView = normalizeMapView(d.guideView);
+  d.detourView = normalizeMapView(d.detourView);
   /* 旧バージョンの目的プリセットは「その他（自由入力）」に寄せて文言を残す */
   if (d.purposePreset && PURPOSE_PRESETS.indexOf(d.purposePreset) < 0) {
     if (!d.purposeCustom) d.purposeCustom = d.purposePreset;
@@ -680,6 +698,8 @@ function toPermitData(settings, draft) {
     guideMarkers: draft.guideMarkers || [],
     sitePinPos: draft.sitePinPos || { x: 0.5, y: 0.5 },
     siteLabelPos: draft.siteLabelPos || { x: 0.5, y: 0.408 },
+    guideView: normalizeMapView(draft.guideView),
+    detourView: normalizeMapView(draft.detourView),
     isClosure: draft.regulation === "車両通行止め",
     hasDetourSheet: draft.regulation === "車両通行止め" && draft.includeDetour !== false
   };
@@ -696,6 +716,56 @@ var MAP_ZOOM = 18;
 var SHEET_MAP_W = 666;
 var SHEET_MAP_H = 520;
 var TILE = 256;
+var TILE_MAX_ZOOM = 18;
+var MAP_ZOOM_MIN = 15;
+var MAP_ZOOM_MAX = 19;
+
+/* 表示ビュー：中心のずらし量dx,dyは「住所の地点を中心・ズーム18」で見たときの世界ピクセル単位。
+   保存座標（マーカー等）はすべて基準ビュー（中心＝住所・ズーム18）での割合で持ち、
+   表示時にビューへ投影するので、表示範囲を変えてもマーカーの地理位置は変わらない。 */
+function normalizeMapView(v) {
+  var zoom = v && isFinite(+v.zoom) ? Math.round(+v.zoom) : MAP_ZOOM;
+  zoom = Math.min(MAP_ZOOM_MAX, Math.max(MAP_ZOOM_MIN, zoom));
+  var dx = v && isFinite(+v.dx) ? +v.dx : 0;
+  var dy = v && isFinite(+v.dy) ? +v.dy : 0;
+  var LIM = 30000;
+  return { zoom: zoom, dx: Math.min(LIM, Math.max(-LIM, dx)), dy: Math.min(LIM, Math.max(-LIM, dy)) };
+}
+function tileXToLon(x, zoom) { return (x / Math.pow(2, zoom)) * 360 - 180; }
+function tileYToLat(y, zoom) {
+  var n = Math.PI * (1 - (2 * y) / Math.pow(2, zoom));
+  return (Math.atan(Math.sinh(n)) * 180) / Math.PI;
+}
+function viewCenterLatLon(geo, view) {
+  var cx = lonToTileX(geo.lon, MAP_ZOOM) * TILE + view.dx;
+  var cy = latToTileY(geo.lat, MAP_ZOOM) * TILE + view.dy;
+  return { lat: tileYToLat(cy / TILE, MAP_ZOOM), lon: tileXToLon(cx / TILE, MAP_ZOOM) };
+}
+/* 保存座標（基準ビューの割合）→ 表示ビューの割合 */
+function refToViewFrac(geo, view, p) {
+  var k = Math.pow(2, view.zoom - MAP_ZOOM);
+  return {
+    x: 0.5 + ((p.x - 0.5) * SHEET_MAP_W - view.dx) * k / SHEET_MAP_W,
+    y: 0.5 + ((p.y - 0.5) * SHEET_MAP_H - view.dy) * k / SHEET_MAP_H
+  };
+}
+/* 表示ビューの割合 → 保存座標 */
+function viewToRefFrac(geo, view, f) {
+  var k = Math.pow(2, view.zoom - MAP_ZOOM);
+  return {
+    x: 0.5 + ((f.x - 0.5) * SHEET_MAP_W / k + view.dx) / SHEET_MAP_W,
+    y: 0.5 + ((f.y - 0.5) * SHEET_MAP_H / k + view.dy) / SHEET_MAP_H
+  };
+}
+/* anchorFrac（表示割合）の地点を固定したままズームを変えた新しいビュー */
+function zoomViewAt(view, newZoom, anchorFrac) {
+  var z = Math.min(MAP_ZOOM_MAX, Math.max(MAP_ZOOM_MIN, Math.round(newZoom)));
+  if (z === view.zoom) return { zoom: view.zoom, dx: view.dx, dy: view.dy };
+  var kOld = Math.pow(2, view.zoom - MAP_ZOOM), kNew = Math.pow(2, z - MAP_ZOOM);
+  var wx = view.dx + (anchorFrac.x - 0.5) * SHEET_MAP_W / kOld;
+  var wy = view.dy + (anchorFrac.y - 0.5) * SHEET_MAP_H / kOld;
+  return normalizeMapView({ zoom: z, dx: wx - (anchorFrac.x - 0.5) * SHEET_MAP_W / kNew, dy: wy - (anchorFrac.y - 0.5) * SHEET_MAP_H / kNew });
+}
 
 function lonToTileX(lon, zoom) { return ((lon + 180) / 360) * Math.pow(2, zoom); }
 function latToTileY(lat, zoom) {
@@ -736,21 +806,24 @@ function geocodeAddress(q, cb) {
 
 function mapTilesHTML(lat, lon, width, height, zoom) {
   zoom = zoom || MAP_ZOOM;
+  var tileZoom = Math.min(zoom, TILE_MAX_ZOOM);
+  var ts = Math.pow(2, zoom - tileZoom);
   var cx = lonToTileX(lon, zoom) * TILE;
   var cy = latToTileY(lat, zoom) * TILE;
   var left = cx - width / 2, top = cy - height / 2;
-  var x0 = Math.floor(left / TILE), x1 = Math.floor((left + width) / TILE);
-  var y0 = Math.floor(top / TILE), y1 = Math.floor((top + height) / TILE);
-  var maxTile = Math.pow(2, zoom) - 1;
+  var x0 = Math.floor(left / (TILE * ts)), x1 = Math.floor((left + width) / (TILE * ts));
+  var y0 = Math.floor(top / (TILE * ts)), y1 = Math.floor((top + height) / (TILE * ts));
+  var maxTile = Math.pow(2, tileZoom) - 1;
   var out = '<div style="position:absolute;inset:0;overflow:hidden;background:#e8e4da" aria-hidden="true">';
   for (var x = x0; x <= x1; x++) {
     for (var y = y0; y <= y1; y++) {
       if (x < 0 || y < 0 || x > maxTile || y > maxTile) continue;
-      out += '<img src="https://cyberjapandata.gsi.go.jp/xyz/std/' + zoom + "/" + x + "/" + y + '.png" alt="" crossorigin="anonymous" draggable="false" style="position:absolute;left:' + (x * TILE - left) + "px;top:" + (y * TILE - top) + 'px;width:256px;height:256px;user-select:none" />';
+      out += '<img src="https://cyberjapandata.gsi.go.jp/xyz/std/' + tileZoom + "/" + x + "/" + y + '.png" alt="" crossorigin="anonymous" draggable="false" style="position:absolute;left:' + (x * TILE * ts - left) + "px;top:" + (y * TILE * ts - top) + "px;width:" + TILE * ts + "px;height:" + TILE * ts + 'px;user-select:none" />';
     }
   }
   return out + "</div>";
 }
+
 
 function sitePinSVG(width, height, pinPos, labelPos, highlight) {
   var pin = pinPos || DEFAULT_SITE_PIN_POS;
@@ -841,20 +914,32 @@ function guideOverlaySVG(width, height, guideMarkers, highlightIndex) {
 function mapCanvasHTML(geo, opts) {
   opts = opts || {};
   var width = SHEET_MAP_W, height = SHEET_MAP_H;
-  var mPerPx = (156543.03392 * Math.cos((geo.lat * Math.PI) / 180)) / Math.pow(2, MAP_ZOOM);
+  var view = normalizeMapView(opts.view);
+  var center = viewCenterLatLon(geo, view);
+  function proj(o) {
+    if (!o) return o;
+    var v = refToViewFrac(geo, view, o);
+    var c = {};
+    Object.keys(o).forEach(function (key) { c[key] = o[key]; });
+    c.x = v.x; c.y = v.y;
+    return c;
+  }
+  function projArr(arr) { return (arr || []).map(proj); }
+  var mPerPx = (156543.03392 * Math.cos((center.lat * Math.PI) / 180)) / Math.pow(2, view.zoom);
   var barW = Math.round(100 / mPerPx);
   var s = '<div style="position:relative;width:' + width + "px;height:" + height + 'px;overflow:hidden;border:1.5px solid #111;background:#e8e4da;flex:none">';
-  s += mapTilesHTML(geo.lat, geo.lon, width, height);
+  s += mapTilesHTML(center.lat, center.lon, width, height, view.zoom);
   s += '<svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + " " + height + '" style="position:absolute;inset:0" aria-hidden="true">';
-  s += sitePinSVG(width, height, opts.sitePinPos, opts.siteLabelPos, opts.highlightSite || null);
+  s += sitePinSVG(width, height, proj(opts.sitePinPos), proj(opts.siteLabelPos), opts.highlightSite || null);
   s += '<g transform="translate(' + (width - 30) + ', 30)"><circle r="17" fill="rgba(255,255,255,0.88)" stroke="#888" stroke-width="0.75" /><path d="M 0 -11 L 5 4 L 0 1 L -5 4 z" fill="#111" /><text x="0" y="13.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#111">北</text></g>';
   s += '<g transform="translate(14, ' + (height - 34) + ')"><rect x="0" y="0" width="' + barW + '" height="5" fill="#111" stroke="#fff" stroke-width="0.75" /><text x="0" y="-4" font-size="11" fill="#111" font-weight="600">100m</text></g>';
   s += "</svg>";
-  if (opts.showRoutes) s += routeOverlaySVG(width, height, opts.detourArrows || [], opts.closurePoints || [], opts.highlightArrowIndex != null ? opts.highlightArrowIndex : -1);
-  if (opts.showGuideMarkers) s += guideOverlaySVG(width, height, opts.guideMarkers || [], opts.highlightGuideIndex != null ? opts.highlightGuideIndex : -1);
+  if (opts.showRoutes) s += routeOverlaySVG(width, height, projArr(opts.detourArrows), projArr(opts.closurePoints), opts.highlightArrowIndex != null ? opts.highlightArrowIndex : -1);
+  if (opts.showGuideMarkers) s += guideOverlaySVG(width, height, projArr(opts.guideMarkers), opts.highlightGuideIndex != null ? opts.highlightGuideIndex : -1);
   s += '<span style="position:absolute;right:4px;bottom:3px;font-size:9.5px;color:#444;background:rgba(255,255,255,0.75);padding:0 3px">出典：国土地理院（地理院タイル）</span>';
   return s + "</div>";
 }
+
 </script>
 <script>
 "use strict";
@@ -1116,7 +1201,7 @@ function guideMapSheetHTML(data, geo) {
   var h = sheetOpen();
   h += mapSheetHeaderHTML("案 内 図", data);
   if (geo) {
-    h += mapCanvasHTML(geo, { guideMarkers: data.guideMarkers, showGuideMarkers: true, sitePinPos: data.sitePinPos, siteLabelPos: data.siteLabelPos });
+    h += mapCanvasHTML(geo, { guideMarkers: data.guideMarkers, showGuideMarkers: true, sitePinPos: data.sitePinPos, siteLabelPos: data.siteLabelPos, view: data.guideView });
   } else {
     h += mapPlaceholderHTML(data.siteAddress);
   }
@@ -1130,7 +1215,7 @@ function detourMapSheetHTML(data, geo) {
   var h = sheetOpen();
   h += mapSheetHeaderHTML("迂 回 路 図", data);
   if (geo) {
-    h += mapCanvasHTML(geo, { sitePinPos: data.sitePinPos, siteLabelPos: data.siteLabelPos, detourArrows: data.detourArrows, closurePoints: data.closurePoints, showRoutes: true });
+    h += mapCanvasHTML(geo, { sitePinPos: data.sitePinPos, siteLabelPos: data.siteLabelPos, detourArrows: data.detourArrows, closurePoints: data.closurePoints, showRoutes: true, view: data.detourView });
   } else {
     h += mapPlaceholderHTML(data.siteAddress);
   }
@@ -1479,17 +1564,63 @@ function toSheetPx(wrap, scale, e) {
   return { x: (e.clientX - rect.left) / scale, y: (e.clientY - rect.top) / scale };
 }
 function clamp01(v) { return Math.min(1, Math.max(0, v)); }
+/* 保存座標の許容範囲（縮小表示では基準の画布の外側も見えるため、0〜1より広く取る） */
+function clampPos(v) { return Math.min(4, Math.max(-3, v)); }
+/* 2本指（ピンチ）操作の追跡：つまんで拡大・縮小、2本指のまま動かして移動 */
+function createPinch() { return { pointers: {}, active: false, lastMid: null, lastDist: 0 }; }
+function pinchDown(st, e) {
+  st.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+  var pts = Object.keys(st.pointers).map(function (k) { return st.pointers[k]; });
+  if (pts.length === 2) {
+    st.active = true;
+    st.lastMid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+    st.lastDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    return true;
+  }
+  return false;
+}
+function pinchMove(st, e) {
+  if (!st.pointers[e.pointerId]) return null;
+  st.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+  if (!st.active) return null;
+  var pts = Object.keys(st.pointers).map(function (k) { return st.pointers[k]; });
+  if (pts.length !== 2 || !st.lastMid) return null;
+  var mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+  var dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+  var out = { dMidX: mid.x - st.lastMid.x, dMidY: mid.y - st.lastMid.y, ratio: st.lastDist > 0 ? dist / st.lastDist : 1, midClient: mid };
+  st.lastMid = mid;
+  if (out.ratio > 1.22 || out.ratio < 0.82) st.lastDist = dist;
+  return out;
+}
+function pinchUp(st, e) {
+  delete st.pointers[e.pointerId];
+  if (Object.keys(st.pointers).length < 2) { st.active = false; st.lastMid = null; st.lastDist = 0; }
+}
+/* ピンチの結果（移動量＋拡縮）をビューへ反映した新しいビューを返す */
+function pinchApplyView(wrap, scale, view, pm) {
+  if (!scale) return view;
+  var k = Math.pow(2, view.zoom - MAP_ZOOM);
+  var nv = { zoom: view.zoom, dx: view.dx - pm.dMidX / scale / k, dy: view.dy - pm.dMidY / scale / k };
+  if (pm.ratio > 1.22 || pm.ratio < 0.82) {
+    var rect = wrap.getBoundingClientRect();
+    var anchor = { x: (pm.midClient.x - rect.left) / scale / SHEET_MAP_W, y: (pm.midClient.y - rect.top) / scale / SHEET_MAP_H };
+    nv = zoomViewAt(nv, nv.zoom + (pm.ratio > 1.22 ? 1 : -1), anchor);
+  }
+  return normalizeMapView(nv);
+}
 var ROTATE_STEP = 45, DRAG_THRESHOLD_PX = 7, ARROW_HIT_PX = 34;
 
 /* ------------------------------ 案内図エディタ ------------------------------ */
 var guideMode = "work";
 var guideDrag = null, guideDraggingIndex = -1, guideDraggingSite = null;
+var guidePinch = createPinch();
+var guidePan = null;
 var guideEditorScale = null;
 
 function renderGuideEditor() {
   if (!guideEditorScale || geoState.kind !== "ok" || !geoState.geo) return;
   els.guideMapInner.innerHTML = mapCanvasHTML(geoState.geo, {
-    guideMarkers: draft.guideMarkers, showGuideMarkers: true,
+    guideMarkers: draft.guideMarkers, showGuideMarkers: true, view: draft.guideView,
     highlightGuideIndex: guideDraggingIndex,
     sitePinPos: draft.sitePinPos, siteLabelPos: draft.siteLabelPos,
     highlightSite: guideDraggingSite
@@ -1498,21 +1629,31 @@ function renderGuideEditor() {
   var guardCount = draft.guideMarkers.length - workCount;
   var siteMoved = Math.abs(draft.sitePinPos.x - 0.5) > 0.001 || Math.abs(draft.sitePinPos.y - 0.5) > 0.001
     || Math.abs(draft.siteLabelPos.x - 0.5) > 0.001 || Math.abs(draft.siteLabelPos.y - 0.408) > 0.001;
+  var guideViewNow = normalizeMapView(draft.guideView);
+  var gvl = $("guide-view-label");
+  if (gvl) gvl.textContent = "ズーム" + guideViewNow.zoom + (guideViewNow.zoom === MAP_ZOOM && guideViewNow.dx === 0 && guideViewNow.dy === 0 ? "（標準）" : "（変更中）");
   els.guideCounts.textContent = "作業帯：" + workCount + "か所 ／ 誘導員：" + guardCount + "名" + (siteMoved ? " ／ 現場の位置は移動済み" : "");
   $("guide-reset-site").disabled = !siteMoved;
   $("guide-reset-site").style.opacity = siteMoved ? "" : "0.4";
   els.guideHelp.textContent = guideMode === "deleteMarker"
     ? "消したいマーカーをタップすると、そのマーカーだけが削除されます。現場の丸印とラベルは削除されません（ドラッグで移動はできます）。"
-    : "地図をタップすると、その場所にマーカーが1個置かれます。置いたマーカーは指でドラッグ（スライド）すると位置を動かせます。作業帯は動かさずタップすると45度ずつ回転します。赤い丸印（現場）と「現場」ラベルは、どのモードでもそれぞれドラッグで動かせます。ラベルだけをずらせば、作業帯の文字などとの重なりを避けられます。この編集地図は案内図のシートとまったく同じ縮尺のため、ここで合わせた位置が印刷でもずれません。";
+    : guideMode === "moveMap"
+      ? "地図を1本指でドラッグすると表示位置を動かせます。2本指でつまむ（ピンチ）と拡大・縮小、2本指のまま動かすと移動もできます。「＋ 拡大」「− 縮小」ボタンでも変えられます。表示範囲を変えても、マーカーと現場の位置は地図に付いて動くので、置いた場所がずれることはありません。「表示をリセット」で最初の表示に戻ります。"
+      : "地図をタップすると、その場所にマーカーが1個置かれます。置いたマーカーは指でドラッグ（スライド）すると位置を動かせます。作業帯は動かさずタップすると45度ずつ回転します。赤い丸印（現場）と「現場」ラベルは、どのモードでもそれぞれドラッグで動かせます。ラベルだけをずらせば、作業帯の文字などとの重なりを避けられます。表示範囲（大きさ・位置）を変えたいときは「地図を動かす」モードを使ってください。編集地図と案内図のシートは同じ表示範囲・縮尺で描かれるため、ここで合わせた位置が印刷でもずれません。";
 }
 function guideEmit(markers, pin, label) {
   draft.guideMarkers = markers; draft.sitePinPos = pin; draft.siteLabelPos = label;
   scheduleDraftSave(); renderGuideEditor(); renderSheets();
 }
+function guideViewEmit(view) {
+  draft.guideView = normalizeMapView(view);
+  scheduleDraftSave(); renderGuideEditor(); renderSheets();
+}
 function guideHitMarker(px, py) {
   for (var i = draft.guideMarkers.length - 1; i >= 0; i--) {
     var m = draft.guideMarkers[i]; if (!m) continue;
-    var cx = m.x * SHEET_MAP_W, cy = m.y * SHEET_MAP_H;
+    var mv = refToViewFrac(geoState.geo, normalizeMapView(draft.guideView), m);
+    var cx = mv.x * SHEET_MAP_W, cy = mv.y * SHEET_MAP_H;
     if (m.kind === "work") {
       var rad = ((m.angle || 0) * Math.PI) / 180;
       var dx = px - cx, dy = py - cy;
@@ -1537,22 +1678,62 @@ function initGuideEditor() {
   $("guide-reset-site").addEventListener("click", function () {
     guideEmit(draft.guideMarkers, { x: DEFAULT_SITE_PIN_POS.x, y: DEFAULT_SITE_PIN_POS.y }, { x: DEFAULT_SITE_LABEL_POS.x, y: DEFAULT_SITE_LABEL_POS.y });
   });
+  $("guide-zoom-in").addEventListener("click", function () {
+    if (geoState.kind !== "ok") return;
+    var v = normalizeMapView(draft.guideView);
+    guideViewEmit(zoomViewAt(v, v.zoom + 1, { x: 0.5, y: 0.5 }));
+  });
+  $("guide-zoom-out").addEventListener("click", function () {
+    if (geoState.kind !== "ok") return;
+    var v = normalizeMapView(draft.guideView);
+    guideViewEmit(zoomViewAt(v, v.zoom - 1, { x: 0.5, y: 0.5 }));
+  });
+  $("guide-view-reset").addEventListener("click", function () { guideViewEmit({ zoom: MAP_ZOOM, dx: 0, dy: 0 }); });
   els.guideMap.addEventListener("pointerdown", function (e) {
     if (geoState.kind !== "ok") return;
+    if (pinchDown(guidePinch, e)) {
+      /* 2本指になったら、進行中のドラッグを取り消し（置いたばかりのマーカーは消す）、ピンチ操作に切り替える */
+      if (guideDrag) {
+        if (guideDrag.isNew) {
+          var newIdx = guideDrag.index;
+          guideEmit(draft.guideMarkers.filter(function (_, i) { return i !== newIdx; }), draft.sitePinPos, draft.siteLabelPos);
+        } else if (guideDrag.kind === "sitePin" && guideDrag.orig) {
+          guideEmit(draft.guideMarkers, guideDrag.orig, draft.siteLabelPos);
+        } else if (guideDrag.kind === "siteLabel" && guideDrag.orig) {
+          guideEmit(draft.guideMarkers, draft.sitePinPos, guideDrag.orig);
+        } else if (guideDrag.kind === "marker" && guideDrag.orig) {
+          var oi = guideDrag.index, ov = guideDrag.orig;
+          guideEmit(draft.guideMarkers.map(function (m, i) { return i === oi ? ov : m; }), draft.sitePinPos, draft.siteLabelPos);
+        }
+      }
+      guideDrag = null; guideDraggingIndex = -1; guideDraggingSite = null; guidePan = null;
+      renderGuideEditor();
+      return;
+    }
+    if (guidePinch.active) return;
     var p = toSheetPx(els.guideMap, guideEditorScale.scale, e);
     if (!p) return;
-    var pt = { x: clamp01(p.x / SHEET_MAP_W), y: clamp01(p.y / SHEET_MAP_H) };
-    var lx = draft.siteLabelPos.x * SHEET_MAP_W, ly = draft.siteLabelPos.y * SHEET_MAP_H;
+    var view = normalizeMapView(draft.guideView);
+    var refPt = viewToRefFrac(geoState.geo, view, { x: p.x / SHEET_MAP_W, y: p.y / SHEET_MAP_H });
+    var pt = { x: clampPos(refPt.x), y: clampPos(refPt.y) };
+    var labelV = refToViewFrac(geoState.geo, view, draft.siteLabelPos);
+    var lx = labelV.x * SHEET_MAP_W, ly = labelV.y * SHEET_MAP_H;
     if (Math.abs(p.x - lx) <= 42 && Math.abs(p.y - ly) <= 24) {
-      guideDrag = { kind: "siteLabel", index: -1, offsetX: lx - p.x, offsetY: ly - p.y, startX: p.x, startY: p.y, moved: false, isNew: false };
+      guideDrag = { kind: "siteLabel", index: -1, offsetX: lx - p.x, offsetY: ly - p.y, startX: p.x, startY: p.y, moved: false, isNew: false, orig: { x: draft.siteLabelPos.x, y: draft.siteLabelPos.y } };
       guideDraggingSite = "label";
       els.guideMap.setPointerCapture(e.pointerId); renderGuideEditor(); return;
     }
-    var cx = draft.sitePinPos.x * SHEET_MAP_W, cy = draft.sitePinPos.y * SHEET_MAP_H;
+    var pinV = refToViewFrac(geoState.geo, view, draft.sitePinPos);
+    var cx = pinV.x * SHEET_MAP_W, cy = pinV.y * SHEET_MAP_H;
     if (Math.hypot(p.x - cx, p.y - cy) <= 36) {
-      guideDrag = { kind: "sitePin", index: -1, offsetX: cx - p.x, offsetY: cy - p.y, startX: p.x, startY: p.y, moved: false, isNew: false };
+      guideDrag = { kind: "sitePin", index: -1, offsetX: cx - p.x, offsetY: cy - p.y, startX: p.x, startY: p.y, moved: false, isNew: false, orig: { x: draft.sitePinPos.x, y: draft.sitePinPos.y } };
       guideDraggingSite = "pin";
       els.guideMap.setPointerCapture(e.pointerId); renderGuideEditor(); return;
+    }
+    if (guideMode === "moveMap") {
+      guidePan = { lastX: p.x, lastY: p.y };
+      els.guideMap.setPointerCapture(e.pointerId);
+      return;
     }
     var hit = guideHitMarker(p.x, p.y);
     if (hit >= 0) {
@@ -1561,33 +1742,50 @@ function initGuideEditor() {
         return;
       }
       var m = draft.guideMarkers[hit];
-      guideDrag = { kind: "marker", index: hit, offsetX: m.x * SHEET_MAP_W - p.x, offsetY: m.y * SHEET_MAP_H - p.y, startX: p.x, startY: p.y, moved: false, isNew: false };
+      var mv2 = refToViewFrac(geoState.geo, view, m);
+      guideDrag = { kind: "marker", index: hit, offsetX: mv2.x * SHEET_MAP_W - p.x, offsetY: mv2.y * SHEET_MAP_H - p.y, startX: p.x, startY: p.y, moved: false, isNew: false, orig: { x: m.x, y: m.y, kind: m.kind, angle: m.angle } };
       guideDraggingIndex = hit;
       els.guideMap.setPointerCapture(e.pointerId); renderGuideEditor(); return;
     }
     if (guideMode === "work" || guideMode === "guard") {
       var next = draft.guideMarkers.concat([{ x: pt.x, y: pt.y, kind: guideMode, angle: 0 }]);
-      guideDrag = { kind: "marker", index: next.length - 1, offsetX: 0, offsetY: 0, startX: p.x, startY: p.y, moved: false, isNew: true };
+      guideDrag = { kind: "marker", index: next.length - 1, offsetX: 0, offsetY: 0, startX: p.x, startY: p.y, moved: false, isNew: true, orig: null };
       guideDraggingIndex = next.length - 1;
       els.guideMap.setPointerCapture(e.pointerId);
       guideEmit(next, draft.sitePinPos, draft.siteLabelPos);
     }
   });
+
   els.guideMap.addEventListener("pointermove", function (e) {
-    if (!guideDrag) return;
+    var pm = pinchMove(guidePinch, e);
+    if (pm) { guideViewEmit(pinchApplyView(els.guideMap, guideEditorScale.scale, normalizeMapView(draft.guideView), pm)); return; }
+    if (guidePinch.active) return;
     var p = toSheetPx(els.guideMap, guideEditorScale.scale, e);
     if (!p) return;
+    if (guidePan) {
+      var pview = normalizeMapView(draft.guideView);
+      var pk = Math.pow(2, pview.zoom - MAP_ZOOM);
+      var pnv = { zoom: pview.zoom, dx: pview.dx - (p.x - guidePan.lastX) / pk, dy: pview.dy - (p.y - guidePan.lastY) / pk };
+      guidePan.lastX = p.x; guidePan.lastY = p.y;
+      guideViewEmit(pnv);
+      return;
+    }
+    if (!guideDrag) return;
     if (!guideDrag.moved) {
       if (Math.hypot(p.x - guideDrag.startX, p.y - guideDrag.startY) < DRAG_THRESHOLD_PX) return;
       guideDrag.moved = true;
     }
-    var nx = clamp01((p.x + guideDrag.offsetX) / SHEET_MAP_W);
-    var ny = clamp01((p.y + guideDrag.offsetY) / SHEET_MAP_H);
+    var target = viewToRefFrac(geoState.geo, normalizeMapView(draft.guideView), { x: (p.x + guideDrag.offsetX) / SHEET_MAP_W, y: (p.y + guideDrag.offsetY) / SHEET_MAP_H });
+    var nx = clampPos(target.x);
+    var ny = clampPos(target.y);
     if (guideDrag.kind === "sitePin") guideEmit(draft.guideMarkers, { x: nx, y: ny }, draft.siteLabelPos);
     else if (guideDrag.kind === "siteLabel") guideEmit(draft.guideMarkers, draft.sitePinPos, { x: nx, y: ny });
     else guideEmit(draft.guideMarkers.map(function (m, i) { return i === guideDrag.index ? { x: nx, y: ny, kind: m.kind, angle: m.angle } : m; }), draft.sitePinPos, draft.siteLabelPos);
   });
-  function guideUp() {
+
+  function guideUp(e) {
+    if (e) pinchUp(guidePinch, e);
+    guidePan = null;
     var drag = guideDrag;
     guideDrag = null; guideDraggingIndex = -1; guideDraggingSite = null;
     if (!drag || drag.moved || drag.isNew) { renderGuideEditor(); return; }
@@ -1600,14 +1798,17 @@ function initGuideEditor() {
     }
     renderGuideEditor();
   }
+
   els.guideMap.addEventListener("pointerup", guideUp);
-  els.guideMap.addEventListener("pointercancel", function () { guideDrag = null; guideDraggingIndex = -1; guideDraggingSite = null; renderGuideEditor(); });
+  els.guideMap.addEventListener("pointercancel", function (e) { pinchUp(guidePinch, e); guidePan = null; guideDrag = null; guideDraggingIndex = -1; guideDraggingSite = null; renderGuideEditor(); });
 }
 
 /* ------------------------------ 迂回路図エディタ ------------------------------ */
 var detourMode = "detour";
 var detourNewDirection = "both";
 var detourDrag = null, detourDraggingIndex = -1;
+var detourPinch = createPinch();
+var detourPan = null;
 var detourEditorScale = null;
 
 function renderDetourSection() {
@@ -1627,29 +1828,40 @@ function renderDetourEditor() {
   if (!detourEditorScale || geoState.kind !== "ok" || !geoState.geo) return;
   if (!currentData().hasDetourSheet) return;
   els.detourMapInner.innerHTML = mapCanvasHTML(geoState.geo, {
-    detourArrows: draft.detourArrows, closurePoints: draft.closurePoints, showRoutes: true,
+    detourArrows: draft.detourArrows, closurePoints: draft.closurePoints, showRoutes: true, view: draft.detourView,
     highlightArrowIndex: detourDraggingIndex,
     sitePinPos: draft.sitePinPos, siteLabelPos: draft.siteLabelPos
   });
   var bothCount = draft.detourArrows.filter(function (a) { return a.direction !== "single"; }).length;
   var singleCount = draft.detourArrows.length - bothCount;
+  var detourViewNow = normalizeMapView(draft.detourView);
+  var dvl = $("detour-view-label");
+  if (dvl) dvl.textContent = "ズーム" + detourViewNow.zoom + (detourViewNow.zoom === MAP_ZOOM && detourViewNow.dx === 0 && detourViewNow.dy === 0 ? "（標準）" : "（変更中）");
   els.detourCounts.textContent = "迂回路の矢印：" + draft.detourArrows.length + "個（両矢印" + bothCount + "個・片矢印" + singleCount + "個）／ 通行止め区間：" + draft.closurePoints.length + "点";
   els.detourHelp.textContent = detourMode === "detour"
-    ? "地図をタップすると、その場所に迂回路の矢印が1個置かれます（線はつながりません）。置いた矢印は指でドラッグ（スライド）すると位置を動かせます。動かさずタップすると45度ずつ回転するので、道路の向きに合わせてください。地図の中心の赤い丸印と「現場」の表示が現場位置です。この編集地図は迂回路図のシートとまったく同じ縮尺で描かれているため、ここで合わせた位置が印刷でもずれません。"
-    : detourMode === "closure"
-      ? "地図をタップすると点が打たれ、点同士が赤い線でつながって通行止め区間になります。"
-      : detourMode === "toggleDirection"
-        ? "切り替えたい矢印をタップすると、両矢印（双方向）⇔片矢印（一方向）が切り替わります。ドラッグすると位置も動かせます。"
-        : "消したい矢印をタップすると、その矢印だけが削除されます。";
+    ? "地図をタップすると、その場所に迂回路の矢印が1個置かれます（線はつながりません）。置いた矢印は指でドラッグ（スライド）すると位置を動かせます。動かさずタップすると45度ずつ回転するので、道路の向きに合わせてください。地図の中心の赤い丸印と「現場」の表示が現場位置です。表示範囲（大きさ・位置）を変えたいときは「地図を動かす」モードを使ってください。編集地図と迂回路図のシートは同じ表示範囲・縮尺で描かれるため、ここで合わせた位置が印刷でもずれません。"
+    : detourMode === "moveMap"
+      ? "地図を1本指でドラッグすると表示位置を動かせます。2本指でつまむ（ピンチ）と拡大・縮小、2本指のまま動かすと移動もできます。「＋ 拡大」「− 縮小」ボタンでも変えられます。迂回路は広い範囲で描くことが多いので、まず縮小して全体を見てから矢印を置くと作りやすくなります。表示範囲を変えても、矢印と現場の位置は地図に付いて動くので、置いた場所がずれることはありません。「表示をリセット」で最初の表示に戻ります。"
+      : detourMode === "closure"
+        ? "地図をタップすると点が打たれ、点同士が赤い線でつながって通行止め区間になります。"
+        : detourMode === "toggleDirection"
+          ? "切り替えたい矢印をタップすると、両矢印（双方向）⇔片矢印（一方向）が切り替わります。ドラッグすると位置も動かせます。"
+          : "消したい矢印をタップすると、その矢印だけが削除されます。";
 }
 function detourEmit(arrows, closure) {
   draft.detourArrows = arrows; draft.closurePoints = closure;
   scheduleDraftSave(); renderDetourEditor(); renderSheets();
 }
+function detourViewEmit(view) {
+  draft.detourView = normalizeMapView(view);
+  scheduleDraftSave(); renderDetourEditor(); renderSheets();
+}
 function nearestArrowIndex(px, py) {
   var best = -1, bestDist = ARROW_HIT_PX;
+  var view = normalizeMapView(draft.detourView);
   draft.detourArrows.forEach(function (a, i) {
-    var d = Math.hypot(a.x * SHEET_MAP_W - px, a.y * SHEET_MAP_H - py);
+    var av = refToViewFrac(geoState.geo, view, a);
+    var d = Math.hypot(av.x * SHEET_MAP_W - px, av.y * SHEET_MAP_H - py);
     if (d <= bestDist) { bestDist = d; best = i; }
   });
   return best;
@@ -1676,11 +1888,45 @@ function initDetourEditor() {
     else detourEmit(draft.detourArrows.slice(0, -1), draft.closurePoints);
   });
   $("detour-clear").addEventListener("click", function () { detourEmit([], []); });
+  $("detour-zoom-in").addEventListener("click", function () {
+    if (geoState.kind !== "ok") return;
+    var v = normalizeMapView(draft.detourView);
+    detourViewEmit(zoomViewAt(v, v.zoom + 1, { x: 0.5, y: 0.5 }));
+  });
+  $("detour-zoom-out").addEventListener("click", function () {
+    if (geoState.kind !== "ok") return;
+    var v = normalizeMapView(draft.detourView);
+    detourViewEmit(zoomViewAt(v, v.zoom - 1, { x: 0.5, y: 0.5 }));
+  });
+  $("detour-view-reset").addEventListener("click", function () { detourViewEmit({ zoom: MAP_ZOOM, dx: 0, dy: 0 }); });
   els.detourMap.addEventListener("pointerdown", function (e) {
     if (geoState.kind !== "ok") return;
+    if (pinchDown(detourPinch, e)) {
+      /* 2本指になったら、進行中のドラッグを取り消し（置いたばかりの矢印は消す）、ピンチ操作に切り替える */
+      if (detourDrag) {
+        if (detourDrag.isNew) {
+          var newIdx = detourDrag.index;
+          detourEmit(draft.detourArrows.filter(function (_, i) { return i !== newIdx; }), draft.closurePoints);
+        } else if (detourDrag.orig) {
+          var oi = detourDrag.index, ov = detourDrag.orig;
+          detourEmit(draft.detourArrows.map(function (a, i) { return i === oi ? ov : a; }), draft.closurePoints);
+        }
+      }
+      detourDrag = null; detourDraggingIndex = -1; detourPan = null;
+      renderDetourEditor();
+      return;
+    }
+    if (detourPinch.active) return;
     var p = toSheetPx(els.detourMap, detourEditorScale.scale, e);
     if (!p) return;
-    var pt = { x: clamp01(p.x / SHEET_MAP_W), y: clamp01(p.y / SHEET_MAP_H) };
+    var view = normalizeMapView(draft.detourView);
+    var refPt = viewToRefFrac(geoState.geo, view, { x: p.x / SHEET_MAP_W, y: p.y / SHEET_MAP_H });
+    var pt = { x: clampPos(refPt.x), y: clampPos(refPt.y) };
+    if (detourMode === "moveMap") {
+      detourPan = { lastX: p.x, lastY: p.y };
+      els.detourMap.setPointerCapture(e.pointerId);
+      return;
+    }
     if (detourMode === "closure") { detourEmit(draft.detourArrows, draft.closurePoints.concat([pt])); return; }
     var hit = nearestArrowIndex(p.x, p.y);
     if (detourMode === "deleteArrow") {
@@ -1689,31 +1935,48 @@ function initDetourEditor() {
     }
     if (hit >= 0) {
       var a = draft.detourArrows[hit];
-      detourDrag = { index: hit, offsetX: a.x * SHEET_MAP_W - p.x, offsetY: a.y * SHEET_MAP_H - p.y, startX: p.x, startY: p.y, moved: false, isNew: false };
+      var av = refToViewFrac(geoState.geo, view, a);
+      detourDrag = { index: hit, offsetX: av.x * SHEET_MAP_W - p.x, offsetY: av.y * SHEET_MAP_H - p.y, startX: p.x, startY: p.y, moved: false, isNew: false, orig: { x: a.x, y: a.y, angle: a.angle, direction: a.direction } };
       detourDraggingIndex = hit;
       els.detourMap.setPointerCapture(e.pointerId); renderDetourEditor(); return;
     }
     if (detourMode === "detour") {
       var next = draft.detourArrows.concat([{ x: pt.x, y: pt.y, angle: 0, direction: detourNewDirection }]);
-      detourDrag = { index: next.length - 1, offsetX: 0, offsetY: 0, startX: p.x, startY: p.y, moved: false, isNew: true };
+      detourDrag = { index: next.length - 1, offsetX: 0, offsetY: 0, startX: p.x, startY: p.y, moved: false, isNew: true, orig: null };
       detourDraggingIndex = next.length - 1;
       els.detourMap.setPointerCapture(e.pointerId);
       detourEmit(next, draft.closurePoints);
     }
   });
+
   els.detourMap.addEventListener("pointermove", function (e) {
-    if (!detourDrag) return;
+    var pm = pinchMove(detourPinch, e);
+    if (pm) { detourViewEmit(pinchApplyView(els.detourMap, detourEditorScale.scale, normalizeMapView(draft.detourView), pm)); return; }
+    if (detourPinch.active) return;
     var p = toSheetPx(els.detourMap, detourEditorScale.scale, e);
     if (!p) return;
+    if (detourPan) {
+      var pview = normalizeMapView(draft.detourView);
+      var pk = Math.pow(2, pview.zoom - MAP_ZOOM);
+      var pnv = { zoom: pview.zoom, dx: pview.dx - (p.x - detourPan.lastX) / pk, dy: pview.dy - (p.y - detourPan.lastY) / pk };
+      detourPan.lastX = p.x; detourPan.lastY = p.y;
+      detourViewEmit(pnv);
+      return;
+    }
+    if (!detourDrag) return;
     if (!detourDrag.moved) {
       if (Math.hypot(p.x - detourDrag.startX, p.y - detourDrag.startY) < DRAG_THRESHOLD_PX) return;
       detourDrag.moved = true;
     }
-    var nx = clamp01((p.x + detourDrag.offsetX) / SHEET_MAP_W);
-    var ny = clamp01((p.y + detourDrag.offsetY) / SHEET_MAP_H);
+    var target = viewToRefFrac(geoState.geo, normalizeMapView(draft.detourView), { x: (p.x + detourDrag.offsetX) / SHEET_MAP_W, y: (p.y + detourDrag.offsetY) / SHEET_MAP_H });
+    var nx = clampPos(target.x);
+    var ny = clampPos(target.y);
     detourEmit(draft.detourArrows.map(function (a, i) { return i === detourDrag.index ? { x: nx, y: ny, angle: a.angle, direction: a.direction } : a; }), draft.closurePoints);
   });
-  function detourUp() {
+
+  function detourUp(e) {
+    if (e) pinchUp(detourPinch, e);
+    detourPan = null;
     var drag = detourDrag;
     detourDrag = null; detourDraggingIndex = -1;
     if (!drag || drag.moved || drag.isNew) { renderDetourEditor(); return; }
@@ -1727,8 +1990,9 @@ function initDetourEditor() {
     }
     renderDetourEditor();
   }
+
   els.detourMap.addEventListener("pointerup", detourUp);
-  els.detourMap.addEventListener("pointercancel", function () { detourDrag = null; detourDraggingIndex = -1; renderDetourEditor(); });
+  els.detourMap.addEventListener("pointercancel", function (e) { pinchUp(detourPinch, e); detourPan = null; detourDrag = null; detourDraggingIndex = -1; renderDetourEditor(); });
 }
 
 /* ------------------------------ 編集地図の再描画フック ------------------------------ */
