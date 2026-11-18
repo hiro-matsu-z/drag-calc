@@ -416,6 +416,7 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
                 <button type="button" class="toggle-btn small mode-guard" data-gmode="guard" aria-pressed="false">誘導員を置く</button>
                 <button type="button" class="toggle-btn small mode-delete" data-gmode="deleteMarker" aria-pressed="false">マーカーを消す</button>
                 <button type="button" class="toggle-btn small" data-gmode="moveMap" aria-pressed="false">地図を動かす</button>
+                <button type="button" class="toggle-btn small" data-gmode="measure" aria-pressed="false">幅員を測る</button>
               </div>
               <div class="editor-map" id="guide-map" role="application" aria-label="案内図の編集地図。作業帯と誘導員のマーカーをタップで置き、ドラッグで移動できます。現場の赤い丸印と現場ラベルもドラッグで移動できます">
                 <div class="scaler" id="guide-map-inner"></div>
@@ -425,6 +426,11 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
                 <button type="button" class="btn" id="guide-zoom-in">＋ 拡大</button>
                 <button type="button" class="btn" id="guide-view-reset">表示をリセット</button>
                 <span class="note" id="guide-view-label" style="align-self:center"></span>
+              </div>
+              <div class="btn-row" id="guide-measure-row" style="margin-top:8px" hidden>
+                <span class="note" id="guide-measure-label" style="align-self:center" aria-live="polite"></span>
+                <button type="button" class="btn" id="guide-measure-apply">この幅員を入力欄に反映</button>
+                <button type="button" class="btn" id="guide-measure-clear">測り直す</button>
               </div>
               <p class="note" id="guide-help" style="margin-top:8px"></p>
               <div class="btn-row" style="margin-top:8px">
@@ -619,7 +625,7 @@ function defaultDraft() {
     startDate: "", endDate: "", startTime: "", endTime: "",
     regulation: "", hasSidewalk: true, includeDetour: true,
     guards: "", roadWidth: "4", lanes: "", workWidth: "", workLength: "",
-    detourArrows: [], closurePoints: [], guideMarkers: [],
+    detourArrows: [], closurePoints: [], guideMarkers: [], guideMeasure: [],
     sitePinPos: { x: DEFAULT_SITE_PIN_POS.x, y: DEFAULT_SITE_PIN_POS.y },
     siteLabelPos: { x: DEFAULT_SITE_LABEL_POS.x, y: DEFAULT_SITE_LABEL_POS.y },
     guideView: { zoom: 18, dx: 0, dy: 0 },
@@ -657,6 +663,7 @@ function normalizeDraft(raw) {
   });
   if (!d.sitePinPos || typeof d.sitePinPos.x !== "number") d.sitePinPos = { x: 0.5, y: 0.5 };
   if (!d.siteLabelPos || typeof d.siteLabelPos.x !== "number") d.siteLabelPos = { x: 0.5, y: 0.408 };
+  d.guideMeasure = (Array.isArray(d.guideMeasure) ? d.guideMeasure : []).filter(function (p) { return p && isFinite(+p.x) && isFinite(+p.y); }).slice(0, 2).map(function (p) { return { x: +p.x, y: +p.y }; });
   d.guideView = normalizeMapView(d.guideView);
   d.detourView = normalizeMapView(d.detourView);
   /* 旧バージョンの目的プリセットは「その他（自由入力）」に寄せて文言を残す */
@@ -804,8 +811,9 @@ function geocodeAddress(q, cb) {
     .catch(function () { done(null); });
 }
 
-function mapTilesHTML(lat, lon, width, height, zoom) {
+function mapTilesHTML(lat, lon, width, height, zoom, layer) {
   zoom = zoom || MAP_ZOOM;
+  var isPhoto = layer === "photo";
   var tileZoom = Math.min(zoom, TILE_MAX_ZOOM);
   var ts = Math.pow(2, zoom - tileZoom);
   var cx = lonToTileX(lon, zoom) * TILE;
@@ -818,7 +826,10 @@ function mapTilesHTML(lat, lon, width, height, zoom) {
   for (var x = x0; x <= x1; x++) {
     for (var y = y0; y <= y1; y++) {
       if (x < 0 || y < 0 || x > maxTile || y > maxTile) continue;
-      out += '<img src="https://cyberjapandata.gsi.go.jp/xyz/std/' + tileZoom + "/" + x + "/" + y + '.png" alt="" crossorigin="anonymous" draggable="false" style="position:absolute;left:' + (x * TILE * ts - left) + "px;top:" + (y * TILE * ts - top) + "px;width:" + TILE * ts + "px;height:" + TILE * ts + 'px;user-select:none" />';
+      var tileSrc = isPhoto
+        ? "https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/" + tileZoom + "/" + x + "/" + y + ".jpg"
+        : "https://cyberjapandata.gsi.go.jp/xyz/std/" + tileZoom + "/" + x + "/" + y + ".png";
+      out += '<img src="' + tileSrc + '" alt="" crossorigin="anonymous" draggable="false" style="position:absolute;left:' + (x * TILE * ts - left) + "px;top:" + (y * TILE * ts - top) + "px;width:" + TILE * ts + "px;height:" + TILE * ts + 'px;user-select:none" />';
     }
   }
   return out + "</div>";
@@ -910,6 +921,32 @@ function guideOverlaySVG(width, height, guideMarkers, highlightIndex) {
   return s + "</svg>";
 }
 
+/* 幅員測定：基準ビュー（ズーム18）の割合で持つ2点間の距離（m）。
+   Webメルカトルは等角図法なので、その緯度でのm/pxでピクセル距離を換算できる。 */
+function measureMeters(geo, a, b) {
+  var mPerPx = (156543.03392 * Math.cos((geo.lat * Math.PI) / 180)) / Math.pow(2, MAP_ZOOM);
+  return Math.hypot((b.x - a.x) * SHEET_MAP_W, (b.y - a.y) * SHEET_MAP_H) * mPerPx;
+}
+/* 道路使用の実務に合わせ、0.5m単位に丸める（例：2.43m → 2.5m） */
+function roundHalfMeter(m) { return Math.round(m * 2) / 2; }
+
+function measureOverlaySVG(width, height, pts, labelText) {
+  var s = '<svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + " " + height + '" style="position:absolute;inset:0" aria-hidden="true">';
+  var px = pts.map(function (p) { return { x: p.x * width, y: p.y * height }; });
+  if (px.length >= 2) {
+    s += '<line x1="' + px[0].x + '" y1="' + px[0].y + '" x2="' + px[1].x + '" y2="' + px[1].y + '" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.85" />';
+    s += '<line x1="' + px[0].x + '" y1="' + px[0].y + '" x2="' + px[1].x + '" y2="' + px[1].y + '" stroke="#2563eb" stroke-width="3" stroke-linecap="round" />';
+  }
+  px.forEach(function (p) {
+    s += '<circle cx="' + p.x + '" cy="' + p.y + '" r="8" fill="#2563eb" stroke="#ffffff" stroke-width="2.5" />';
+  });
+  if (px.length >= 2 && labelText) {
+    var mx = (px[0].x + px[1].x) / 2, my = (px[0].y + px[1].y) / 2;
+    s += '<g transform="translate(' + mx + ", " + (my - 20) + ')"><rect x="-46" y="-15" width="92" height="28" rx="5" fill="#2563eb" stroke="#ffffff" stroke-width="2" /><text x="0" y="5" text-anchor="middle" font-size="15" font-weight="800" fill="#ffffff">' + labelText + "</text></g>";
+  }
+  return s + "</svg>";
+}
+
 /* 地図タイル＋現場マーカー＋オーバーレイを1枚にまとめた表示（666×520固定） */
 function mapCanvasHTML(geo, opts) {
   opts = opts || {};
@@ -928,7 +965,7 @@ function mapCanvasHTML(geo, opts) {
   var mPerPx = (156543.03392 * Math.cos((center.lat * Math.PI) / 180)) / Math.pow(2, view.zoom);
   var barW = Math.round(100 / mPerPx);
   var s = '<div style="position:relative;width:' + width + "px;height:" + height + 'px;overflow:hidden;border:1.5px solid #111;background:#e8e4da;flex:none">';
-  s += mapTilesHTML(center.lat, center.lon, width, height, view.zoom);
+  s += mapTilesHTML(center.lat, center.lon, width, height, view.zoom, opts.layer);
   s += '<svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + " " + height + '" style="position:absolute;inset:0" aria-hidden="true">';
   s += sitePinSVG(width, height, proj(opts.sitePinPos), proj(opts.siteLabelPos), opts.highlightSite || null);
   s += '<g transform="translate(' + (width - 30) + ', 30)"><circle r="17" fill="rgba(255,255,255,0.88)" stroke="#888" stroke-width="0.75" /><path d="M 0 -11 L 5 4 L 0 1 L -5 4 z" fill="#111" /><text x="0" y="13.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#111">北</text></g>';
@@ -936,6 +973,11 @@ function mapCanvasHTML(geo, opts) {
   s += "</svg>";
   if (opts.showRoutes) s += routeOverlaySVG(width, height, projArr(opts.detourArrows), projArr(opts.closurePoints), opts.highlightArrowIndex != null ? opts.highlightArrowIndex : -1);
   if (opts.showGuideMarkers) s += guideOverlaySVG(width, height, projArr(opts.guideMarkers), opts.highlightGuideIndex != null ? opts.highlightGuideIndex : -1);
+  if (opts.measure && opts.measure.length) {
+    var measureLabel = "";
+    if (opts.measure.length >= 2) measureLabel = "約" + roundHalfMeter(measureMeters(geo, opts.measure[0], opts.measure[1])).toFixed(1) + " m";
+    s += measureOverlaySVG(width, height, projArr(opts.measure), measureLabel);
+  }
   s += '<span style="position:absolute;right:4px;bottom:3px;font-size:9.5px;color:#444;background:rgba(255,255,255,0.75);padding:0 3px">出典：国土地理院（地理院タイル）</span>';
   return s + "</div>";
 }
@@ -1621,6 +1663,7 @@ function renderGuideEditor() {
   if (!guideEditorScale || geoState.kind !== "ok" || !geoState.geo) return;
   els.guideMapInner.innerHTML = mapCanvasHTML(geoState.geo, {
     guideMarkers: draft.guideMarkers, showGuideMarkers: true, view: draft.guideView,
+    layer: guideMode === "measure" ? "photo" : "std", measure: draft.guideMeasure,
     highlightGuideIndex: guideDraggingIndex,
     sitePinPos: draft.sitePinPos, siteLabelPos: draft.siteLabelPos,
     highlightSite: guideDraggingSite
@@ -1639,7 +1682,28 @@ function renderGuideEditor() {
     ? "消したいマーカーをタップすると、そのマーカーだけが削除されます。現場の丸印とラベルは削除されません（ドラッグで移動はできます）。"
     : guideMode === "moveMap"
       ? "地図を1本指でドラッグすると表示位置を動かせます。2本指でつまむ（ピンチ）と拡大・縮小、2本指のまま動かすと移動もできます。「＋ 拡大」「− 縮小」ボタンでも変えられます。表示範囲を変えても、マーカーと現場の位置は地図に付いて動くので、置いた場所がずれることはありません。「表示をリセット」で最初の表示に戻ります。"
-      : "地図をタップすると、その場所にマーカーが1個置かれます。置いたマーカーは指でドラッグ（スライド）すると位置を動かせます。作業帯は動かさずタップすると45度ずつ回転します。赤い丸印（現場）と「現場」ラベルは、どのモードでもそれぞれドラッグで動かせます。ラベルだけをずらせば、作業帯の文字などとの重なりを避けられます。表示範囲（大きさ・位置）を変えたいときは「地図を動かす」モードを使ってください。編集地図と案内図のシートは同じ表示範囲・縮尺で描かれるため、ここで合わせた位置が印刷でもずれません。";
+      : guideMode === "measure"
+        ? "航空写真に切り替わります。道路の一方の端をタップし、次にもう一方の端をタップすると、その間の距離が幅員として表示されます（0.5m単位の概算）。「この幅員を入力欄に反映」を押すと、車道幅員の入力欄に入ります。表示範囲を変えたいときは「地図を動かす」モードに切り替えてください（置いた点は残ります）。あくまで概算のため、提出前の正式な幅員は道路台帳や現地実測でご確認ください。"
+        : "地図をタップすると、その場所にマーカーが1個置かれます。置いたマーカーは指でドラッグ（スライド）すると位置を動かせます。作業帯は動かさずタップすると45度ずつ回転します。赤い丸印（現場）と「現場」ラベルは、どのモードでもそれぞれドラッグで動かせます。ラベルだけをずらせば、作業帯の文字などとの重なりを避けられます。表示範囲（大きさ・位置）を変えたいときは「地図を動かす」モードを使ってください。編集地図と案内図のシートは同じ表示範囲・縮尺で描かれるため、ここで合わせた位置が印刷でもずれません。";
+  var measureRow = $("guide-measure-row");
+  if (measureRow) {
+    var inMeasure = guideMode === "measure";
+    measureRow.hidden = !inMeasure;
+    if (inMeasure) {
+      var mp = draft.guideMeasure || [];
+      var ml = $("guide-measure-label");
+      if (mp.length >= 2 && geoState.geo) {
+        ml.textContent = "幅員：約" + roundHalfMeter(measureMeters(geoState.geo, mp[0], mp[1])).toFixed(1) + " m（概算）";
+      } else if (mp.length === 1) {
+        ml.textContent = "1点目を置きました。道路のもう一方の端をタップしてください。";
+      } else {
+        ml.textContent = "道路の一方の端をタップしてください。";
+      }
+      var applyBtn = $("guide-measure-apply");
+      applyBtn.disabled = mp.length < 2;
+      applyBtn.style.opacity = mp.length < 2 ? "0.4" : "";
+    }
+  }
 }
 function guideEmit(markers, pin, label) {
   draft.guideMarkers = markers; draft.sitePinPos = pin; draft.siteLabelPos = label;
@@ -1689,6 +1753,17 @@ function initGuideEditor() {
     guideViewEmit(zoomViewAt(v, v.zoom - 1, { x: 0.5, y: 0.5 }));
   });
   $("guide-view-reset").addEventListener("click", function () { guideViewEmit({ zoom: MAP_ZOOM, dx: 0, dy: 0 }); });
+  $("guide-measure-clear").addEventListener("click", function () {
+    draft.guideMeasure = [];
+    scheduleDraftSave(); renderGuideEditor();
+  });
+  $("guide-measure-apply").addEventListener("click", function () {
+    if (!geoState.geo || !draft.guideMeasure || draft.guideMeasure.length < 2) return;
+    var w = roundHalfMeter(measureMeters(geoState.geo, draft.guideMeasure[0], draft.guideMeasure[1]));
+    draft.roadWidth = String(w);
+    if (els.roadWidth) els.roadWidth.value = String(w);
+    scheduleDraftSave(); renderSheets(); renderGuideEditor();
+  });
   els.guideMap.addEventListener("pointerdown", function (e) {
     if (geoState.kind !== "ok") return;
     if (pinchDown(guidePinch, e)) {
@@ -1729,6 +1804,14 @@ function initGuideEditor() {
       guideDrag = { kind: "sitePin", index: -1, offsetX: cx - p.x, offsetY: cy - p.y, startX: p.x, startY: p.y, moved: false, isNew: false, orig: { x: draft.sitePinPos.x, y: draft.sitePinPos.y } };
       guideDraggingSite = "pin";
       els.guideMap.setPointerCapture(e.pointerId); renderGuideEditor(); return;
+    }
+    if (guideMode === "measure") {
+      var curMeasure = (draft.guideMeasure || []).slice();
+      if (curMeasure.length >= 2) curMeasure = [];
+      curMeasure.push({ x: pt.x, y: pt.y });
+      draft.guideMeasure = curMeasure;
+      scheduleDraftSave(); renderGuideEditor();
+      return;
     }
     if (guideMode === "moveMap") {
       guidePan = { lastX: p.x, lastY: p.y };
