@@ -1057,10 +1057,11 @@ function applicationSheetHTML(data) {
   var dbl = "border-bottom:4px double #111";
 
   var h = sheetOpen();
-  h += '<div style="margin:-16px -8px">';
+  /* 様式の枠は公式どおり幅164.8mm（623px）に寄せて中央配置する */
+  h += '<div style="width:623px;margin:2px auto 0">';
   h += '<p style="font-size:13.5px;margin:0 0 4px">別記様式第六（第十条関係）</p>';
-  h += '<div style="border:1px solid #111;border-bottom:none;padding:14px 22px 12px;min-height:158px;box-sizing:border-box">';
-  h += '<h2 style="text-align:center;font-size:23px;font-weight:700;letter-spacing:9px;margin:2px 0 0;font-family:' + GOTHIC + '">道路使用許可申請書</h2>';
+  h += '<div style="border:1px solid #111;border-bottom:none;padding:14px 22px 12px;min-height:176px;box-sizing:border-box">';
+  h += '<h2 style="text-align:center;font-size:23px;font-weight:700;letter-spacing:9px;margin:2px 0 0">道路使用許可申請書</h2>';
   h += '<p style="text-align:right;font-size:15px;margin:18px 6px 0">' + esc(appDate) + "</p>";
   h += '<div style="display:flex;align-items:flex-start">';
   h += '<p style="font-size:16px;margin:18px 0 0;padding-left:7%;white-space:nowrap">' + esc(stationChiefName(data.station)) + "　警察署長　殿</p>";
@@ -1083,13 +1084,14 @@ function applicationSheetHTML(data) {
   h += '<tr style="height:45px"><td style="' + subLabelCell + ";" + dbl + '">' + spreadLabel("氏名") + '</td><td style="' + valueCell + ";" + dbl + '">' + esc(data.managerName) + '</td><td style="' + subLabelCell + ";" + dbl + '">' + spreadLabel("電話") + '</td><td style="' + valueCell + ";" + dbl + '">' + esc(data.managerPhone) + "</td></tr>";
   h += "</tbody></table>";
 
-  h += '<div style="border:1px solid #111;border-top:none;padding:12px 22px 16px;min-height:268px;box-sizing:border-box">';
+  h += '<div style="border:1px solid #111;border-top:none;padding:12px 22px 16px;min-height:305px;box-sizing:border-box">';
   h += '<p style="font-size:15px;margin:2px 0 0 12px">第　　　　　号</p>';
   h += '<h3 style="text-align:center;font-size:22px;font-weight:400;letter-spacing:10px;margin:8px 0 12px">道路使用許可証</h3>';
   h += '<p style="font-size:15px;margin:0 0 0 8px">上記のとおり許可する。ただし、次の条件に従うこと。</p>';
-  h += '<table style="width:86%;margin-left:9%;margin-top:14px;border-collapse:collapse"><tbody><tr style="height:48px"><td style="width:15%;border:1px solid #111;padding:6px 12px;font-size:14.5px;text-align:center;vertical-align:middle">' + spreadLabel("条件") + '</td><td style="border:1px solid #111"></td></tr></tbody></table>';
+  h += '<table style="width:80%;margin-left:9%;margin-top:14px;border-collapse:collapse"><tbody><tr style="height:50px"><td style="width:15%;border:1px solid #111;padding:6px 12px;font-size:14.5px;text-align:center;vertical-align:middle">' + spreadLabel("条件") + '</td><td style="border:1px solid #111"></td></tr></tbody></table>';
   h += '<p style="text-align:right;font-size:15px;margin:18px 12% 0 0;letter-spacing:6px">年　　月　　日</p>';
   h += '<p style="text-align:right;font-size:16px;margin:22px 12% 0 0">警　察　署　長<span style="display:inline-block;width:22px;height:22px;border:1px solid #888;color:#555;font-size:13px;line-height:20px;text-align:center;vertical-align:middle;margin-left:16px">印</span></p>';
+  h += "</div>";
   h += "</div>";
 
   var remarks = [
@@ -1098,7 +1100,7 @@ function applicationSheetHTML(data) {
     "３　添付書類の欄には、道路使用の場所、方法等を明らかにした図面その他必要な書類を添付した場合に、その書類名を記載すること。",
     "４　用紙の大きさは、日本産業規格Ａ列４番とする。"
   ];
-  h += '<div style="margin-top:12px;font-size:11.5px;line-height:1.8">';
+  h += '<div style="width:640px;margin:12px auto 0;font-size:11px;line-height:1.6">';
   remarks.forEach(function (line, i) {
     h += '<p style="margin:0;display:flex"><span style="flex:none;width:3.2em">' + (i === 0 ? "備考" : "") + "</span><span>" + esc(line) + "</span></p>";
   });
@@ -1111,7 +1113,6 @@ function applicationSheetHTML(data) {
     h += '<td style="border:1px solid #111;padding:3px 6px;text-align:center;width:19%"><div style="font-weight:700;margin-bottom:2px">' + f.label + "　" + f.price + "</div>" + feeBarcodeSVG(f.code) + "</td>";
   });
   h += "</tr></tbody></table>";
-  h += "</div>";
   return h + sheetClose();
 }
 
