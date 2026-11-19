@@ -331,16 +331,7 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
               <input id="end-date" type="date" />
             </label>
           </div>
-          <div class="grid2">
-            <label class="field">
-              <span class="field-label">開始時刻</span>
-              <input id="start-time" type="time" />
-            </label>
-            <label class="field">
-              <span class="field-label">終了時刻</span>
-              <input id="end-time" type="time" />
-            </label>
-          </div>
+          <p class="note" style="font-size:13.5px">作業時間：<strong>9:00〜17:00</strong>（固定。申請書・案内図・迂回路図・周知文すべてこの時間で作成されます）</p>
           <p class="note" id="days-note" aria-live="polite" style="font-size:13.5px">開始日・終了日を入れると日数が自動計算されます</p>
         </div>
       </section>
@@ -622,7 +613,7 @@ function defaultDraft() {
     purposePreset: "", purposeCustom: "",
     managerAddress: "", managerName: "", managerPhone: "",
     siteAddress: "", siteName: "",
-    startDate: "", endDate: "", startTime: "", endTime: "",
+    startDate: "", endDate: "", startTime: "09:00", endTime: "17:00",
     regulation: "", hasSidewalk: true, includeDetour: true,
     guards: "", roadWidth: "4", lanes: "", workWidth: "", workLength: "",
     detourArrows: [], closurePoints: [], guideMarkers: [], guideMeasure: [],
@@ -666,6 +657,9 @@ function normalizeDraft(raw) {
   d.guideMeasure = (Array.isArray(d.guideMeasure) ? d.guideMeasure : []).filter(function (p) { return p && isFinite(+p.x) && isFinite(+p.y); }).slice(0, 2).map(function (p) { return { x: +p.x, y: +p.y }; });
   d.guideView = normalizeMapView(d.guideView);
   d.detourView = normalizeMapView(d.detourView);
+  /* 作業時間は9:00〜17:00に固定する（旧下書きに別時間が入っていても上書き） */
+  d.startTime = "09:00";
+  d.endTime = "17:00";
   /* 旧バージョンの目的プリセットは「その他（自由入力）」に寄せて文言を残す */
   if (d.purposePreset && PURPOSE_PRESETS.indexOf(d.purposePreset) < 0) {
     if (!d.purposeCustom) d.purposeCustom = d.purposePreset;
@@ -690,8 +684,9 @@ function toPermitData(settings, draft) {
     siteName: draft.siteName.trim(),
     startDate: parseDate(draft.startDate),
     endDate: parseDate(draft.endDate),
-    startTime: draft.startTime,
-    endTime: draft.endTime,
+    /* 作業時間は無条件に9:00〜17:00で固定（下書きの値に関わらず様式・図面・周知文すべてこの時間で出す） */
+    startTime: "09:00",
+    endTime: "17:00",
     regulation: draft.regulation,
     hasSidewalk: draft.hasSidewalk !== false,
     includeDetour: draft.includeDetour !== false,
@@ -1413,7 +1408,7 @@ var settingInputs = {
 var draftInputs = {
   policeCustom: $("police-custom"), applicationDate: $("application-date"),
   purposeCustom: $("purpose-custom"), siteAddress: $("site-address"), siteName: $("site-name"),
-  startDate: $("start-date"), endDate: $("end-date"), startTime: $("start-time"), endTime: $("end-time"),
+  startDate: $("start-date"), endDate: $("end-date"),
   guards: $("guards"), roadWidth: $("road-width"), lanes: $("lanes"),
   workWidth: $("work-width"), workLength: $("work-length")
 };
@@ -2206,7 +2201,7 @@ function bindEvents() {
     setDraft({ siteAddress: draftInputs.siteAddress.value });
     triggerGeocode(false);
   });
-  ["applicationDate", "startDate", "endDate", "startTime", "endTime"].forEach(function (k) {
+  ["applicationDate", "startDate", "endDate"].forEach(function (k) {
     draftInputs[k].addEventListener("change", function () {
       var patch = {}; patch[k] = draftInputs[k].value; setDraft(patch);
     });
