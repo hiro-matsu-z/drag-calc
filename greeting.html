@@ -89,6 +89,7 @@
       .note { font-size: 12.5px; line-height: 1.7; color: var(--dim); margin: 0; }
       .note.warn { color: var(--warn); font-size: 13.5px; }
       #scaled-wrap { width: 100%; max-width: 794px; margin: 0 auto; overflow: hidden; border-radius: 6px; }
+      .zoom-bar { max-width: 794px; margin: 12px auto 0; }
       #scaled-inner { transform-origin: top left; box-shadow: 0 2px 14px rgba(0,0,0,.25); width: 794px; height: 1123px; }
       .action-bar {
         position: fixed; left: 0; right: 0; bottom: calc(60px + env(safe-area-inset-bottom)); z-index: 40;
@@ -125,7 +126,7 @@
       }
     </style>
   <style id="theme-b-notebook">
-/* ===== THEME B: 現場ノート (2026-11-20 v2) ===== */
+/* ===== THEME B: 現場ノート (2026-11-21 v3) ===== */
 @media screen {
 :root { --bg:#F6EDD8; --card:#FFFDF6; --blue:#2E7CC4; --orange:#F97316; --text:#22304A; --border:#22304A; color-scheme: light; }
 body { background-color:#F6EDD8; background-image:repeating-linear-gradient(0deg, rgba(34,48,74,.05) 0 1px, transparent 1px 28px); color:#22304A; }
@@ -175,6 +176,8 @@ body.light #themeToggle { background:#FFFDF6; border-color:#22304A; }
 .card table td, .card table th { border-color:rgba(34,48,74,.4); }
 a { color:#2E7CC4; }
 ::selection { background:rgba(249,115,22,.35); }
+/* ===== v3: ズーム操作バーをプレビュー直下へ移設 (2026-11-21) ===== */
+.zoom-bar { background:#FFFDF6; border:2px solid #22304A; border-radius:8px; box-shadow:4px 4px 0 rgba(34,48,74,.85); padding:12px 16px; }
 }
 </style>
 </head>
@@ -193,15 +196,6 @@ a { color:#2E7CC4; }
             <input id="f-address" placeholder="例：東京都○○区○○○丁目○番○" autocomplete="off" />
             <span class="field-hint">入力すると位置図が自動で表示されます</span>
           </label>
-          <div class="field">
-            <span class="field-label">位置図の範囲（ズーム）</span>
-            <div style="display:flex;gap:8px;align-items:center">
-              <button type="button" id="zoom-out" class="btn" style="flex:1;padding:10px 0">− 広く表示</button>
-              <span id="zoom-level" style="min-width:64px;text-align:center;font-weight:700">標準</span>
-              <button type="button" id="zoom-in" class="btn" style="flex:1;padding:10px 0">＋ 詳しく表示</button>
-            </div>
-            <span class="field-hint">配布する範囲に合わせて調整できます（印刷にも反映されます）</span>
-          </div>
           <label class="field">
             <span class="field-label">工事内容</span>
             <select id="f-work-type">
@@ -284,6 +278,15 @@ a { color:#2E7CC4; }
     </div>
 
     <div id="scaled-wrap"><div id="scaled-inner"></div></div>
+    <div class="zoom-bar no-print">
+      <span class="field-label">位置図の範囲（ズーム）</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button type="button" id="zoom-out" class="btn" style="flex:1;padding:10px 0">− 広く表示</button>
+        <span id="zoom-level" style="min-width:64px;text-align:center;font-weight:700">標準</span>
+        <button type="button" id="zoom-in" class="btn" style="flex:1;padding:10px 0">＋ 詳しく表示</button>
+      </div>
+      <span class="field-hint">プレビューを見ながら調整できます（印刷にも反映されます）</span>
+    </div>
     <div class="bottom-space"></div>
 
     <div class="action-bar">
