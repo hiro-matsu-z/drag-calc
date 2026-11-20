@@ -475,6 +475,7 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
             <div class="btn-row" style="margin-bottom:8px">
               <button type="button" class="toggle-btn small mode-detour" data-dmode="detour" aria-pressed="true">矢印を置く</button>
               <button type="button" class="toggle-btn small mode-closure" data-dmode="closure" aria-pressed="false">通行止め区間</button>
+              <button type="button" class="toggle-btn small mode-trace" data-dmode="trace" aria-pressed="false">なぞって描く</button>
             </div>
             <div class="btn-row" style="margin-bottom:8px">
               <button type="button" class="toggle-btn small mode-toggle" data-dmode="toggleDirection" aria-pressed="false">両・片切替</button>
@@ -945,7 +946,7 @@ function detourArrowShapeSVG(direction) {
   return '<polygon points="' + points + '" fill="#1d4ed8" stroke="#ffffff" stroke-width="2.2" stroke-linejoin="round" />';
 }
 
-function routeOverlaySVG(width, height, detourArrows, closurePoints, highlightArrowIndex) {
+function routeOverlaySVG(width, height, detourArrows, closurePoints, highlightArrowIndex, traceStroke) {
   var arrows = (detourArrows || []).map(function (a) {
     return { x: a.x * width, y: a.y * height, angle: a.angle, direction: a.direction === "single" ? "single" : "both" };
   });
@@ -961,6 +962,10 @@ function routeOverlaySVG(width, height, detourArrows, closurePoints, highlightAr
   if (closure.length) {
     var mid = closure[Math.floor(closure.length / 2)];
     s += '<g transform="translate(' + mid.x + ", " + (mid.y - 22) + ')"><rect x="-52" y="-13" width="104" height="24" fill="#dc2626" /><text x="0" y="4" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffffff">通行止め区間</text></g>';
+  }
+  if (traceStroke && traceStroke.length >= 2) {
+    var spts = traceStroke.map(function (p) { return p.x * width + "," + p.y * height; }).join(" ");
+    s += '<polyline points="' + spts + '" fill="none" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" />';
   }
   arrows.forEach(function (a) {
     s += '<g transform="translate(' + a.x + ", " + a.y + ") rotate(" + a.angle + ')">' + detourArrowShapeSVG(a.direction) + "</g>";
@@ -1054,7 +1059,7 @@ function mapCanvasHTML(geo, opts) {
   s += '<g transform="translate(' + (width - 30) + ', 30)"><circle r="17" fill="rgba(255,255,255,0.88)" stroke="#888" stroke-width="0.75" /><path d="M 0 -11 L 5 4 L 0 1 L -5 4 z" fill="#111" /><text x="0" y="13.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#111">北</text></g>';
   s += '<g transform="translate(14, ' + (height - 34) + ')"><rect x="0" y="0" width="' + barW + '" height="5" fill="#111" stroke="#fff" stroke-width="0.75" /><text x="0" y="-4" font-size="11" fill="#111" font-weight="600">100m</text></g>';
   s += "</svg>";
-  if (opts.showRoutes) s += routeOverlaySVG(width, height, projArr(opts.detourArrows), projArr(opts.closurePoints), opts.highlightArrowIndex != null ? opts.highlightArrowIndex : -1);
+  if (opts.showRoutes) s += routeOverlaySVG(width, height, projArr(opts.detourArrows), projArr(opts.closurePoints), opts.highlightArrowIndex != null ? opts.highlightArrowIndex : -1, projArr(opts.traceStroke));
   if (opts.showGuideMarkers) s += guideOverlaySVG(width, height, projArr(opts.guideMarkers), opts.highlightGuideIndex != null ? opts.highlightGuideIndex : -1);
   if (opts.measure && opts.measure.length) {
     var measureLabel = "";
@@ -1997,6 +2002,7 @@ function initGuideEditor() {
 /* ------------------------------ 迂回路図エディタ ------------------------------ */
 var detourMode = "detour";
 var detourNewDirection = "both";
+var detourTracePoints = null;
 var detourDrag = null, detourDraggingIndex = -1;
 var detourPinch = createPinch();
 var detourPan = null;
@@ -2020,6 +2026,7 @@ function renderDetourEditor() {
   if (!currentData().hasDetourSheet) return;
   els.detourMapInner.innerHTML = mapCanvasHTML(geoState.geo, {
     detourArrows: draft.detourArrows, closurePoints: draft.closurePoints, showRoutes: true, view: draft.detourView,
+    traceStroke: detourTracePoints,
     highlightArrowIndex: detourDraggingIndex,
     sitePinPos: draft.sitePinPos, siteLabelPos: draft.siteLabelPos
   });
@@ -2035,6 +2042,8 @@ function renderDetourEditor() {
       ? "地図を1本指でドラッグすると表示位置を動かせます。2本指でつまむ（ピンチ）と拡大・縮小、2本指のまま動かすと移動もできます。「＋ 拡大」「− 縮小」ボタンでも変えられます。迂回路は広い範囲で描くことが多いので、まず縮小して全体を見てから矢印を置くと作りやすくなります。表示範囲を変えても、矢印と現場の位置は地図に付いて動くので、置いた場所がずれることはありません。「表示をリセット」で最初の表示に戻ります。"
       : detourMode === "closure"
         ? "地図をタップすると点が打たれ、点同士が赤い線でつながって通行止め区間になります。"
+        : detourMode === "trace"
+          ? "迂回路にしたい道を、指やマウスでなぞってください。なぞった軌跡に沿って両矢印（双方向）が自動で並びます。一方通行の区間は、置いた後に「両・片切替」モードで片矢印に変えてください。矢印の移動・回転・削除は今まで通り各モードで行えます。"
         : detourMode === "toggleDirection"
           ? "切り替えたい矢印をタップすると、両矢印（双方向）⇔片矢印（一方向）が切り替わります。ドラッグすると位置も動かせます。"
           : "消したい矢印をタップすると、その矢印だけが削除されます。";
@@ -2047,6 +2056,49 @@ function detourViewEmit(view) {
   draft.detourView = normalizeMapView(view);
   scheduleDraftSave(); renderDetourEditor(); renderSheets();
 }
+
+/* なぞった軌跡（保存座標の点列）を、等間隔の両矢印に変換する */
+var DETOUR_TRACE_SPACING = 68;
+function traceStrokeToArrows(refPoints) {
+  if (!refPoints || refPoints.length < 2 || geoState.kind !== "ok" || !geoState.geo) return [];
+  var view = normalizeMapView(draft.detourView);
+  var px = refPoints.map(function (p) {
+    var v = refToViewFrac(geoState.geo, view, p);
+    return { x: v.x * SHEET_MAP_W, y: v.y * SHEET_MAP_H };
+  });
+  var pts = [px[0]];
+  for (var i = 1; i < px.length; i++) {
+    var last = pts[pts.length - 1];
+    if (Math.hypot(px[i].x - last.x, px[i].y - last.y) >= 4) pts.push(px[i]);
+  }
+  if (pts.length < 2) return [];
+  var cum = [0];
+  for (var j = 1; j < pts.length; j++) cum.push(cum[j - 1] + Math.hypot(pts[j].x - pts[j - 1].x, pts[j].y - pts[j - 1].y));
+  var total = cum[cum.length - 1];
+  if (total < 6) return [];
+  function pointAt(d) {
+    if (d <= 0) return pts[0];
+    if (d >= total) return pts[pts.length - 1];
+    var k = 1;
+    while (cum[k] < d) k++;
+    var segLen = (cum[k] - cum[k - 1]) || 1;
+    var t = (d - cum[k - 1]) / segLen;
+    return { x: pts[k - 1].x + (pts[k].x - pts[k - 1].x) * t, y: pts[k - 1].y + (pts[k].y - pts[k - 1].y) * t };
+  }
+  var n = Math.max(1, Math.round(total / DETOUR_TRACE_SPACING));
+  var out = [];
+  for (var m = 0; m < n; m++) {
+    var d = ((m + 0.5) * total) / n;
+    var c = pointAt(d);
+    var a = pointAt(Math.max(0, d - 12));
+    var b = pointAt(Math.min(total, d + 12));
+    var angle = ((Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI + 360) % 360;
+    var ref = viewToRefFrac(geoState.geo, view, { x: c.x / SHEET_MAP_W, y: c.y / SHEET_MAP_H });
+    out.push({ x: clampPos(ref.x), y: clampPos(ref.y), angle: Math.round(angle), direction: "both" });
+  }
+  return out;
+}
+
 function nearestArrowIndex(px, py) {
   var best = -1, bestDist = ARROW_HIT_PX;
   var view = normalizeMapView(draft.detourView);
@@ -2103,7 +2155,7 @@ function initDetourEditor() {
           detourEmit(draft.detourArrows.map(function (a, i) { return i === oi ? ov : a; }), draft.closurePoints);
         }
       }
-      detourDrag = null; detourDraggingIndex = -1; detourPan = null;
+      detourDrag = null; detourDraggingIndex = -1; detourPan = null; detourTracePoints = null;
       renderDetourEditor();
       return;
     }
@@ -2119,6 +2171,12 @@ function initDetourEditor() {
       return;
     }
     if (detourMode === "closure") { detourEmit(draft.detourArrows, draft.closurePoints.concat([pt])); return; }
+    if (detourMode === "trace") {
+      detourTracePoints = [pt];
+      els.detourMap.setPointerCapture(e.pointerId);
+      renderDetourEditor();
+      return;
+    }
     var hit = nearestArrowIndex(p.x, p.y);
     if (detourMode === "deleteArrow") {
       if (hit >= 0) detourEmit(draft.detourArrows.filter(function (_, i) { return i !== hit; }), draft.closurePoints);
@@ -2146,6 +2204,16 @@ function initDetourEditor() {
     if (detourPinch.active) return;
     var p = toSheetPx(els.detourMap, detourEditorScale.scale, e);
     if (!p) return;
+    if (detourTracePoints) {
+      var tview = normalizeMapView(draft.detourView);
+      var tlv = refToViewFrac(geoState.geo, tview, detourTracePoints[detourTracePoints.length - 1]);
+      if (Math.hypot(tlv.x * SHEET_MAP_W - p.x, tlv.y * SHEET_MAP_H - p.y) >= 4) {
+        var tref = viewToRefFrac(geoState.geo, tview, { x: p.x / SHEET_MAP_W, y: p.y / SHEET_MAP_H });
+        detourTracePoints.push({ x: clampPos(tref.x), y: clampPos(tref.y) });
+        renderDetourEditor();
+      }
+      return;
+    }
     if (detourPan) {
       var pview = normalizeMapView(draft.detourView);
       var pk = Math.pow(2, pview.zoom - MAP_ZOOM);
@@ -2167,6 +2235,14 @@ function initDetourEditor() {
 
   function detourUp(e) {
     if (e) pinchUp(detourPinch, e);
+    if (detourTracePoints) {
+      var stroke = detourTracePoints;
+      detourTracePoints = null;
+      var addedArrows = traceStrokeToArrows(stroke);
+      if (addedArrows.length) detourEmit(draft.detourArrows.concat(addedArrows), draft.closurePoints);
+      else renderDetourEditor();
+      return;
+    }
     detourPan = null;
     var drag = detourDrag;
     detourDrag = null; detourDraggingIndex = -1;
@@ -2183,7 +2259,7 @@ function initDetourEditor() {
   }
 
   els.detourMap.addEventListener("pointerup", detourUp);
-  els.detourMap.addEventListener("pointercancel", function (e) { pinchUp(detourPinch, e); detourPan = null; detourDrag = null; detourDraggingIndex = -1; renderDetourEditor(); });
+  els.detourMap.addEventListener("pointercancel", function (e) { pinchUp(detourPinch, e); detourPan = null; detourDrag = null; detourDraggingIndex = -1; detourTracePoints = null; renderDetourEditor(); });
 }
 
 /* ------------------------------ 編集地図の再描画フック ------------------------------ */
