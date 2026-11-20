@@ -128,7 +128,7 @@ body.light #permit-notice p { color: #444 !important; }
 body.light #permit-notice button { background: #eeeeee !important; color: #333 !important; }
 </style>
 <style id="theme-b-notebook">
-/* ===== THEME B: 現場ノート (2026-11-20) ===== */
+/* ===== THEME B: 現場ノート (2026-11-20 v2) ===== */
 @media screen {
 :root { --bg:#F6EDD8; --card:#FFFDF6; --blue:#2E7CC4; --orange:#F97316; --text:#22304A; --border:#22304A; color-scheme: light; }
 body { background-color:#F6EDD8; background-image:repeating-linear-gradient(0deg, rgba(34,48,74,.05) 0 1px, transparent 1px 28px); color:#22304A; }
@@ -140,7 +140,11 @@ header p { display:inline-block; background:#F97316; color:#fff !important; padd
 .input-box { background:#FFFDF6; border:2px solid #22304A; border-radius:8px; }
 .input-box label { color:#B45309; }
 .input-box input { color:#22304A; }
-.input-box.active { border-color:#F97316; box-shadow:3px 3px 0 rgba(249,115,22,.55); }
+.input-box input::placeholder { color:#7A8699; opacity:1; }
+.input-box.active { background:#FFF1D6; border-color:#F97316; box-shadow:3px 3px 0 rgba(249,115,22,.55); }
+body.light .input-box { background:#FFFDF6; border-color:#22304A; }
+body.light .input-box input, body.light .laser-name input { color:#22304A; }
+.laser-name input { color:#22304A; }
 .card input, .card select, .card textarea, .field input, .field select, .field textarea { color:#22304A; }
 .field input, .field select, .field textarea { background:#FFFDF6; border:2px solid #22304A; border-radius:6px; }
 .field-label { color:#22304A; }
@@ -151,8 +155,8 @@ header p { display:inline-block; background:#F97316; color:#fff !important; padd
 .main-btn { background:#F97316; color:#fff; border:2px solid #22304A; border-radius:8px; box-shadow:3px 3px 0 rgba(34,48,74,.85); font-weight:900; }
 .btn { border:2px solid #22304A; border-radius:8px; }
 .calc-btn { background:#FFFDF6; color:#22304A; border:2px solid #22304A; border-radius:8px; }
-.calc-btn.op { background:#FDEBD7; }
-.calc-btn.action { background:#FDE8E8; }
+.calc-btn.op { background:#FDEBD7; color:#1D6FB8; border-color:#22304A; }
+.calc-btn.action { background:#FDE8E8; color:#B3402A; border-color:#22304A; }
 .calc-btn.eq { background:#22304A; color:#FFF7E0; }
 .result-area { background:#22304A; border-top:2px solid #22304A; border-radius:0 0 6px 6px; color:#FFF7E0; }
 .result-area .val, .result-main .val { color:#FFD166 !important; }
@@ -162,6 +166,7 @@ nav { background:rgba(246,237,216,.97); border-top:2px solid #22304A; backdrop-f
 .nav-item.active { color:#F97316; }
 .nav-item.active .material-symbols-outlined { text-shadow:none; }
 .chip { background:#FFFDF6; border:2px solid #22304A; color:#22304A; border-radius:999px; }
+.chip.active { background:#22304A; color:#FFF7E0; }
 .note { border:2px dashed rgba(34,48,74,.45); background:rgba(255,253,246,.7); color:#43536E; border-radius:8px; }
 .warn { background:#FDE8E8; border:2px solid #B3402A; color:#7C2D12; border-radius:8px; }
 .settings-btn { background:#FFFDF6; border:2px solid #22304A; color:#22304A; border-radius:8px; font-weight:700; }
