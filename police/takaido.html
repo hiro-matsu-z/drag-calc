@@ -51,7 +51,7 @@
 <div class="container">
     <div class="breadcrumb"><a href="../index.html">現場計算 PRO</a> ＞ <a href="./index.html">警察署別 道路使用許可ガイド</a> ＞ <a href="./tokyo.html">東京都</a> ＞ 高井戸警察署</div>
     <header><h1>高井戸警察署の道路使用許可ガイド</h1><p>管轄エリア・申請手順・日数の目安</p></header>
-    <div class="days-hero" style="background:#ff9500;border-radius:12px;padding:14px 16px;margin:0 0 18px;display:flex;align-items:center;gap:16px;box-shadow:0 4px 14px rgba(255,149,0,.35)"><div style="font-size:2.4rem;font-weight:900;color:#1a1a1a;line-height:1.05;white-space:nowrap">中2日</div><div><div style="font-weight:900;color:#1a1a1a;font-size:1rem;line-height:1.4">申請から交付までの日数</div><div style="color:#4a2c00;font-size:.78rem;line-height:1.5">申請代行の実績ベース ・ 標準処理期間は7日以内（土日祝・年末年始を除く）</div></div></div>
+    <div class="days-hero" style="background:#ff9500;border-radius:12px;padding:14px 16px;margin:0 0 18px;display:flex;align-items:center;gap:16px;box-shadow:0 4px 14px rgba(255,149,0,.35)"><div style="font-size:2.4rem;font-weight:900;color:#1a1a1a;line-height:1.05;white-space:nowrap">中2日</div><div><div style="font-weight:900;color:#1a1a1a;font-size:1rem;line-height:1.4">申請から交付までの日数</div><div style="color:#4a2c00;font-size:.78rem;line-height:1.5">標準処理期間は7日以内（土日祝・年末年始を除く）</div></div></div>
 
     <div class="summary-box">
         <h2>📌 このページの要点</h2>
@@ -66,7 +66,7 @@
     </div>
 
     <p style="font-size:0.92rem; color:#ddd; line-height:1.8;">高井戸警察署は東京都の杉並区を管轄する警察署です。このエリアで道路を使って工事や作業を行う場合は、実施場所を管轄する高井戸警察署へ道路使用許可を申請します。申請書類は下記の無料ツールでスマホから作成できます。</p>
-    <a href="https://zawa.click/permit.html" class="main-btn">📄 高井戸警察署への申請書類を作成する（無料）</a>
+    <a href="https://zawa.click/permit.html?station=%E9%AB%98%E4%BA%95%E6%88%B8%E8%AD%A6%E5%AF%9F%E7%BD%B2&pref=%E6%9D%B1%E4%BA%AC%E9%83%BD" class="main-btn">📄 高井戸警察署への申請書類を作成する（無料）</a>
 
     <div class="section">
         <h2>高井戸警察署の窓口情報</h2>
@@ -93,7 +93,7 @@
             <li><strong>申請先：</strong>作業を実施する場所を管轄する警察署（このエリアでは高井戸警察署）の交通課窓口です。</li>
             <li><strong>申請書：</strong>正副2通を提出します。様式は警察署の窓口や各都県警のサイトで入手できます。</li>
             <li><strong>添付書類：</strong>案内図（現場位置図）、保安図・配置図、必要に応じて迂回路図などを添付します。</li>
-            <li><strong>手数料：</strong>工事・作業は2,700円、工事・作業以外は2,100円、年間を通じて行う縁日・露店等は1,100円です（許可証の再交付は700円）。納付した手数料は原則として返還されません。</li>
+            <li><strong>手数料：</strong>申請時に窓口で納付します。金額は上の「高井戸警察署の窓口情報」をご覧ください。</li>
             <li><strong>許可までの日数：</strong>申請代行の実績では、申請から交付までは中2日（土日祝・年末年始を除く）とされています。標準処理期間は7日以内と定められています。道路管理者との協議や交通規制が必要な場合は、その分の日数が加算されます。</li>
         </ul>
     </div>
@@ -156,13 +156,95 @@
     </div>
 
     <div class="section">
-        <h2>東京都の他の警察署</h2>
+        <h2>申請期限の逆算ツール（目安）</h2>
+        <p>工事開始日を入れると、この署の交付目安「中2日」で逆算した申請期限の目安と、その場合の交付目安日を表示します。</p>
+        <p><label>工事開始日 <input type="date" id="rev-start" style="background:#222;color:#fff;border:1px solid #444;border-radius:8px;padding:10px;font-size:1rem;"></label></p>
+        <p id="rev-result" style="background:#222;border-radius:8px;padding:12px;line-height:1.8;">工事開始日を選ぶと、申請期限の目安を表示します。</p>
+        <p style="font-size:0.78rem;color:#999;">※ 土日祝・年末年始（12月29日〜1月3日）を除く営業日で計算した目安です。書類の不備や道路管理者との協議が必要な場合は日数が延びるため、余裕を持って申請してください。</p>
+    </div>
+
+<script>
+(function () {
+  var N = 2;
+  var WD = ["日", "月", "火", "水", "木", "金", "土"];
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function keyOf(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  var HOL = {};
+  var EQ = {2025: [3, 20, 9, 23], 2026: [3, 20, 9, 23], 2027: [3, 20, 9, 23], 2028: [3, 20, 9, 22], 2029: [3, 20, 9, 23], 2030: [3, 20, 9, 23]};
+  function nthMon(y, mo, n) { var d = new Date(y, mo, 1); var off = (8 - d.getDay()) % 7; return new Date(y, mo, 1 + off + (n - 1) * 7); }
+  function buildYear(y) {
+    var list = [];
+    function add(mo, dd) { list.push(new Date(y, mo, dd)); }
+    add(0, 1); add(1, 11); add(1, 23); add(3, 29); add(4, 3); add(4, 4); add(4, 5); add(7, 11); add(10, 3); add(10, 23);
+    list.push(nthMon(y, 0, 2)); list.push(nthMon(y, 6, 3)); list.push(nthMon(y, 8, 3)); list.push(nthMon(y, 9, 2));
+    if (EQ[y]) { add(EQ[y][0] - 1, EQ[y][1]); add(EQ[y][2] - 1, EQ[y][3]); }
+    var keys = {};
+    list.forEach(function (d) { keys[keyOf(d)] = 1; });
+    list.slice().forEach(function (d) {
+      if (d.getDay() === 0) {
+        var nx = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+        while (keys[keyOf(nx)]) { nx = new Date(nx.getFullYear(), nx.getMonth(), nx.getDate() + 1); }
+        list.push(nx); keys[keyOf(nx)] = 1;
+      }
+    });
+    list.forEach(function (d) { HOL[keyOf(d)] = 1; });
+    var d = new Date(y, 0, 1);
+    while (d.getFullYear() === y) {
+      var pv = new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1);
+      var nx2 = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+      if (d.getDay() !== 0 && d.getDay() !== 6 && !HOL[keyOf(d)] && HOL[keyOf(pv)] && HOL[keyOf(nx2)]) HOL[keyOf(d)] = 1;
+      d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+    }
+  }
+  for (var y = 2025; y <= 2030; y++) buildYear(y);
+  function isBiz(d) {
+    var w = d.getDay(); if (w === 0 || w === 6) return false;
+    var mo = d.getMonth(), dd = d.getDate();
+    if ((mo === 11 && dd >= 29) || (mo === 0 && dd <= 3)) return false;
+    return !HOL[keyOf(d)];
+  }
+  function stepBiz(d, n) {
+    var c = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var dir = n >= 0 ? 1 : -1, left = Math.abs(n);
+    while (left > 0) { c = new Date(c.getFullYear(), c.getMonth(), c.getDate() + dir); if (isBiz(c)) left--; }
+    return c;
+  }
+  function fmt(d) { return d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日（" + WD[d.getDay()] + "）"; }
+  var input = document.getElementById("rev-start"), out = document.getElementById("rev-result");
+  if (!input || !out) return;
+  function calc() {
+    if (!input.value) { out.textContent = "工事開始日を選ぶと、申請期限の目安を表示します。"; return; }
+    var p = input.value.split("-");
+    var s = new Date(+p[0], +p[1] - 1, +p[2]);
+    if (isNaN(s.getTime())) return;
+    var deadline = stepBiz(s, -(N + 1));
+    var delivery = stepBiz(deadline, N);
+    out.innerHTML = "申請期限の目安：<strong>" + fmt(deadline) + "</strong> までに申請<br>その場合の交付目安：<strong>" + fmt(delivery) + "</strong> ごろ";
+  }
+  input.addEventListener("change", calc);
+  input.addEventListener("input", calc);
+  calc();
+})();
+</script>
+
+    <div class="section">
+        <h2>このページの出典・確認日</h2>
+        <ul>
+            <li><strong>公式出典：</strong><a href="https://www.keishicho.metro.tokyo.lg.jp/tetsuzuki/kotsu/road_permission.html" target="_blank" rel="noopener" style="color:var(--blue);">警視庁「道路使用許可申請手続きについて」</a>（手数料・受付時間などの公式情報）</li>
+            <li><strong>最終確認日：</strong>2026年11月21日</li>
+            <li><strong>日数の根拠：</strong>「中2日」は、道路使用許可の申請代行を行う事業者が公表している実績データに基づく目安です。実際の日数は申請内容や窓口の状況で前後します（標準処理期間は7日以内）。</li>
+        </ul>
+        <p>本サイトは行政書士事務所ではありません。申請代行は行っていません。申請はご本人、または行政書士へご依頼ください。</p>
+    </div>
+
+    <div class="section">
+        <h2>近くの警察署</h2>
         <ul class="rel-list">
-            <li><a href="./takao.html">高尾警察署の道路使用許可ガイド</a></li>
-            <li><a href="./takashimadaira.html">高島平警察署の道路使用許可ガイド</a></li>
+            <li><a href="./ogikubo.html">荻窪警察署の道路使用許可ガイド</a></li>
+            <li><a href="./suginami.html">杉並警察署の道路使用許可ガイド</a></li>
             <li><a href="./takanawa.html">高輪警察署の道路使用許可ガイド</a></li>
-            <li><a href="./takinogawa.html">滝野川警察署の道路使用許可ガイド</a></li>
-            <li><a href="./takenotsuka.html">竹の塚警察署の道路使用許可ガイド</a></li>
+            <li><a href="./tachikawa.html">立川警察署の道路使用許可ガイド</a></li>
+            <li><a href="./takao.html">高尾警察署の道路使用許可ガイド</a></li>
             <li><a href="./tokyo.html">東京都の警察署一覧を見る</a></li>
             <li><a href="./index.html">警察署別ガイドの索引に戻る</a></li>
         </ul>

@@ -66,7 +66,7 @@
     </div>
 
     <p style="font-size:0.92rem; color:#ddd; line-height:1.8;">東松山警察署は埼玉県の東松山市・吉見町・川島町・滑川町を管轄する警察署です。このエリアで道路を使って工事や作業を行う場合は、実施場所を管轄する東松山警察署へ道路使用許可を申請します。申請書類は下記の無料ツールでスマホから作成できます。</p>
-    <a href="https://zawa.click/permit.html" class="main-btn">📄 東松山警察署への申請書類を作成する（無料）</a>
+    <a href="https://zawa.click/permit.html?station=%E6%9D%B1%E6%9D%BE%E5%B1%B1%E8%AD%A6%E5%AF%9F%E7%BD%B2&pref=%E5%9F%BC%E7%8E%89%E7%9C%8C" class="main-btn">📄 東松山警察署への申請書類を作成する（無料）</a>
 
     <div class="section">
         <h2>東松山警察署の窓口情報</h2>
@@ -96,7 +96,7 @@
             <li><strong>申請先：</strong>作業を実施する場所を管轄する警察署（このエリアでは東松山警察署）の交通課窓口です。</li>
             <li><strong>申請書：</strong>正副2通を提出します。様式は警察署の窓口や各都県警のサイトで入手できます。</li>
             <li><strong>添付書類：</strong>案内図（現場位置図）、保安図・配置図、必要に応じて迂回路図などを添付します。</li>
-            <li><strong>手数料：</strong>1申請につき2,500円（一律）です（許可証の再交付は500円）。電子申請の場合は電子納付（Pay-easy・クレジットカード・コード決済）が使えます。</li>
+            <li><strong>手数料：</strong>申請時に窓口で納付します。金額は上の「東松山警察署の窓口情報」をご覧ください。</li>
             <li><strong>許可までの日数：</strong>申請から交付までは中1〜2日（土日祝・年末年始を除く）程度が多いです。標準処理期間は7日以内と定められていますが、多くの署ではそれより早く交付されます。道路管理者との協議や交通規制が必要な場合は、その分の日数が加算されます。</li>
         </ul>
     </div>
@@ -158,13 +158,95 @@
     </div>
 
     <div class="section">
-        <h2>埼玉県の他の警察署</h2>
+        <h2>申請期限の逆算ツール（目安）</h2>
+        <p>工事開始日を入れると、この署の交付目安「中1〜2日」（範囲がある場合は安全側の2日で計算しています）で逆算した申請期限の目安と、その場合の交付目安日を表示します。</p>
+        <p><label>工事開始日 <input type="date" id="rev-start" style="background:#222;color:#fff;border:1px solid #444;border-radius:8px;padding:10px;font-size:1rem;"></label></p>
+        <p id="rev-result" style="background:#222;border-radius:8px;padding:12px;line-height:1.8;">工事開始日を選ぶと、申請期限の目安を表示します。</p>
+        <p style="font-size:0.78rem;color:#999;">※ 土日祝・年末年始（12月29日〜1月3日）を除く営業日で計算した目安です。書類の不備や道路管理者との協議が必要な場合は日数が延びるため、余裕を持って申請してください。</p>
+    </div>
+
+<script>
+(function () {
+  var N = 2;
+  var WD = ["日", "月", "火", "水", "木", "金", "土"];
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function keyOf(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  var HOL = {};
+  var EQ = {2025: [3, 20, 9, 23], 2026: [3, 20, 9, 23], 2027: [3, 20, 9, 23], 2028: [3, 20, 9, 22], 2029: [3, 20, 9, 23], 2030: [3, 20, 9, 23]};
+  function nthMon(y, mo, n) { var d = new Date(y, mo, 1); var off = (8 - d.getDay()) % 7; return new Date(y, mo, 1 + off + (n - 1) * 7); }
+  function buildYear(y) {
+    var list = [];
+    function add(mo, dd) { list.push(new Date(y, mo, dd)); }
+    add(0, 1); add(1, 11); add(1, 23); add(3, 29); add(4, 3); add(4, 4); add(4, 5); add(7, 11); add(10, 3); add(10, 23);
+    list.push(nthMon(y, 0, 2)); list.push(nthMon(y, 6, 3)); list.push(nthMon(y, 8, 3)); list.push(nthMon(y, 9, 2));
+    if (EQ[y]) { add(EQ[y][0] - 1, EQ[y][1]); add(EQ[y][2] - 1, EQ[y][3]); }
+    var keys = {};
+    list.forEach(function (d) { keys[keyOf(d)] = 1; });
+    list.slice().forEach(function (d) {
+      if (d.getDay() === 0) {
+        var nx = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+        while (keys[keyOf(nx)]) { nx = new Date(nx.getFullYear(), nx.getMonth(), nx.getDate() + 1); }
+        list.push(nx); keys[keyOf(nx)] = 1;
+      }
+    });
+    list.forEach(function (d) { HOL[keyOf(d)] = 1; });
+    var d = new Date(y, 0, 1);
+    while (d.getFullYear() === y) {
+      var pv = new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1);
+      var nx2 = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+      if (d.getDay() !== 0 && d.getDay() !== 6 && !HOL[keyOf(d)] && HOL[keyOf(pv)] && HOL[keyOf(nx2)]) HOL[keyOf(d)] = 1;
+      d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+    }
+  }
+  for (var y = 2025; y <= 2030; y++) buildYear(y);
+  function isBiz(d) {
+    var w = d.getDay(); if (w === 0 || w === 6) return false;
+    var mo = d.getMonth(), dd = d.getDate();
+    if ((mo === 11 && dd >= 29) || (mo === 0 && dd <= 3)) return false;
+    return !HOL[keyOf(d)];
+  }
+  function stepBiz(d, n) {
+    var c = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var dir = n >= 0 ? 1 : -1, left = Math.abs(n);
+    while (left > 0) { c = new Date(c.getFullYear(), c.getMonth(), c.getDate() + dir); if (isBiz(c)) left--; }
+    return c;
+  }
+  function fmt(d) { return d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日（" + WD[d.getDay()] + "）"; }
+  var input = document.getElementById("rev-start"), out = document.getElementById("rev-result");
+  if (!input || !out) return;
+  function calc() {
+    if (!input.value) { out.textContent = "工事開始日を選ぶと、申請期限の目安を表示します。"; return; }
+    var p = input.value.split("-");
+    var s = new Date(+p[0], +p[1] - 1, +p[2]);
+    if (isNaN(s.getTime())) return;
+    var deadline = stepBiz(s, -(N + 1));
+    var delivery = stepBiz(deadline, N);
+    out.innerHTML = "申請期限の目安：<strong>" + fmt(deadline) + "</strong> までに申請<br>その場合の交付目安：<strong>" + fmt(delivery) + "</strong> ごろ";
+  }
+  input.addEventListener("change", calc);
+  input.addEventListener("input", calc);
+  calc();
+})();
+</script>
+
+    <div class="section">
+        <h2>このページの出典・確認日</h2>
+        <ul>
+            <li><strong>公式出典：</strong><a href="https://www.police.pref.saitama.lg.jp/f0040/shinse/dourosiyoukyoka.html" target="_blank" rel="noopener" style="color:var(--blue);">埼玉県警察「道路使用許可に関する申請手続」</a>（手数料・受付時間などの公式情報）</li>
+            <li><strong>最終確認日：</strong>2026年11月21日</li>
+            <li><strong>日数の根拠：</strong>「中1〜2日」は、標準処理期間（7日以内）をもとにした目安です。実際の日数は申請内容や窓口の状況で前後します。</li>
+        </ul>
+        <p>本サイトは行政書士事務所ではありません。申請代行は行っていません。申請はご本人、または行政書士へご依頼ください。</p>
+    </div>
+
+    <div class="section">
+        <h2>近くの警察署</h2>
         <ul class="rel-list">
-            <li><a href="./ogawa.html">小川警察署の道路使用許可ガイド</a></li>
-            <li><a href="./chichibu.html">秩父警察署の道路使用許可ガイド</a></li>
-            <li><a href="./ogano.html">小鹿野警察署の道路使用許可ガイド</a></li>
             <li><a href="./honjo-saitama.html">本庄警察署の道路使用許可ガイド</a></li>
-            <li><a href="./kodama.html">児玉警察署の道路使用許可ガイド</a></li>
+            <li><a href="./higashi-iruma.html">東入間警察署の道路使用許可ガイド</a></li>
+            <li><a href="./iwatsuki.html">岩槻警察署の道路使用許可ガイド</a></li>
+            <li><a href="./hanyu.html">羽生警察署の道路使用許可ガイド</a></li>
+            <li><a href="./kasukabe.html">春日部警察署の道路使用許可ガイド</a></li>
             <li><a href="./saitama.html">埼玉県の警察署一覧を見る</a></li>
             <li><a href="./index.html">警察署別ガイドの索引に戻る</a></li>
         </ul>
