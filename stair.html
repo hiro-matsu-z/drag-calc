@@ -128,7 +128,7 @@ body.light #permit-notice p { color: #444 !important; }
 body.light #permit-notice button { background: #eeeeee !important; color: #333 !important; }
 </style>
 <style id="theme-b-notebook">
-/* ===== THEME B: 現場ノート (2026-11-20 v2) ===== */
+/* ===== THEME B: 現場ノート (2026-11-21 v3) ===== */
 @media screen {
 :root { --bg:#F6EDD8; --card:#FFFDF6; --blue:#2E7CC4; --orange:#F97316; --text:#22304A; --border:#22304A; color-scheme: light; }
 body { background-color:#F6EDD8; background-image:repeating-linear-gradient(0deg, rgba(34,48,74,.05) 0 1px, transparent 1px 28px); color:#22304A; }
@@ -178,6 +178,18 @@ body.light #themeToggle { background:#FFFDF6; border-color:#22304A; }
 .card table td, .card table th { border-color:rgba(34,48,74,.4); }
 a { color:#2E7CC4; }
 ::selection { background:rgba(249,115,22,.35); }
+
+/* ===== v3: 記事セクション等のダーク残り修正 (2026-11-21) ===== */
+.article-section { background:#FFFDF6; border:2px solid #22304A; border-top:4px solid #F97316; border-radius:8px; color:#22304A; box-shadow:4px 4px 0 rgba(34,48,74,.85); }
+.article-section p { color:#22304A; }
+.article-section ul { background:#FBF3DF; }
+.article-section li { color:#22304A; }
+.article-section th { background:#22304A; color:#FFF7E0; }
+.article-section th, .article-section td { border-color:rgba(34,48,74,.4); }
+.profile-content h4 { color:#22304A; }
+.profile-content p { color:#43536E; }
+.profile-icon { color:#F97316; }
+.input-box span { color:#5A6B87; }
 }
 </style>
 </head>
