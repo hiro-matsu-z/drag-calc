@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>道路使用許可のオンライン申請ガイド｜e-Govでのやり方・手数料・注意点｜現場計算 PRO</title>
+    <meta name="description" content="道路使用許可はe-Gov電子申請でオンライン申請できます。アカウント準備から申請手順、手数料の支払い（東京は窓口納付のみ・埼玉は電子納付可）、許可証の電子交付、補正で取り下げになる注意点まで、実務目線でまとめました。">
+    <meta name="google-adsense-account" content="ca-pub-5476919369993440">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5476919369993440" crossorigin="anonymous"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ERMFG5G32F"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ERMFG5G32F');</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+    <style>
+        :root { --bg: #121212; --card: #1e1e1e; --blue: #00d4ff; --orange: #ff9500; --text: #e0e0e0; --border: #333; }
+        * { box-sizing: border-box; touch-action: manipulation; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom)); line-height: 1.6; }
+        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; }
+        header { border-left: 5px solid var(--blue); padding-left: 15px; margin-bottom: 20px; }
+        header h1 { font-size: 1.25rem; margin: 0; color: white; }
+        header p { font-size: 0.7rem; color: var(--blue); margin: 0; font-weight: bold; }
+        .breadcrumb { font-size: 0.72rem; color: #888; margin-bottom: 15px; line-height: 1.8; }
+        .breadcrumb a { color: #aaa; text-decoration: none; }
+        .summary-box { background: #1a2a3a; border: 2px solid var(--blue); border-radius: 12px; padding: 15px 18px; margin-bottom: 20px; }
+        .summary-box h2 { font-size: 0.95rem; color: var(--blue); margin: 0 0 10px 0; }
+        .summary-box ul { margin: 0; padding-left: 20px; }
+        .summary-box li { font-size: 0.88rem; color: #e8f6fa; margin-bottom: 7px; line-height: 1.6; }
+        .warn-box { background: #3a2a1a; border: 2px solid var(--orange); border-radius: 12px; padding: 15px 18px; margin-bottom: 20px; }
+        .warn-box h2 { font-size: 0.95rem; color: var(--orange); margin: 0 0 10px 0; }
+        .warn-box ul { margin: 0; padding-left: 20px; }
+        .warn-box li { font-size: 0.88rem; color: #faeee0; margin-bottom: 7px; line-height: 1.6; }
+        .main-btn { display: block; width: 100%; padding: 16px; border: none; border-radius: 12px; background: linear-gradient(135deg, #00d4ff, #008fb3); color: white; font-weight: bold; font-size: 1rem; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; }
+        .section { margin-top: 30px; padding: 22px 18px; background: #1a1a1a; border-radius: 12px; border-top: 4px solid var(--blue); }
+        .section h2 { color: var(--blue); font-size: 1.1rem; border-bottom: 1px solid #444; padding-bottom: 8px; margin: 0 0 14px 0; }
+        .section p { font-size: 0.9rem; color: #ccc; margin-bottom: 12px; line-height: 1.8; }
+        .section ul, .section ol { background: #222; padding: 13px 13px 13px 33px; border-radius: 8px; margin: 0 0 12px 0; }
+        .section li { font-size: 0.88rem; color: #ddd; margin-bottom: 7px; line-height: 1.65; }
+        .section table { width: 100%; border-collapse: collapse; margin: 0 0 12px 0; font-size: 0.82rem; }
+        .section th, .section td { border: 1px solid #333; padding: 8px; text-align: left; color: #ddd; line-height: 1.5; }
+        .section th { background: #222; color: var(--blue); }
+        .rel-list { list-style: none; padding: 0; margin: 0; }
+        .rel-list li { margin-bottom: 8px; }
+        .rel-list a { color: var(--blue); text-decoration: none; font-size: 0.9rem; }
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #333; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); height: calc(60px + env(safe-area-inset-bottom)); z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; text-decoration: none; padding-top: 8px; }
+        .nav-item .material-symbols-outlined { font-size: 24px; font-weight: 300; margin-bottom: 2px; }
+        .nav-item span:last-child { font-size: 0.65rem; font-weight: 500; }
+        .nav-item.active { color: var(--blue); }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="breadcrumb"><a href="./index.html">現場計算 PRO</a> ＞ <a href="./police/index.html">警察署別 道路使用許可ガイド</a> ＞ オンライン申請ガイド</div>
+    <header><h1>道路使用許可のオンライン申請ガイド</h1><p>e-Gov電子申請のやり方・手数料・注意点</p></header>
+
+    <div class="summary-box">
+        <h2>📌 このページの要点</h2>
+        <ul>
+            <li><strong>申請窓口：</strong>e-Gov電子申請（旧「警察行政手続サイト」は2025年12月で運用停止し、e-Govへ移行）</li>
+            <li><strong>受付：</strong>24時間365日、パソコンから申請可能（審査は警察署の執務時間内）</li>
+            <li><strong>事前準備：</strong>e-Govアカウント等が必要。法人の業務で使うなら<strong>GビズID</strong>が便利（電子証明書の用意が不要）</li>
+            <li><strong>許可証：</strong>審査終了後に<strong>電子交付</strong>（東京・埼玉）</li>
+            <li><strong>最大の注意点：</strong>東京は手数料が<strong>窓口納付のみ</strong>。納付しないと審査が始まらない</li>
+        </ul>
+    </div>
+
+    <p style="font-size:0.92rem; color:#ddd; line-height:1.8;">道路使用許可はオンラインで申請できますが、「申請はオンラインでも、手数料は結局窓口」「補正の連絡を見落とすと取り下げ扱い」など、実務でつまずくポイントがいくつかあります。このページでは、公式の案内をもとに手順と注意点を実務目線で整理しました。</p>
+
+    <div class="section">
+        <h2>窓口申請との違い</h2>
+        <table>
+            <tr><th>項目</th><th>オンライン申請（e-Gov）</th><th>窓口申請</th></tr>
+            <tr><td>申請の受付</td><td>24時間365日</td><td>平日の受付時間内（東京 8:30〜16:30）</td></tr>
+            <tr><td>手数料の支払い</td><td>東京：窓口納付のみ／埼玉：電子納付可（Pay-easy・クレジットカード・コード決済）</td><td>窓口で納付</td></tr>
+            <tr><td>許可証の交付</td><td>電子交付（東京・埼玉）</td><td>窓口で交付</td></tr>
+            <tr><td>補正の連絡</td><td>登録メールアドレスへ通知</td><td>電話・窓口</td></tr>
+        </table>
+        <p>つまり東京の場合、オンライン申請でも手数料を払いに一度は警察署へ行きます。ただし申請書の提出と許可証の受け取りはオンラインで完結するため、窓口に行く回数は減らせます。</p>
+    </div>
+
+    <div class="section">
+        <h2>事前に必要な準備</h2>
+        <ol>
+            <li><strong>アカウントの取得：</strong>e-Govアカウント、GビズID、マイナンバーカード等が使えます。会社の業務で継続的に申請するなら、電子証明書の用意が不要な<strong>GビズID（プライム／メンバー）</strong>がおすすめです（e-Govアカウントの場合は電子証明書の添付が必要な手続があります）。</li>
+            <li><strong>e-Gov電子申請アプリケーションのインストール：</strong>パソコンへのインストール（管理者権限が必要）と、ブラウザの設定（ポップアップブロックの解除等）が必要です。会社のPCで権限がない場合は、情シスへの確認を先に済ませておくと詰まりません。</li>
+            <li><strong>添付書類の電子データ：</strong>案内図（見取図）・道路使用状況図（保安図）などの添付資料を、データで用意します。東京では Word／Excel／PDF での作成が案内されています。ファイル容量に制限があり、超える場合は警察署へ持参・郵送になります。</li>
+        </ol>
+        <a href="https://zawa.click/permit.html" class="main-btn">📄 添付書類（申請書・案内図・保安図）を作成する（無料）</a>
+        <p style="margin-top:12px;">当サイトの書類作成ツールで、申請書（頭紙）・案内図・保安図・迂回路図をスマホやPCで作成してPDFで保存できます。オンライン申請の添付資料としても使えます。</p>
+    </div>
+
+    <div class="section">
+        <h2>申請手順（6ステップ）</h2>
+        <ol>
+            <li><strong>アカウント取得・事前準備：</strong>e-Govのアカウントを取得し、アプリケーションのインストール等の事前準備をします。</li>
+            <li><strong>手続の選択と入力：</strong>e-Gov電子申請で「道路使用許可申請」を選択し、申請書の内容を入力、添付資料をアップロードして送信します。申請先は、道路を使用する場所を管轄する警察署です（管轄違いは補正の原因になります）。</li>
+            <li><strong>到達・受付：</strong>申請が届くとステータスが「到達」になり、受付が完了すると「審査中」になります。</li>
+            <li><strong>補正対応：</strong>不備があると、登録したメールアドレスに補正依頼が届きます。<strong>指定された期日までに対応しないと、申請が取り下げられたものとして扱われることがあります。</strong>メールは必ず確認できるアドレスを登録してください。</li>
+            <li><strong>手数料の納付：</strong>手数料の納付をもって審査が開始されます。東京は警察署の窓口で納付（工事・作業 2,700円、その他 2,100円）。埼玉は電子納付が可能（1申請 2,500円）です。</li>
+            <li><strong>許可証の電子交付：</strong>審査が終わると、道路使用許可証が電子交付されます。納付から交付までは通常数日を要します。東京の場合、手数料を払いに来署しても、その場では許可証を受け取れません（後日、電子交付）。</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h2>都県別の違い（東京・埼玉・神奈川）</h2>
+        <table>
+            <tr><th>項目</th><th>東京</th><th>埼玉</th><th>神奈川</th></tr>
+            <tr><td>手数料の納付</td><td><strong>窓口納付のみ</strong></td><td>電子納付可（Pay-easy／カード／コード決済）</td><td>公式ページで未確認</td></tr>
+            <tr><td>手数料（工事）</td><td>2,700円</td><td>2,500円（一律）</td><td>2,520円</td></tr>
+            <tr><td>手数料（その他）</td><td>2,100円／縁日露店等 1,100円</td><td>―</td><td>2,000円</td></tr>
+            <tr><td>再交付手数料</td><td>700円</td><td>500円</td><td>500円</td></tr>
+            <tr><td>許可証の交付</td><td>電子交付</td><td>オンライン交付</td><td>公式ページで未確認</td></tr>
+            <tr><td>申請の目安</td><td>納付から交付まで通常数日</td><td>使用初日の7日前（休日除く）までに申請、交付まで約7日</td><td>―</td></tr>
+        </table>
+        <p>神奈川県警の道路使用の手続ページにはオンライン申請の案内が掲載されておらず、e-Govで申請できるかは公式ページ上では確認できませんでした。神奈川でオンライン申請を検討する場合は、管轄の警察署へ事前に確認してください。</p>
+    </div>
+
+    <div class="warn-box">
+        <h2>⚠️ 実務でつまずくポイント</h2>
+        <ul>
+            <li><strong>補正依頼の見落とし＝取り下げのリスク：</strong>連絡は登録メールに届きます。期日無応答は取り下げ扱いになることがあるため、申請後はメールとe-Govのステータスを定期的に確認を。</li>
+            <li><strong>東京は「納付しないと審査が始まらない」：</strong>オンラインで送って終わりではありません。窓口へ納付に行く段取りまで含めて工程を組んでください。</li>
+            <li><strong>添付ファイルの容量制限：</strong>大きな図面データはアップロードできない場合があります。その場合は持参・郵送となり、審査は添付資料が揃ってから進みます。</li>
+            <li><strong>1行為1申請が原則：</strong>複数の行為・場所は、それぞれ申請が必要です。</li>
+            <li><strong>別の許可は別途申請：</strong>通行禁止道路通行許可や制限外許可などが含まれる場合は、オンラインでも別に申請が必要です。</li>
+            <li><strong>大規模な工事・イベントは事前協議：</strong>広範囲の工事や通行止めを伴うイベントは、オンライン申請でも事前相談が必要になる場合があります。余裕を持った申請を。</li>
+            <li><strong>手数料の減免を受ける場合（埼玉）：</strong>電子申請できません。窓口で申請してください。</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>よくある質問</h2>
+        <p><strong>Q. 旧「警察行政手続サイト」からは申請できませんか？</strong><br>
+        A. 旧サイトは2025年12月15日に運用を停止し、道路使用許可を含む警察行政手続はe-Gov電子申請へ移行しました。今後はe-Govから申請します。</p>
+        <p><strong>Q. スマホから申請できますか？</strong><br>
+        A. e-Gov電子申請はパソコンでの利用が前提です（専用アプリケーションのインストールが必要）。添付書類の作成自体は、当サイトのツールでスマホからでも行えます。</p>
+        <p><strong>Q. オンライン申請なら警察署に行かずに済みますか？</strong><br>
+        A. 埼玉は手数料の電子納付とオンライン交付があり、来署なしで完結します。東京は手数料が窓口納付のため、納付のために1回は来署が必要です（申請と許可証の受け取りはオンライン）。</p>
+        <p><strong>Q. オンライン申請でも添付書類は必要ですか？</strong><br>
+        A. 必要です。工事・作業の場合は工事概要、現場案内図、道路使用状況図（作業帯図）などをデータで添付します（内容により必要な書類は異なります）。</p>
+        <p><strong>Q. 申請してから何日で許可が出ますか？</strong><br>
+        A. 東京は手数料の納付から交付まで通常数日と案内されています。埼玉は受理後おおむね7日程度です。署ごとの実績データは<a href="./police/index.html" style="color:var(--blue);">警察署別ガイド</a>にまとめています。</p>
+    </div>
+
+    <div class="section">
+        <h2>公式情報へのリンク</h2>
+        <ul class="rel-list">
+            <li><a href="https://shinsei.e-gov.go.jp/" target="_blank" rel="noopener">e-Gov電子申請（申請入口）</a></li>
+            <li><a href="https://shinsei.e-gov.go.jp/contents/preparation/" target="_blank" rel="noopener">e-Gov電子申請の利用準備</a></li>
+            <li><a href="https://www.keishicho.metro.tokyo.lg.jp/tetsuzuki/kotsu/road_permission.html" target="_blank" rel="noopener">警視庁｜道路使用許可申請手続きについて</a></li>
+            <li><a href="https://www.npa.go.jp/bureau/traffic/seibi2/shinsei-todokede/dourosiyoukyoka/permission.html" target="_blank" rel="noopener">警察庁｜道路使用許可の概要、申請手続等</a></li>
+        </ul>
+        <p>このページの内容は2026年11月20日時点で各公式ページを確認して作成しています。制度や手数料は変更される場合があるため、申請前に公式ページでもご確認ください。</p>
+    </div>
+
+    <div class="section">
+        <h2>関連ページ</h2>
+        <ul class="rel-list">
+            <li><a href="./permit.html">道路使用許可 書類作成ツール（申請書・案内図・保安図）</a></li>
+            <li><a href="./police/index.html">警察署別 道路使用許可ガイド（管轄・日数の目安）</a></li>
+            <li><a href="./road.html">道路幅員・切り下げ計算ツール</a></li>
+        </ul>
+    </div>
+
+    <div style="text-align:center; padding: 10px 0 80px 0; font-size: 0.7rem;">
+        <a href="./policy.html" style="color: #888; text-decoration: none;">プライバシーポリシー・免責事項</a><span style="color: #444; margin: 0 10px;">|</span><a href="mailto:Hiroki199809@gmail.com" style="color: #888; text-decoration: none;">お問い合わせ</a><br><br>
+        <span style="color: #666;">© 2026 現場計算 PRO</span>
+    </div>
+
+    <nav>
+        <a href="./index.html" class="nav-item"><span class="material-symbols-outlined">square_foot</span><span>対角</span></a>
+        <a href="./stair.html" class="nav-item"><span class="material-symbols-outlined">stairs</span><span>ポーチ</span></a>
+        <a href="./concrete.html" class="nav-item"><span class="material-symbols-outlined">water_drop</span><span>生コン</span></a>
+        <a href="./soil.html" class="nav-item"><span class="material-symbols-outlined">landscape</span><span>残土</span></a>
+        <a href="./road.html" class="nav-item active"><span class="material-symbols-outlined">edit_road</span><span>道路</span></a>
+    </nav>
+</div>
+</body>
+</html>
