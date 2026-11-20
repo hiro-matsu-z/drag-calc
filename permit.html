@@ -2641,6 +2641,24 @@ if (placeDetailHasValues()) setDetailOpen("place-detail-btn", "place-detail", tr
 if (methodDetailHasValues()) setDetailOpen("method-detail-btn", "method-detail", true);
 if (draft.siteAddress.trim()) triggerGeocode(true);
 
+/* 署別ガイドからのプリフィル（?station=署名&pref=都県）があれば、その署を初期選択にする */
+(function () {
+  var qs = location.search || "";
+  var mS = /[?&]station=([^&]+)/.exec(qs);
+  if (!mS) return;
+  var name = null, pref = null;
+  try { name = decodeURIComponent(mS[1]); } catch (e) { return; }
+  var mP = /[?&]pref=([^&]+)/.exec(qs);
+  if (mP) { try { pref = decodeURIComponent(mP[1]); } catch (e) { pref = null; } }
+  var hit = null;
+  STATIONS.forEach(function (s) { if (s.name === name && (!pref || s.pref === pref) && !hit) hit = s; });
+  if (!hit) return;
+  stationPrefOverride = hit.pref;
+  setDraft({ policeStation: hit.name });
+  els.stationSelect.value = hit.name;
+  try { history.replaceState(null, "", location.pathname); } catch (e) {}
+})();
+
 /* 引き継ぎリンク（?d=）があれば読み込む */
 (function () {
   var m = /[?&]d=([^&]+)/.exec(location.search || "");
