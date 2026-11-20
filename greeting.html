@@ -193,6 +193,15 @@ a { color:#2E7CC4; }
             <input id="f-address" placeholder="例：東京都○○区○○○丁目○番○" autocomplete="off" />
             <span class="field-hint">入力すると位置図が自動で表示されます</span>
           </label>
+          <div class="field">
+            <span class="field-label">位置図の範囲（ズーム）</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button type="button" id="zoom-out" class="btn" style="flex:1;padding:10px 0">− 広く表示</button>
+              <span id="zoom-level" style="min-width:64px;text-align:center;font-weight:700">標準</span>
+              <button type="button" id="zoom-in" class="btn" style="flex:1;padding:10px 0">＋ 詳しく表示</button>
+            </div>
+            <span class="field-hint">配布する範囲に合わせて調整できます（印刷にも反映されます）</span>
+          </div>
           <label class="field">
             <span class="field-label">工事内容</span>
             <select id="f-work-type">
@@ -306,6 +315,7 @@ a { color:#2E7CC4; }
 var MINCHO = "'Hiragino Mincho ProN', 'Hiragino Mincho Pro', 'YuMincho', 'Yu Mincho', 'MS Mincho', serif";
 var LS_KEY = "genba-greeting-draft-v1";
 var MAP_W = 500, MAP_H = 300, MAP_ZOOM = 17, TILE = 256;
+var mapZoom = MAP_ZOOM;
 
 function $(id) { return document.getElementById(id); }
 function esc(s) {
@@ -373,18 +383,18 @@ function geocodeAddress(q, cb) {
     .catch(function () { done(null); });
 }
 function mapHTML(geo) {
-  var cx = lonToTileX(geo.lon, MAP_ZOOM) * TILE;
-  var cy = latToTileY(geo.lat, MAP_ZOOM) * TILE;
+  var cx = lonToTileX(geo.lon, mapZoom) * TILE;
+  var cy = latToTileY(geo.lat, mapZoom) * TILE;
   var left = cx - MAP_W / 2, top = cy - MAP_H / 2;
   var x0 = Math.floor(left / TILE), x1 = Math.floor((left + MAP_W) / TILE);
   var y0 = Math.floor(top / TILE), y1 = Math.floor((top + MAP_H) / TILE);
-  var maxTile = Math.pow(2, MAP_ZOOM) - 1;
+  var maxTile = Math.pow(2, mapZoom) - 1;
   var s = '<div style="position:relative;width:' + MAP_W + "px;height:" + MAP_H + 'px;overflow:hidden;border:1.5px solid #111;background:#e8e4da">';
   s += '<div style="position:absolute;inset:0;overflow:hidden" aria-hidden="true">';
   for (var x = x0; x <= x1; x++) {
     for (var y = y0; y <= y1; y++) {
       if (x < 0 || y < 0 || x > maxTile || y > maxTile) continue;
-      s += '<img src="https://cyberjapandata.gsi.go.jp/xyz/std/' + MAP_ZOOM + "/" + x + "/" + y + '.png" alt="" draggable="false" style="position:absolute;left:' + (x * TILE - left) + "px;top:" + (y * TILE - top) + "px;width:" + TILE + "px;height:" + TILE + 'px" />';
+      s += '<img src="https://cyberjapandata.gsi.go.jp/xyz/std/' + mapZoom + "/" + x + "/" + y + '.png" alt="" draggable="false" style="position:absolute;left:' + (x * TILE - left) + "px;top:" + (y * TILE - top) + "px;width:" + TILE + "px;height:" + TILE + 'px" />';
     }
   }
   s += "</div>";
@@ -421,12 +431,14 @@ function saveDraft() {
     start: els.start.value, end: els.end.value,
     timeStart: els.timeStart.value, timeEnd: els.timeEnd.value,
     notes: els.notes.value, company: els.company.value, manager: els.manager.value,
-    phone: els.phone.value, phoneLabel: els.phoneLabel.value
+    phone: els.phone.value, phoneLabel: els.phoneLabel.value,
+    mapZoom: mapZoom
   };
   try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch (e) {}
 }
 function restoreDraft() {
   var d = readDraft();
+  if (typeof d.mapZoom === "number" && d.mapZoom >= 15 && d.mapZoom <= 18) mapZoom = d.mapZoom;
   if (d.address) els.address.value = d.address;
   if (d.workType) els.workType.value = d.workType;
   if (d.workCustom) els.workCustom.value = d.workCustom;
@@ -568,10 +580,19 @@ document.querySelectorAll("[data-months]").forEach(function (chip) {
     saveDraft(); renderSheet();
   });
 });
+function syncZoomUI() {
+  var names = { 15: "広域", 16: "やや広い", 17: "標準", 18: "詳細" };
+  $("zoom-level").textContent = names[mapZoom] || ("ズーム" + mapZoom);
+  $("zoom-out").disabled = mapZoom <= 15;
+  $("zoom-in").disabled = mapZoom >= 18;
+}
+$("zoom-out").addEventListener("click", function () { if (mapZoom > 15) { mapZoom--; saveDraft(); renderSheet(); syncZoomUI(); } });
+$("zoom-in").addEventListener("click", function () { if (mapZoom < 18) { mapZoom++; saveDraft(); renderSheet(); syncZoomUI(); } });
 $("print-btn").addEventListener("click", function () { window.print(); });
 
 /* ---------- 初期化 ---------- */
 restoreDraft();
+syncZoomUI();
 els.workCustomWrap.hidden = els.workType.value !== "__other__";
 renderSheet();
 resizePreview();
