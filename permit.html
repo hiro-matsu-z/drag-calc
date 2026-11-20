@@ -1217,16 +1217,22 @@ function diagramSheetHTML(data) {
     s += '<text x="' + ((wzX0 + wzX1) / 2) + '" y="' + (roadTop + wzH / 2 + 6) + '" text-anchor="middle" font-size="17" font-weight="700" fill="#b91c1c">作 業 帯</text>';
   }
 
-  cones.forEach(function (cx) {
-    s += '<path d="M ' + cx + " " + (wzBottom + 14) + " L " + (cx + 7) + " " + (wzBottom - 2) + " L " + (cx + 14) + " " + (wzBottom + 14) + ' z" fill="#ea580c" stroke="#9a3412" stroke-width="1" />';
-  });
+  var coneAt = function (x, y) {
+    return '<path d="M ' + x + " " + (y + 16) + " L " + (x + 7) + " " + y + " L " + (x + 14) + " " + (y + 16) + ' z" fill="#ea580c" stroke="#9a3412" stroke-width="1" />';
+  };
+  cones.forEach(function (cx) { s += coneAt(cx, wzBottom - 2); });
+  for (var cy = roadTop + 6; cy + 16 <= wzBottom - 4; cy += 46) {
+    s += coneAt(wzX0 - 16, cy);
+    s += coneAt(wzX1 + 2, cy);
+  }
 
-  s += '<g><rect x="108" y="' + (wzBottom + 29) + '" width="36" height="28" fill="#fff7ed" stroke="#ea580c" stroke-width="2" />'
-    + '<path d="M 119 ' + (wzBottom + 43) + " L 131 " + (wzBottom + 43) + " M 125 " + (wzBottom + 37.5) + " L 131 " + (wzBottom + 43) + " L 125 " + (wzBottom + 48.5) + '" stroke="#ea580c" stroke-width="2.5" fill="none" />'
-    + '<text x="126" y="' + (wzBottom + 80) + '" text-anchor="middle" font-size="12.5" fill="#9a3412">矢印板</text></g>';
-
-  s += '<text x="' + midX + '" y="' + (wzBottom + 78) + '" text-anchor="middle" font-size="16" font-weight="600">通行帯　' + numLabel(passageW) + " m</text>";
-  s += '<line x1="' + (wzX0 + 30) + '" y1="' + (roadBottom - 26) + '" x2="' + (wzX1 - 30) + '" y2="' + (roadBottom - 26) + '" stroke="#111" stroke-width="2.5" marker-end="url(#arr)" />';
+  var isClosure = data.regulation === "車両通行止め";
+  if (isClosure) {
+    s += '<text x="' + midX + '" y="' + ((wzBottom + roadBottom) / 2 + 7) + '" text-anchor="middle" font-size="19" font-weight="700" fill="#b91c1c">車 両 通 行 止 め</text>';
+  } else {
+    s += '<text x="' + midX + '" y="' + (wzBottom + 78) + '" text-anchor="middle" font-size="16" font-weight="600">通行帯　' + numLabel(passageW) + " m</text>";
+    s += '<line x1="' + (wzX0 + 30) + '" y1="' + (roadBottom - 26) + '" x2="' + (wzX1 - 30) + '" y2="' + (roadBottom - 26) + '" stroke="#111" stroke-width="2.5" marker-end="url(#arr)" />';
+  }
   if (bidirectional) s += '<line x1="' + (wzX1 - 30) + '" y1="' + (wzBottom + 40) + '" x2="' + (wzX0 + 30) + '" y2="' + (wzBottom + 40) + '" stroke="#111" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr)" />';
 
   [{ x: wzX0 - 16, y: wzBottom + 16 }, { x: wzX1 + 16, y: wzBottom + 16 }].forEach(function (g) {
@@ -1254,7 +1260,7 @@ function diagramSheetHTML(data) {
   if (data.purposePreset === "生コン打設") rows.push(["配置車両", "ポンプ車・ミキサー車 各1台（作業帯内に配置）"]);
   else if (data.purposePreset === "資材搬入出") rows.push(["配置車両", "トラック 1台（作業帯内に配置）"]);
   rows.push(["交通誘導員", data.guards + " 名（作業帯の両端に配置）"]);
-  rows.push(["保安施設", "カラーコーン・矢印板を作業帯の周囲に設置"]);
+  rows.push(["保安施設", "カラーコーンを作業帯の周囲に設置"]);
 
   h += '<table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:15px"><tbody>';
   rows.forEach(function (r) {
