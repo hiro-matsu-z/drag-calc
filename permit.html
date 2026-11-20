@@ -326,10 +326,17 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
             <span class="field-label">使用する場所（住所）</span>
             <input id="site-address" placeholder="例：東京都○○区○○ ○-○-○" autocomplete="off" />
           </label>
-          <label class="field">
-            <span class="field-label">現場名・建物名</span>
-            <input id="site-name" placeholder="例：○○ビル新築工事" autocomplete="off" />
-          </label>
+          <div>
+            <div class="btn-row" role="group" aria-label="場所の詳細設定">
+              <button type="button" class="toggle-btn small" id="place-detail-btn" aria-expanded="false" aria-pressed="false">詳細設定（現場名・建物名）</button>
+            </div>
+            <div id="place-detail" hidden style="margin-top:12px">
+              <label class="field">
+                <span class="field-label">現場名・建物名</span>
+                <input id="site-name" placeholder="例：○○ビル新築工事" autocomplete="off" />
+              </label>
+            </div>
+          </div>
           <div class="grid2">
             <label class="field">
               <span class="field-label">開始日</span>
@@ -349,14 +356,6 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
       <section class="block">
         <h2>使用の方法・保安図の数値</h2>
         <div class="fields">
-          <div>
-            <span class="field-label">歩道</span>
-            <div class="btn-row" role="group" aria-label="歩道の有無を選ぶ">
-              <button type="button" class="toggle-btn" id="sw-yes" aria-pressed="true">歩道あり</button>
-              <button type="button" class="toggle-btn" id="sw-no" aria-pressed="false">歩道なし</button>
-            </div>
-            <span class="field-hint">保安図に反映されます。歩道なしの場合は歩道帯を描かず、車道の外側を路肩・敷地境界として表示します。</span>
-          </div>
           <div class="grid2">
             <label class="field">
               <span class="field-label">規制方法</span>
@@ -369,29 +368,46 @@ body.light #permit-notice button { background: #eeeeee !important; color: #333 !
               </select>
             </label>
             <label class="field">
-              <span class="field-label">交通誘導員の人数</span>
-              <input id="guards" inputmode="numeric" placeholder="例：2" autocomplete="off" />
-            </label>
-          </div>
-          <div class="grid2">
-            <label class="field">
-              <span class="field-label">車道幅員（m）</span>
-              <input id="road-width" inputmode="decimal" placeholder="例：4" autocomplete="off" />
-            </label>
-            <label class="field">
-              <span class="field-label">車線数</span>
-              <input id="lanes" inputmode="numeric" placeholder="例：2" autocomplete="off" />
-            </label>
-          </div>
-          <div class="grid2">
-            <label class="field">
               <span class="field-label">作業帯の幅（m）</span>
               <input id="work-width" inputmode="decimal" placeholder="例：2.0" autocomplete="off" />
             </label>
-            <label class="field">
-              <span class="field-label">作業帯の延長（m）</span>
-              <input id="work-length" inputmode="decimal" placeholder="例：15" autocomplete="off" />
-            </label>
+          </div>
+          <div>
+            <div class="btn-row" role="group" aria-label="使用の方法の詳細設定">
+              <button type="button" class="toggle-btn small" id="method-detail-btn" aria-expanded="false" aria-pressed="false">詳細設定（歩道・誘導員・車線数など）</button>
+            </div>
+            <div id="method-detail" hidden style="margin-top:12px">
+              <div class="fields">
+                <div>
+                  <span class="field-label">歩道</span>
+                  <div class="btn-row" role="group" aria-label="歩道の有無を選ぶ">
+                    <button type="button" class="toggle-btn" id="sw-yes" aria-pressed="true">歩道あり</button>
+                    <button type="button" class="toggle-btn" id="sw-no" aria-pressed="false">歩道なし</button>
+                  </div>
+                  <span class="field-hint">保安図に反映されます。歩道なしの場合は歩道帯を描かず、車道の外側を路肩・敷地境界として表示します。</span>
+                </div>
+                <div class="grid2">
+                  <label class="field">
+                    <span class="field-label">交通誘導員の人数</span>
+                    <input id="guards" inputmode="numeric" placeholder="例：2" autocomplete="off" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">車線数</span>
+                    <input id="lanes" inputmode="numeric" placeholder="例：2" autocomplete="off" />
+                  </label>
+                </div>
+                <div class="grid2">
+                  <label class="field">
+                    <span class="field-label">車道幅員（m）</span>
+                    <input id="road-width" inputmode="decimal" placeholder="例：4" autocomplete="off" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">作業帯の延長（m）</span>
+                    <input id="work-length" inputmode="decimal" placeholder="例：15" autocomplete="off" />
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -2321,6 +2337,9 @@ function bindEvents() {
     if (q) { delete geoCache[q]; lastGeoQuery = null; triggerGeocode(true); }
   });
   els.pdfBtn.addEventListener("click", generatePdf);
+  $("place-detail-btn").addEventListener("click", function () { setDetailOpen("place-detail-btn", "place-detail", $("place-detail").hidden); });
+  $("method-detail-btn").addEventListener("click", function () { setDetailOpen("method-detail-btn", "method-detail", $("method-detail").hidden); });
+
   $("egov-text-btn").addEventListener("click", function () {
     var panel = $("egov-panel");
     panel.hidden = !panel.hidden;
@@ -2464,6 +2483,24 @@ function copyFromElement(el, doneEl) {
   }
 }
 
+
+/* ------------------------------ 詳細設定（任意項目の開閉） ------------------------------ */
+function setDetailOpen(btnId, panelId, open) {
+  var btn = $(btnId), panel = $(panelId);
+  if (!btn || !panel) return;
+  panel.hidden = !open;
+  btn.setAttribute("aria-expanded", open ? "true" : "false");
+  btn.setAttribute("aria-pressed", open ? "true" : "false");
+}
+function placeDetailHasValues() { return String(draft.siteName || "").trim() !== ""; }
+function methodDetailHasValues() {
+  return draft.hasSidewalk === false
+    || String(draft.guards || "").trim() !== ""
+    || String(draft.lanes || "").trim() !== ""
+    || String(draft.workLength || "").trim() !== ""
+    || (String(draft.roadWidth || "").trim() !== "" && String(draft.roadWidth).trim() !== "4");
+}
+
 /* ------------------------------ 初期化 ------------------------------ */
 fillInputs();
 bindEvents();
@@ -2471,6 +2508,8 @@ initGuideEditor();
 initDetourEditor();
 updateAll();
 renderGeoStatus();
+if (placeDetailHasValues()) setDetailOpen("place-detail-btn", "place-detail", true);
+if (methodDetailHasValues()) setDetailOpen("method-detail-btn", "method-detail", true);
 if (draft.siteAddress.trim()) triggerGeocode(true);
 
 /* 引き継ぎリンク（?d=）があれば読み込む */
