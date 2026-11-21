@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>電圧降下計算 | 現場計算 PRO</title>
-    <meta name="description" content="電圧降下計算の無料ツール。配線方式（単相2線式・単相3線式・三相3線式）と電線サイズ・こう長・電流から電圧降下（V）と降下率（%）を即時計算。電線サイズ選定の目安判定付き。">
-    <meta name="keywords" content="電圧降下,電圧降下計算,電線サイズ,単相3線,三相3線,こう長,内線規程,電気工事">
+    <meta name="description" content="電圧降下計算の無料ツール。配線方式（単相2線式・単相3線式・三相3線式）と電線サイズ・こう長・電流から電圧降下（V）と降下率（%）を即時計算。電線サイズ選定の目安判定付き。第二種電気工事士試験の計算問題の練習・答え合わせにも使えます。">
+    <meta name="keywords" content="電圧降下,電圧降下計算,電線サイズ,単相3線,三相3線,こう長,内線規程,電気工事,電気工事士,試験対策">
 
     <meta name="google-adsense-account" content="ca-pub-5476919369993440">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5476919369993440" crossorigin="anonymous"></script>
@@ -252,6 +252,18 @@ a { color:#2E7CC4; }
         A. いいえ、片道の長さで入力してください。本ツールの係数には、往復分の抵抗がすでに織り込まれています。往復で入力すると、実際の2倍の降下になってしまいます。</p>
         <p><strong>Q. 計算結果より実測の電圧降下が大きいことがあります。なぜですか？</strong><br>
         A. 計算式が想定していない要因として、端子接続部の接触抵抗、電線の温度上昇による抵抗増加、力率の悪い負荷などが挙げられます。実測と大きく乖離する場合は、接続部の増し締めや緩みの点検も行ってください。</p>
+
+        <h3><span class="material-symbols-outlined">school</span> 電気工事士試験の計算対策</h3>
+        <p>電圧降下は、第二種電気工事士試験（筆記）の計算問題で繰り返し出題される定番テーマです。出題は、①条件から電圧降下（V）を求める、②降下率（%）まで求める、③目安に収まる電線サイズを選ぶ、の3パターンが中心です。使う公式は実務の簡易式そのもので、係数 K（単相2線式 35.6／単相3線式 17.8／三相3線式 30.8）を覚えることが第一歩です。</p>
+        <p><strong>例題1．</strong>単相2線式、こう長25m、電流20A、電線2.0mm²の電圧降下は？<br>
+        e = 35.6 × 25 × 20 ÷（1000 × 2.0）= <strong>8.9V</strong>。100V回路では降下率8.9%で、目安を大きく超えます。「計算して終わり」ではなく、サイズアップが必要と判断するところまでが、試験でも実務でも問われます。</p>
+        <p><strong>例題2．</strong>三相3線式、こう長50m、電流40A、電線14mm²の電圧降下は？<br>
+        e = 30.8 × 50 × 40 ÷（1000 × 14）= <strong>4.4V</strong>。200V回路では降下率2.2%です。</p>
+        <ul>
+            <li><strong>落とし穴は「こう長」：</strong>公式に入れるのは片道の長さです。往復分は係数に織り込み済みなので、往復で計算すると答えが2倍になってしまいます。</li>
+            <li><strong>降下率は使用電圧で割る：</strong>同じ4.4Vでも、100V回路なら4.4%、200V回路なら2.2%。分母を取り違えるミスが定番です。</li>
+            <li><strong>答え合わせに本ツール：</strong>例題の数値をそのまま入力すれば、降下（V）と100V・200V基準の降下率が同時に出ます。手計算→ツールで確認の反復が、定着への近道です。</li>
+        </ul>
 
         <div class="profile-card">
             <div class="profile-icon material-symbols-outlined">verified_user</div>
