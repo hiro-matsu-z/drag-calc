@@ -210,7 +210,8 @@ div[style*="background:#2a2a2a"] p { color:#C9D4E8 !important; }
                 </select>
             </div>
         </div>
-        <button class="main-btn" style="margin-top:15px;" onclick="addConcreteRecord()">＋ リストに追加</button>
+        <div style="margin-top:12px; text-align:right; font-size:0.85rem; color:var(--text);">この入力の体積（正味）：<span id="con_preview_vol" style="font-weight:bold; color:var(--orange);">—</span></div>
+        <button class="main-btn" style="margin-top:10px;" onclick="addConcreteRecord()">＋ リストに追加</button>
     </div>
     <div class="card" style="padding:0; overflow:hidden;">
         <div style="background:#252525; padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
@@ -229,6 +230,17 @@ div[style*="background:#2a2a2a"] p { color:#C9D4E8 !important; }
                 <span id="con_grand_total" style="font-size:2rem; font-weight:bold; color:var(--orange);">0.000 m³</span>
             </div>
             <p style="text-align:right; margin:0; font-size:0.7rem; color:#666;" id="con_pure_total">（正味合計：0.000 m³）</p>
+            <div style="margin-top:15px; padding-top:10px; border-top:1px solid #444;">
+                <label style="font-size:0.7rem; color:#888;">ミキサー車 台数目安（発注量ベース）</label>
+                <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.8rem;">
+                    <div>大型 (4.25㎥): <span id="mixer_large" style="font-weight:bold; color:white;">0</span> 台</div>
+                    <div>中型 (3.0㎥): <span id="mixer_medium" style="font-weight:bold; color:white;">0</span> 台</div>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.8rem;">
+                    <div>小型 (1.5㎥): <span id="mixer_small" style="font-weight:bold; color:white;">0</span> 台</div>
+                    <div style="color:#888; font-size:0.7rem;">※積載量はプラント・車両で異なります</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -297,6 +309,17 @@ div[style*="background:#2a2a2a"] p { color:#C9D4E8 !important; }
             <p style="margin:0;">コンクリート打設は、気象条件、プラントからの運搬時間、職人の技術など、多くの変動要素をコントロールする高度なマネジメントの結晶です。これらの知識を持った上で現場の打設風景を見ると、職人たちの動きの意図が手に取るようにわかるようになります。</p>
         </div>
 
+        <h3><span class="material-symbols-outlined">percent</span> 発注量とロス率（ふかし）の目安</h3>
+        <p>生コンの発注量は、正味の数量にロス率（ふかし）を上乗せして決めます。不足すると打設の途中で継ぎ足しになり、コールドジョイントや追加費用の原因になるため、少し多めに見るのが原則です。部位ごとの目安は次のとおりです。</p>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px; font-size:0.85rem;">
+            <tr><th style="border:1px solid #555; padding:8px; text-align:left;">部位・条件</th><th style="border:1px solid #555; padding:8px; text-align:left;">ロス率の目安</th></tr>
+            <tr><td style="border:1px solid #555; padding:8px;">基礎（ベタ基礎・布基礎）</td><td style="border:1px solid #555; padding:8px;">3〜5%</td></tr>
+            <tr><td style="border:1px solid #555; padding:8px;">土間コンクリート</td><td style="border:1px solid #555; padding:8px;">3〜5%（面積が広い・厚みのバラつきが大きい場合は5%側）</td></tr>
+            <tr><td style="border:1px solid #555; padding:8px;">擁壁・立ち上がりなど形状が複雑な部位</td><td style="border:1px solid #555; padding:8px;">5〜8%</td></tr>
+            <tr><td style="border:1px solid #555; padding:8px;">ポンプ圧送の場合</td><td style="border:1px solid #555; padding:8px;">上記に加え、ホース・配管内の残りとして0.3〜0.5㎥を別途見込む</td></tr>
+        </table>
+        <p>本ツールのロス率の初期値は3%です。型枠の精度に不安がある現場では5%で見ておくと安全です。逆に余りすぎると残コンの処分費用がかかるため、最後の1台は打設の進み具合を見てから数量を調整するのが実務的です。</p>
+
         <div class="profile-card">
             <div class="profile-icon material-symbols-outlined">verified_user</div>
             <div class="profile-content">
@@ -364,6 +387,7 @@ div[style*="background:#2a2a2a"] p { color:#C9D4E8 !important; }
         saveConcreteData(); renderConcreteList();
         
         document.getElementById('con_name').value = ''; document.getElementById('con_l').value = ''; document.getElementById('con_w').value = '';
+        updateConcretePreview();
     }
 
     function renderConcreteList() {
@@ -385,8 +409,30 @@ div[style*="background:#2a2a2a"] p { color:#C9D4E8 !important; }
         const grandTotal = totalVol * (1 + loss / 100);
         document.getElementById('con_grand_total').innerText = grandTotal.toFixed(3) + " m³";
         document.getElementById('con_pure_total').innerText = "（正味合計：" + totalVol.toFixed(3) + " m³）";
+        document.getElementById('mixer_large').innerText = Math.ceil(grandTotal / 4.25);
+        document.getElementById('mixer_medium').innerText = Math.ceil(grandTotal / 3.0);
+        document.getElementById('mixer_small').innerText = Math.ceil(grandTotal / 1.5);
         localStorage.setItem('concreteLoss', loss);
     }
+
+    function updateConcretePreview() {
+        const el = document.getElementById('con_preview_vol');
+        if (!el) return;
+        const l = parseFloat(evaluateMathString(document.getElementById('con_l').value));
+        const w = parseFloat(evaluateMathString(document.getElementById('con_w').value));
+        const d = parseFloat(evaluateMathString(document.getElementById('con_d').value));
+        const count = parseFloat(document.getElementById('con_count').value) || 1;
+        const shape = document.getElementById('con_shape').value;
+        if (!l || !w || !d) { el.innerText = '—'; return; }
+        let singleVol = (l * w * d) / 1000000000;
+        if (shape === 'hunch') singleVol = singleVol / 2;
+        el.innerText = (singleVol * count).toFixed(3) + ' m³';
+    }
+    ['con_l','con_w','con_d','con_count','con_shape'].forEach(function(id) {
+        const t = document.getElementById(id);
+        if (t) { t.addEventListener('input', updateConcretePreview); t.addEventListener('change', updateConcretePreview); }
+    });
+    updateConcretePreview();
 </script>
 
 <!-- ▼ 新機能お知らせポップアップ（一度だけ表示） -->
