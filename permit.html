@@ -1204,14 +1204,14 @@ function applicationSheetHTML(data) {
 
   var h = sheetOpen();
   /* 様式の枠は公式どおり幅164.8mm（623px）に寄せて中央配置する */
-  h += '<div style="width:623px;margin:2px auto 0">';
+  h += '<div style="width:623px;margin:-8px auto 0">';
   h += '<p style="font-size:13.5px;margin:0 0 4px">別記様式第六（第十条関係）</p>';
   h += '<div style="border:1px solid #111;border-bottom:none;padding:14px 22px 12px;min-height:176px;box-sizing:border-box">';
   h += '<h2 style="text-align:center;font-size:23px;font-weight:700;letter-spacing:9px;margin:2px 0 0">道路使用許可申請書</h2>';
-  h += '<p style="text-align:right;font-size:15px;margin:18px 6px 0">' + esc(appDate) + "</p>";
+  h += '<p style="text-align:right;font-size:15px;margin:12px 6px 0">' + esc(appDate) + "</p>";
   h += '<div style="display:flex;align-items:flex-start">';
   h += '<p style="font-size:16px;margin:18px 0 0;padding-left:7%;white-space:nowrap">' + esc(stationChiefName(data.station)) + "　警察署長　殿</p>";
-  h += '<div style="margin-left:auto;width:57%;font-size:15px;line-height:1.95">';
+  h += '<div style="margin-left:auto;width:57%;font-size:15px;line-height:1.85">';
   h += '<p style="margin:0;display:flex"><span style="width:3.4em;text-align:right;flex:none">住所</span><span style="margin-left:0.6em">' + esc(s.companyAddress) + "</span></p>";
   h += '<p style="margin:0;display:flex"><span style="width:3.4em;text-align:right;flex:none">申請者</span><span style="margin-left:0.6em">' + esc(s.companyName) + "</span></p>";
   h += '<p style="margin:0;display:flex"><span style="width:3.4em;text-align:right;flex:none">氏名</span><span style="margin-left:0.6em">' + esc(s.representative) + "</span></p>";
@@ -1230,7 +1230,7 @@ function applicationSheetHTML(data) {
   h += '<tr style="height:45px"><td style="' + subLabelCell + ";" + dbl + '">' + spreadLabel("氏名") + '</td><td style="' + valueCell + ";" + dbl + '">' + esc(data.managerName) + '</td><td style="' + subLabelCell + ";" + dbl + '">' + spreadLabel("電話") + '</td><td style="' + valueCell + ";" + dbl + '">' + esc(data.managerPhone) + "</td></tr>";
   h += "</tbody></table>";
 
-  h += '<div style="border:1px solid #111;border-top:none;padding:12px 22px 16px;min-height:305px;box-sizing:border-box">';
+  h += '<div style="border:1px solid #111;border-top:none;padding:12px 22px 16px;min-height:278px;box-sizing:border-box">';
   h += '<p style="font-size:15px;margin:2px 0 0 12px">第　　　　　号</p>';
   h += '<h3 style="text-align:center;font-size:22px;font-weight:400;letter-spacing:10px;margin:8px 0 12px">道路使用許可証</h3>';
   h += '<p style="font-size:15px;margin:0 0 0 8px">上記のとおり許可する。ただし、次の条件に従うこと。</p>';
@@ -1246,13 +1246,13 @@ function applicationSheetHTML(data) {
     "３　添付書類の欄には、道路使用の場所、方法等を明らかにした図面その他必要な書類を添付した場合に、その書類名を記載すること。",
     "４　用紙の大きさは、日本産業規格Ａ列４番とする。"
   ];
-  h += '<div style="width:640px;margin:12px auto 0;font-size:11px;line-height:1.6">';
+  h += '<div style="width:640px;margin:8px auto 0;font-size:10.5px;line-height:1.5">';
   remarks.forEach(function (line, i) {
     h += '<p style="margin:0;display:flex"><span style="flex:none;width:3.2em">' + (i === 0 ? "備考" : "") + "</span><span>" + esc(line) + "</span></p>";
   });
   h += "</div>";
 
-  h += '<table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:10.5px"><tbody>';
+  h += '<table style="width:100%;border-collapse:collapse;margin-top:6px;font-size:10.5px"><tbody>';
   h += '<tr style="height:12px"><td style="width:36px;border:1px solid #111;text-align:center;font-size:9px;padding:1px 0">該当欄</td>' + FEES.map(function () { return '<td style="border:1px solid #111"></td>'; }).join("") + "</tr>";
   h += '<tr><td style="border:1px solid #111;text-align:center;padding:2px 0;writing-mode:vertical-rl;font-size:10px">手数料種別</td>';
   FEES.forEach(function (f, i) {
